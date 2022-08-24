@@ -116,5 +116,66 @@ pattern := lpg.Pattern{
 
 ```
 
+## JSON Encoding
+
+This graph library uses the following JSON representation:
+
+```json
+{
+  "nodes": [
+     {
+       "n": 0,
+       "labels": [ "l1", "l2",... ],
+       "properties": {
+          "key1": value,
+          "key2": value,
+          ...
+        },
+        "edges": [
+           {
+             "to": "1",
+             "label": "edgeLabel",
+             "properties": {
+               "key1": value,
+               "key2": value,
+               ...
+             }
+           },
+           ...
+        ]
+     },
+      ...
+  ],
+  "edges": [
+     {
+        "from": 0,
+        "to": 1,
+        "label": "edgeLabel",
+        "properties": {
+           "key1": value1,
+           "key2": value2,
+           ...
+        }
+     },
+     ...
+  ]
+}
+```
+
+All graph nodes are under the `nodes` key as an array. The `n` key
+identifies the node using a unique index. All node references in edges
+use these indexes. A node may include all outgoing edges embedded in
+it, or edges may be included under a separate top-level array
+`edges`. If the edge is included in the node, the edge only has a `to`
+field that gives the target node index as the node containing the edge
+is assumed to be the source node. Edges under the top-level `edges`
+array include both a `from` and a `to` index.
+
+Standard library JSON marshaler/unmarshaler does not work with graphs,
+because the edge and node property values are of type
+`interface{}`. The `JSON` struct can be used to marshal and unmarshal
+graphs with custom property marshaler and unmarshalers.
+
 This Go module is part of the [Layered Schema
 Architecture](https://layeredschemas.org).
+
