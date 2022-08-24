@@ -3,9 +3,6 @@
 [![Build Status](https://github.com/cloudprivacylabs/lpg/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/cloudprivacylabs/lpg/actions/workflows/CI.yml)
 # Labeled property graphs
 
-This Go module is part of the [Layered Schema
-Architecture](https://layeredschemas.org).
-
 This labeled property graph package implements the openCypher model of
 labeled property graphs. A labeled property graph (LPG) contains nodes
 and directed edges between those nodes. Every node contains:
@@ -17,11 +14,9 @@ and directed edges between those nodes. Every node contains:
 Every edge contains:
   * A label: String token that identifies a relationship, and
   * Properties: Key-value pairs.
-  
-A graph indexes its nodes and edges, so finding a node, or a pattern
-usually does not involve iterating through all possibilities. 
 
-Create a graph using `NewGraph` function:
+A `Graph` objects keeps an index of the nodes and edges included in
+it. Create a graph using `NewGraph` function:
 
 ```
 g := lpg.NewGraph()
@@ -32,24 +27,36 @@ n2 := g.NewNode([]string{"label2"},map[string]interface{}{"prop": "value2" })
 edge:=g.NewEdge(n1,n2,"relatedTo",nil)
 ```
 
-The LPG library uses an iterator model to address nodes and edges
-because the underlying algorithm to collect nodes and edges mathcing a
-certain criteria may depend on the existence of indexes. Both incoming
-and outgoing edges of nodes are accessible:
+The LPG library uses iterators to address nodes and edges.
 
-```
-for edges:=n1.GetEdges(lpg.OutgoingEdge); edges.Next(); {
-  edge:=edges.Edge()
-  // edge.GetTo() and edge.GetFrom() are the adjacent nodes
+``` go
+for nodes:=graph.GetNodes(); nodes.Next(); {
+  node:=nodes.Node()
+}
+for edges:=graph.GetEdges(); edges.Next(); {
+  edge:edges.Edge()
 }
 ```
 
+Every node knows its adjacent edges. 
+
+```go
+// Get outgoing edges
+for edges:=node1.GetEdges(lpg.OutgoingEdge); edges.Next(); {
+  edge:=edges.Edge
+}
+
+// Get all edges
+for edges:=node1.GetEdges(lpg.AnyEdge); edges.Next(); {
+  edge:=edges.Edge
+}
+```
 
 The graph indexes nodes by label, so access to nodes using labels is
 fast. You can add additional indexes on properties:
 
 ```
-g := lpg.NewOCGraph()
+g := lpg.NewGraph()
 // Index all nodes with property 'prop'
 g.AddNodePropertyIndex("prop")
 
@@ -60,8 +67,10 @@ nodes := g.GetNodesWithProperty("prop")
 slowNodes:= g.GetNodesWithProperty("propWithoutIndex")
 ```
 
-Graph library supports searching patterns. The following example
-searches for the pattern that match 
+## Pattern Searches
+
+Graph library supports searching patterns within a graph. The
+following example searches for the pattern that match
 
 ```
 (:label1) -[]->({prop:value})`
@@ -87,3 +96,25 @@ pattern := lpg.Pattern{
 nodes, err:=pattern.FindNodes(g,nil)
 ```
 
+Variable length paths are supported:
+
+``` go
+pattern := lpg.Pattern{ 
+ // Node containing label 'label1'
+ {
+   Labels: lpg.NewStringSet("label1"),
+ },
+ // Minimum paths of length 2, no maximum length
+ {
+   Min: 2, 
+   Max: -1,
+ },
+ // Node with property prop=value
+ {
+   Properties: map[string]interface{} {"prop":"value"},
+ }}
+
+```
+
+This Go module is part of the [Layered Schema
+Architecture](https://layeredschemas.org).

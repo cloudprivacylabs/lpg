@@ -18,6 +18,7 @@ import (
 	"fmt"
 )
 
+// An Edge connects two nodes of a graph
 type Edge struct {
 	from, to *Node
 	label    string
@@ -35,29 +36,46 @@ const (
 	OutgoingEdge EdgeDir = 1
 )
 
-func (edge *Edge) GetID() int       { return edge.id }
+// GetID returns the unique identifier for the edge. The identifier is
+// unique in this graph, and meaningless once the edge is
+// disconnected.
+func (edge *Edge) GetID() int { return edge.id }
+
+// GetGraph returns the graph of the edge.
 func (edge *Edge) GetGraph() *Graph { return edge.from.graph }
+
+// GetLabel returns the edge label
 func (edge *Edge) GetLabel() string { return edge.label }
-func (edge *Edge) GetFrom() *Node   { return edge.from }
-func (edge *Edge) GetTo() *Node     { return edge.to }
 
+// GetFrom returns the source node
+func (edge *Edge) GetFrom() *Node { return edge.from }
+
+// GetTo returns the target node
+func (edge *Edge) GetTo() *Node { return edge.to }
+
+// SetLabel sets the edge label
 func (edge *Edge) SetLabel(label string) {
-	edge.from.graph.SetEdgeLabel(edge, label)
+	if label != edge.label {
+		edge.from.graph.setEdgeLabel(edge, label)
+	}
 }
 
+// SetProperty sets an edge property
 func (edge *Edge) SetProperty(key string, value interface{}) {
-	edge.from.graph.SetEdgeProperty(edge, key, value)
+	edge.from.graph.setEdgeProperty(edge, key, value)
 }
 
+// RemoveProperty removes an edge property
 func (edge *Edge) RemoveProperty(key string) {
-	edge.from.graph.RemoveEdgeProperty(edge, key)
+	edge.from.graph.removeEdgeProperty(edge, key)
 }
 
 // Remove an edge
 func (edge *Edge) Remove() {
-	edge.from.graph.RemoveEdge(edge)
+	edge.from.graph.removeEdge(edge)
 }
 
+// Returns the string representation of an edge
 func (edge *Edge) String() string {
 	return fmt.Sprintf("[:%s %s]", edge.label, edge.Properties)
 }

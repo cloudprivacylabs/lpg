@@ -19,6 +19,7 @@ import (
 	"strings"
 )
 
+// A Node represents a graph node.
 type Node struct {
 	labels StringSet
 	Properties
@@ -28,10 +29,18 @@ type Node struct {
 	id       int
 }
 
-func (node *Node) GetGraph() *Graph       { return node.graph }
-func (node *Node) GetLabels() StringSet   { return node.labels.Clone() }
+// GetGraph returns the graph owning the node
+func (node *Node) GetGraph() *Graph { return node.graph }
+
+// GetLabels returns a copy of the node labels
+func (node *Node) GetLabels() StringSet { return node.labels.Clone() }
+
+// HasLabel returns true if the node has the given label
 func (node *Node) HasLabel(s string) bool { return node.labels.Has(s) }
-func (node *Node) GetID() int             { return node.id }
+
+// GetID returns the unique node ID. The ID is meaningless if the node
+// is removed from the graph
+func (node *Node) GetID() int { return node.id }
 
 // Returns an edge iterator for incoming or outgoing edges
 func (node *Node) GetEdges(dir EdgeDir) EdgeIterator {
@@ -78,28 +87,32 @@ func (node *Node) GetEdgesWithAnyLabel(dir EdgeDir, labels StringSet) EdgeIterat
 	return &edgeIterator{withSize(MultiIterator(i1, i2), i1.MaxSize()+i2.MaxSize())}
 }
 
+// SetLabels sets the node labels
 func (node *Node) SetLabels(labels StringSet) {
-	node.graph.SetNodeLabels(node, labels)
+	node.graph.setNodeLabels(node, labels)
 }
 
+// SetProperty sets a node property
 func (node *Node) SetProperty(key string, value interface{}) {
-	node.graph.SetNodeProperty(node, key, value)
+	node.graph.setNodeProperty(node, key, value)
 }
 
+// RemoveProperty removes a node property
 func (node *Node) RemoveProperty(key string) {
-	node.graph.RemoveNodeProperty(node, key)
+	node.graph.removeNodeProperty(node, key)
 }
 
 // Remove all connected edges, and remove the node
 func (node *Node) DetachAndRemove() {
-	node.graph.DetachRemoveNode(node)
+	node.graph.detachRemoveNode(node)
 }
 
 // Remove all connected edges
 func (node *Node) Detach() {
-	node.graph.DetachNode(node)
+	node.graph.detachNode(node)
 }
 
+// String returns the string representation of the node
 func (node *Node) String() string {
 	labels := strings.Join(node.labels.Slice(), ":")
 	if node.labels.Len() > 0 {
