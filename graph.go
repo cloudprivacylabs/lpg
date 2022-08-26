@@ -14,6 +14,10 @@
 
 package lpg
 
+import (
+	"container/list"
+)
+
 // A Graph is a labeled property graph containing nodes, and directed
 // edges combining those nodes.
 //
@@ -31,7 +35,7 @@ package lpg
 // new graph.
 type Graph struct {
 	index    graphIndex
-	allNodes NodeSet
+	allNodes *list.List
 	allEdges EdgeMap
 	idBase   int
 }
@@ -41,7 +45,7 @@ type Graph struct {
 func NewGraph() *Graph {
 	return &Graph{
 		index:    newGraphIndex(),
-		allNodes: *NewNodeSet(),
+		allNodes: list.New(),
 		allEdges: *NewEdgeMap(),
 	}
 }
@@ -99,7 +103,7 @@ func (g *Graph) NumEdges() int {
 // during iteration nodes are updated, new nodes are added, or
 // existing nodes are deleted.
 func (g *Graph) GetNodes() NodeIterator {
-	return g.allNodes.Iterator()
+	return &nodeIterator{&listIterator{next: g.allNodes.Front(), size: g.allNodes.Len()}}
 }
 
 // GetNodesWithAllLabels returns an iterator that goes through the
@@ -419,7 +423,7 @@ func (g *Graph) cloneNode(node *Node, cloneProperty func(string, interface{}) in
 }
 
 func (g *Graph) addNode(node *Node) {
-	g.allNodes.Add(node)
+	node.el = g.allNodes.PushBack(node)
 	g.index.addNodeToIndex(node)
 }
 
@@ -440,7 +444,7 @@ func (g *Graph) removeNodeProperty(node *Node, key string) {
 
 func (g *Graph) detachRemoveNode(node *Node) {
 	g.detachNode(node)
-	g.allNodes.Remove(node)
+	g.allNodes.Remove(node.el)
 	g.index.removeNodeFromIndex(node)
 }
 

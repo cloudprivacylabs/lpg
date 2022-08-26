@@ -15,6 +15,7 @@
 package lpg
 
 import (
+	"container/list"
 	"fmt"
 	"strings"
 )
@@ -24,6 +25,7 @@ type Node struct {
 	labels StringSet
 	properties
 	graph    *Graph
+	el       *list.Element
 	incoming EdgeMap
 	outgoing EdgeMap
 	id       int
