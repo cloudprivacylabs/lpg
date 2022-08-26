@@ -94,7 +94,7 @@ func (set NodeSet) Len() int {
 
 func (set NodeSet) Iterator() NodeIterator {
 	i := set.set.Iterator()
-	return &nodeIterator{withSize(i, set.set.Len())}
+	return &nodeIterator{i}
 }
 
 func (set NodeSet) Slice() []*Node {
@@ -126,7 +126,7 @@ func (set EdgeSet) Len() int {
 
 func (set EdgeSet) Iterator() EdgeIterator {
 	i := set.set.Iterator()
-	return &edgeIterator{withSize(i, set.set.Len())}
+	return &edgeIterator{i}
 }
 
 func (set EdgeSet) Slice() []*Edge {
