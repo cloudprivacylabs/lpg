@@ -44,9 +44,7 @@ func (em *EdgeMap) Add(edge *Edge) {
 	} else {
 		set = v.(*FastSet)
 	}
-	k := set.Size()
-	set.Add(edge.id, edge)
-	if set.Size() > k {
+	if set.Add(edge.id, edge) {
 		em.n++
 	}
 }
@@ -58,9 +56,7 @@ func (em EdgeMap) Remove(edge *Edge) {
 		return
 	}
 	set = v.(*FastSet)
-	k := set.Size()
-	set.Remove(edge.id, edge)
-	if set.Size() < k {
+	if set.Remove(edge.id, edge) {
 		em.n--
 	}
 	if set.Size() == 0 {

@@ -35,22 +35,26 @@ func NewFastSet() *FastSet {
 func (f FastSet) Len() int  { return len(f.m) }
 func (f FastSet) Size() int { return len(f.m) }
 
-func (f *FastSet) Add(id int, item interface{}) {
+// Add a new item. Returns true if added
+func (f *FastSet) Add(id int, item interface{}) bool {
 	_, exists := f.m[id]
 	if exists {
-		return
+		return false
 	}
 	el := f.l.PushBack(item)
 	f.m[id] = el
+	return true
 }
 
-func (f *FastSet) Remove(id int, item interface{}) {
+// Remove an item. Returns true if removed
+func (f *FastSet) Remove(id int, item interface{}) bool {
 	el := f.m[id]
 	if el == nil {
-		return
+		return false
 	}
 	delete(f.m, id)
 	f.l.Remove(el)
+	return true
 }
 
 func (f FastSet) Has(id int) bool {
