@@ -292,9 +292,12 @@ func (nm NodeMap) Iterator() NodeIterator {
 					for _, l := range nmIterator.seenLabels {
 						if onode.labels.Has(l) {
 							nSeen++
+							if nSeen > 1 {
+								return false
+							}
 						}
 					}
-					return nSeen < 2
+					return true
 				},
 			},
 			nm.nolabels.Iterator(),

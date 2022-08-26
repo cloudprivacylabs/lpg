@@ -43,3 +43,44 @@ func TestGraphCRUD(t *testing.T) {
 		t.Errorf("Wrong numNodes")
 	}
 }
+
+func BenchmarkAddNode(b *testing.B) {
+	g := NewGraph()
+	for n := 0; n < b.N; n++ {
+		g.NewNode([]string{"a", "b", "c"}, map[string]interface{}{"a": "b", "c": "d"})
+	}
+}
+
+func benchmarkItrNodes(numNodes int, b *testing.B) {
+	g := NewGraph()
+	var x *Node
+	for i := 0; i < numNodes; i++ {
+		g.NewNode([]string{"a", "b", "c"}, map[string]interface{}{"a": "b", "c": "d"})
+	}
+	for n := 0; n < b.N; n++ {
+		for nodes := g.GetNodes(); nodes.Next(); {
+			x = nodes.Node()
+		}
+	}
+	_ = x
+}
+
+func BenchmarkItrNodes1000(b *testing.B)  { benchmarkItrNodes(1000, b) }
+func BenchmarkItrNodes10000(b *testing.B) { benchmarkItrNodes(10000, b) }
+
+func benchmarkItrNodesViaIndex(numNodes int, b *testing.B) {
+	g := NewGraph()
+	var x *Node
+	for i := 0; i < numNodes; i++ {
+		g.NewNode([]string{"a", "b", "c"}, map[string]interface{}{"a": "b", "c": "d"})
+	}
+	for n := 0; n < b.N; n++ {
+		for nodes := g.index.nodesByLabel.Iterator(); nodes.Next(); {
+			x = nodes.Node()
+		}
+	}
+	_ = x
+}
+
+func BenchmarkItrNodesViaIndex1000(b *testing.B)  { benchmarkItrNodesViaIndex(1000, b) }
+func BenchmarkItrNodesViaIndex10000(b *testing.B) { benchmarkItrNodesViaIndex(10000, b) }
