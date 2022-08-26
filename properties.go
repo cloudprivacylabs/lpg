@@ -19,11 +19,11 @@ import (
 	"strings"
 )
 
-type Properties map[string]interface{}
+type properties map[string]interface{}
 
 // GetProperty returns the value for the key, and whether or not key
 // exists. p can be nil
-func (p *Properties) GetProperty(key string) (interface{}, bool) {
+func (p *properties) GetProperty(key string) (interface{}, bool) {
 	if p == nil {
 		return nil, false
 	}
@@ -33,7 +33,7 @@ func (p *Properties) GetProperty(key string) (interface{}, bool) {
 
 // ForEachProperty calls f for each property in p until f returns
 // false. Returns false if f returned false. p can be nil
-func (p *Properties) ForEachProperty(f func(string, interface{}) bool) bool {
+func (p *properties) ForEachProperty(f func(string, interface{}) bool) bool {
 	if p == nil {
 		return true
 	}
@@ -204,7 +204,7 @@ func ComparePropertyValue(a, b interface{}) int {
 	panic(fmt.Sprintf("Incomparable values: %v (%T) vs %v (%T)", a, a, b, b))
 }
 
-func (p Properties) String() string {
+func (p properties) String() string {
 	elements := make([]string, 0, len(p))
 	for k, v := range p {
 		elements = append(elements, fmt.Sprintf("%s:%v", k, v))
@@ -212,8 +212,8 @@ func (p Properties) String() string {
 	return "{" + strings.Join(elements, " ") + "}"
 }
 
-func (p Properties) clone(cloneProperty func(string, interface{}) interface{}) Properties {
-	ret := make(Properties, len(p))
+func (p properties) clone(cloneProperty func(string, interface{}) interface{}) properties {
+	ret := make(properties, len(p))
 	for k, v := range p {
 		ret[k] = cloneProperty(k, v)
 	}

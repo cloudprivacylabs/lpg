@@ -26,17 +26,16 @@ type FastSet struct {
 }
 
 func NewFastSet() *FastSet {
-	return &FastSet{}
+	return &FastSet{
+		m: make(map[int]*list.Element),
+		l: list.New(),
+	}
 }
 
 func (f FastSet) Len() int  { return len(f.m) }
 func (f FastSet) Size() int { return len(f.m) }
 
 func (f *FastSet) Add(id int, item interface{}) {
-	if f.m == nil {
-		f.m = make(map[int]*list.Element)
-		f.l = list.New()
-	}
 	_, exists := f.m[id]
 	if exists {
 		return
@@ -46,9 +45,6 @@ func (f *FastSet) Add(id int, item interface{}) {
 }
 
 func (f *FastSet) Remove(id int, item interface{}) {
-	if f.m == nil {
-		return
-	}
 	el := f.m[id]
 	if el == nil {
 		return
@@ -58,22 +54,22 @@ func (f *FastSet) Remove(id int, item interface{}) {
 }
 
 func (f FastSet) Has(id int) bool {
-	if f.m == nil {
-		return false
-	}
 	_, exists := f.m[id]
 	return exists
 }
 
 func (f FastSet) Iterator() Iterator {
-	if f.m == nil {
-		return emptyIterator{}
-	}
 	return &listIterator{next: f.l.Front(), size: f.Len()}
 }
 
 type NodeSet struct {
 	set FastSet
+}
+
+func NewNodeSet() *NodeSet {
+	return &NodeSet{
+		set: *NewFastSet(),
+	}
 }
 
 func (set *NodeSet) Add(node *Node) {
@@ -104,6 +100,12 @@ func (set NodeSet) Slice() []*Node {
 // EdgeSet keeps an unordered set of edges
 type EdgeSet struct {
 	set FastSet
+}
+
+func NewEdgeSet() *EdgeSet {
+	return &EdgeSet{
+		set: *NewFastSet(),
+	}
 }
 
 func (set *EdgeSet) Add(edge *Edge) {

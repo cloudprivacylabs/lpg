@@ -42,5 +42,4 @@ func TestGraphCRUD(t *testing.T) {
 	if g.NumNodes() != len(nodes)-1 {
 		t.Errorf("Wrong numNodes")
 	}
-
 }

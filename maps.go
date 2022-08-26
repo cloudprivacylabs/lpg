@@ -24,16 +24,18 @@ type EdgeMap struct {
 	n int
 }
 
+func NewEdgeMap() *EdgeMap {
+	return &EdgeMap{
+		m: linkedhashmap.New(),
+	}
+}
+
 func (em *EdgeMap) Clear() {
 	em.m = linkedhashmap.New()
 	em.n = 0
 }
 
 func (em *EdgeMap) Add(edge *Edge) {
-	if em.m == nil {
-		em.m = linkedhashmap.New()
-	}
-
 	var set *FastSet
 	v, found := em.m.Get(edge.label)
 	if !found {
@@ -50,9 +52,6 @@ func (em *EdgeMap) Add(edge *Edge) {
 }
 
 func (em EdgeMap) Remove(edge *Edge) {
-	if em.m == nil {
-		return
-	}
 	var set *FastSet
 	v, found := em.m.Get(edge.label)
 	if !found {
@@ -70,9 +69,6 @@ func (em EdgeMap) Remove(edge *Edge) {
 }
 
 func (em EdgeMap) IsEmpty() bool {
-	if em.m == nil {
-		return true
-	}
 	if em.m.Size() == 0 {
 		return true
 	}
@@ -118,17 +114,11 @@ func (itr *edgeMapIterator) Edge() *Edge {
 func (itr *edgeMapIterator) MaxSize() int { return itr.size }
 
 func (em EdgeMap) Iterator() EdgeIterator {
-	if em.m == nil {
-		return &edgeIterator{&emptyIterator{}}
-	}
 	i := em.m.Iterator()
 	return &edgeMapIterator{labels: &i, size: em.Len()}
 }
 
 func (em EdgeMap) IteratorLabel(label string) EdgeIterator {
-	if em.m == nil {
-		return &edgeIterator{&emptyIterator{}}
-	}
 	v, found := em.m.Get(label)
 	if !found {
 		return &edgeIterator{&emptyIterator{}}
@@ -139,9 +129,6 @@ func (em EdgeMap) IteratorLabel(label string) EdgeIterator {
 }
 
 func (em EdgeMap) IteratorAnyLabel(labels StringSet) EdgeIterator {
-	if em.m == nil {
-		return &edgeIterator{&emptyIterator{}}
-	}
 	strings := labels.Slice()
 	return &edgeIterator{&funcIterator{
 		iteratorFunc: func() Iterator {
@@ -167,10 +154,14 @@ type NodeMap struct {
 	nolabels FastSet
 }
 
-func (nm *NodeMap) Replace(node *Node, oldLabels, newLabels StringSet) {
-	if nm.m == nil {
-		nm.m = linkedhashmap.New()
+func NewNodeMap() *NodeMap {
+	return &NodeMap{
+		m:        linkedhashmap.New(),
+		nolabels: *NewFastSet(),
 	}
+}
+
+func (nm *NodeMap) Replace(node *Node, oldLabels, newLabels StringSet) {
 	if oldLabels.Len() == 0 {
 		if newLabels.Len() == 0 {
 			return
@@ -201,7 +192,7 @@ func (nm *NodeMap) Replace(node *Node, oldLabels, newLabels StringSet) {
 		if !oldLabels.Has(label) {
 			v, found := nm.m.Get(label)
 			if !found {
-				set = &FastSet{}
+				set = NewFastSet()
 				nm.m.Put(label, set)
 			} else {
 				set = v.(*FastSet)
@@ -212,9 +203,6 @@ func (nm *NodeMap) Replace(node *Node, oldLabels, newLabels StringSet) {
 }
 
 func (nm *NodeMap) Add(node *Node) {
-	if nm.m == nil {
-		nm.m = linkedhashmap.New()
-	}
 	if node.labels.Len() == 0 {
 		nm.nolabels.Add(node.id, node)
 		return
@@ -224,7 +212,7 @@ func (nm *NodeMap) Add(node *Node) {
 	for label := range node.labels.M {
 		v, found := nm.m.Get(label)
 		if !found {
-			set = &FastSet{}
+			set = NewFastSet()
 			nm.m.Put(label, set)
 		} else {
 			set = v.(*FastSet)
@@ -234,9 +222,6 @@ func (nm *NodeMap) Add(node *Node) {
 }
 
 func (nm NodeMap) Remove(node *Node) {
-	if nm.m == nil {
-		return
-	}
 	if node.labels.Len() == 0 {
 		nm.nolabels.Remove(node.id, node)
 		return
@@ -256,9 +241,6 @@ func (nm NodeMap) Remove(node *Node) {
 }
 
 func (nm NodeMap) IsEmpty() bool {
-	if nm.m == nil {
-		return true
-	}
 	if nm.m.Size() == 0 {
 		return true
 	}
@@ -301,9 +283,6 @@ func (itr *nodeMapIterator) Node() *Node {
 }
 
 func (nm NodeMap) Iterator() NodeIterator {
-	if nm.m == nil {
-		return &nodeIterator{&emptyIterator{}}
-	}
 	i := nm.m.Iterator()
 
 	nmIterator := &nodeMapIterator{labels: &i}
@@ -328,9 +307,6 @@ func (nm NodeMap) Iterator() NodeIterator {
 }
 
 func (nm NodeMap) IteratorAllLabels(labels StringSet) NodeIterator {
-	if nm.m == nil {
-		return &nodeIterator{&emptyIterator{}}
-	}
 	// Find the smallest map element, iterate that
 	var minSet *FastSet
 	for label := range labels.M {

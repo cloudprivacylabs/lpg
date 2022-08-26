@@ -40,13 +40,21 @@ type Graph struct {
 // nodes or edges.
 func NewGraph() *Graph {
 	return &Graph{
-		index: newGraphIndex(),
+		index:    newGraphIndex(),
+		allNodes: *NewNodeSet(),
+		allEdges: *NewEdgeMap(),
 	}
 }
 
 // NewNode creates a new node with the given labels and properties
-func (g *Graph) NewNode(labels []string, properties map[string]interface{}) *Node {
-	node := &Node{labels: NewStringSet(labels...), Properties: Properties(properties), graph: g}
+func (g *Graph) NewNode(labels []string, props map[string]interface{}) *Node {
+	node := &Node{
+		labels:     NewStringSet(labels...),
+		properties: properties(props),
+		graph:      g,
+		incoming:   *NewEdgeMap(),
+		outgoing:   *NewEdgeMap(),
+	}
 	node.id = g.idBase
 	g.idBase++
 	g.addNode(node)
@@ -55,7 +63,7 @@ func (g *Graph) NewNode(labels []string, properties map[string]interface{}) *Nod
 
 // NewEdge creates a new edge between the two nodes of the graph. Both
 // nodes must be nodes of this graph, otherwise this call panics
-func (g *Graph) NewEdge(from, to *Node, label string, properties map[string]interface{}) *Edge {
+func (g *Graph) NewEdge(from, to *Node, label string, props map[string]interface{}) *Edge {
 	if from.graph != g {
 		panic("from node is not in graph")
 	}
@@ -66,7 +74,7 @@ func (g *Graph) NewEdge(from, to *Node, label string, properties map[string]inte
 		from:       from,
 		to:         to,
 		label:      label,
-		Properties: Properties(properties),
+		properties: properties(props),
 		id:         g.idBase,
 	}
 	g.idBase++
@@ -382,15 +390,15 @@ func (g *Graph) setNodeLabels(node *Node, labels StringSet) {
 }
 
 func (g *Graph) setNodeProperty(node *Node, key string, value interface{}) {
-	if node.Properties == nil {
-		node.Properties = make(Properties)
+	if node.properties == nil {
+		node.properties = make(properties)
 	}
-	oldValue, exists := node.Properties[key]
+	oldValue, exists := node.properties[key]
 	nix := g.index.isNodePropertyIndexed(key)
 	if nix != nil && exists {
 		nix.remove(oldValue, node.id, node)
 	}
-	node.Properties[key] = value
+	node.properties[key] = value
 	if nix != nil {
 		nix.add(value, node.id, node)
 	}
@@ -399,8 +407,10 @@ func (g *Graph) setNodeProperty(node *Node, key string, value interface{}) {
 func (g *Graph) cloneNode(node *Node, cloneProperty func(string, interface{}) interface{}) *Node {
 	newNode := &Node{
 		labels:     node.labels.Clone(),
-		Properties: node.Properties.clone(cloneProperty),
+		properties: node.properties.clone(cloneProperty),
 		graph:      g,
+		incoming:   *NewEdgeMap(),
+		outgoing:   *NewEdgeMap(),
 	}
 	newNode.id = g.idBase
 	g.idBase++
@@ -414,10 +424,10 @@ func (g *Graph) addNode(node *Node) {
 }
 
 func (g *Graph) removeNodeProperty(node *Node, key string) {
-	if node.Properties == nil {
+	if node.properties == nil {
 		return
 	}
-	value, exists := node.Properties[key]
+	value, exists := node.properties[key]
 	if !exists {
 		return
 	}
@@ -425,7 +435,7 @@ func (g *Graph) removeNodeProperty(node *Node, key string) {
 	if nix != nil {
 		nix.remove(value, node.id, node)
 	}
-	delete(node.Properties, key)
+	delete(node.properties, key)
 }
 
 func (g *Graph) detachRemoveNode(node *Node) {
@@ -460,7 +470,7 @@ func (g *Graph) cloneEdge(from, to *Node, edge *Edge, cloneProperty func(string,
 		from:       from,
 		to:         to,
 		label:      edge.label,
-		Properties: edge.Properties.clone(cloneProperty),
+		properties: edge.properties.clone(cloneProperty),
 		id:         g.idBase,
 	}
 	g.idBase++
@@ -492,25 +502,25 @@ func (g *Graph) removeEdge(edge *Edge) {
 }
 
 func (g *Graph) setEdgeProperty(edge *Edge, key string, value interface{}) {
-	if edge.Properties == nil {
-		edge.Properties = make(Properties)
+	if edge.properties == nil {
+		edge.properties = make(properties)
 	}
-	oldValue, exists := edge.Properties[key]
+	oldValue, exists := edge.properties[key]
 	nix := g.index.isEdgePropertyIndexed(key)
 	if nix != nil && exists {
 		nix.remove(oldValue, edge.id, edge)
 	}
-	edge.Properties[key] = value
+	edge.properties[key] = value
 	if nix != nil {
 		nix.add(value, edge.id, edge)
 	}
 }
 
 func (g *Graph) removeEdgeProperty(edge *Edge, key string) {
-	if edge.Properties == nil {
+	if edge.properties == nil {
 		return
 	}
-	oldValue, exists := edge.Properties[key]
+	oldValue, exists := edge.properties[key]
 	if !exists {
 		return
 	}
@@ -518,7 +528,7 @@ func (g *Graph) removeEdgeProperty(edge *Edge, key string) {
 	if nix != nil {
 		nix.remove(oldValue, edge.id, edge)
 	}
-	delete(edge.Properties, key)
+	delete(edge.properties, key)
 }
 
 type WithProperties interface {

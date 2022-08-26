@@ -91,6 +91,7 @@ type graphIndex struct {
 
 func newGraphIndex() graphIndex {
 	return graphIndex{
+		nodesByLabel:   *NewNodeMap(),
 		nodeProperties: make(map[string]*setTree),
 		edgeProperties: make(map[string]*setTree),
 	}
@@ -107,7 +108,7 @@ func (g *graphIndex) NodePropertyIndex(propertyName string, graph *Graph) {
 	// Reindex
 	for nodes := graph.GetNodes(); nodes.Next(); {
 		node := nodes.Node()
-		value, ok := node.Properties[propertyName]
+		value, ok := node.properties[propertyName]
 		if ok {
 			index.add(value, node.id, node)
 		}
@@ -157,7 +158,7 @@ func (g *graphIndex) EdgesWithProperty(key string) EdgeIterator {
 func (g *graphIndex) addNodeToIndex(node *Node) {
 	g.nodesByLabel.Add(node)
 
-	for k, v := range node.Properties {
+	for k, v := range node.properties {
 		index, found := g.nodeProperties[k]
 		if !found {
 			continue
@@ -169,7 +170,7 @@ func (g *graphIndex) addNodeToIndex(node *Node) {
 func (g *graphIndex) removeNodeFromIndex(node *Node) {
 	g.nodesByLabel.Remove(node)
 
-	for k, v := range node.Properties {
+	for k, v := range node.properties {
 		index, found := g.nodeProperties[k]
 		if !found {
 			continue
@@ -189,7 +190,7 @@ func (g *graphIndex) EdgePropertyIndex(propertyName string, graph *Graph) {
 	// Reindex
 	for edges := graph.GetEdges(); edges.Next(); {
 		edge := edges.Edge()
-		value, ok := edge.Properties[propertyName]
+		value, ok := edge.properties[propertyName]
 		if ok {
 			index.add(value, edge.id, edge)
 		}
@@ -197,7 +198,7 @@ func (g *graphIndex) EdgePropertyIndex(propertyName string, graph *Graph) {
 }
 
 func (g *graphIndex) addEdgeToIndex(edge *Edge) {
-	for k, v := range edge.Properties {
+	for k, v := range edge.properties {
 		index, found := g.edgeProperties[k]
 		if !found {
 			continue
@@ -207,7 +208,7 @@ func (g *graphIndex) addEdgeToIndex(edge *Edge) {
 }
 
 func (g *graphIndex) removeEdgeFromIndex(edge *Edge) {
-	for k, v := range edge.Properties {
+	for k, v := range edge.properties {
 		index, found := g.edgeProperties[k]
 		if !found {
 			continue

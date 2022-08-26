@@ -216,7 +216,7 @@ func (p *PatternSymbol) Add(item interface{}) bool {
 
 	case *Edge:
 		if p.Edges == nil {
-			p.Edges = &EdgeSet{}
+			p.Edges = NewEdgeSet()
 		}
 		p.Edges.Add(k)
 
@@ -228,14 +228,14 @@ func (p *PatternSymbol) Add(item interface{}) bool {
 
 func (p *PatternSymbol) AddNode(item *Node) {
 	if p.Nodes == nil {
-		p.Nodes = &NodeSet{}
+		p.Nodes = NewNodeSet()
 	}
 	p.Nodes.Add(item)
 }
 
 func (p *PatternSymbol) AddPath(path []*Edge) {
 	if p.Edges == nil {
-		p.Edges = &EdgeSet{}
+		p.Edges = NewEdgeSet()
 	}
 	for _, x := range path {
 		p.Edges.Add(x)

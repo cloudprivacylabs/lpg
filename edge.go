@@ -22,7 +22,7 @@ import (
 type Edge struct {
 	from, to *Node
 	label    string
-	Properties
+	properties
 	id int
 }
 
@@ -77,5 +77,5 @@ func (edge *Edge) Remove() {
 
 // Returns the string representation of an edge
 func (edge *Edge) String() string {
-	return fmt.Sprintf("[:%s %s]", edge.label, edge.Properties)
+	return fmt.Sprintf("[:%s %s]", edge.label, edge.properties)
 }

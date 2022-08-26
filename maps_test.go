@@ -6,7 +6,7 @@ import (
 )
 
 func TestEdgeMap(t *testing.T) {
-	m := EdgeMap{}
+	m := NewEdgeMap()
 	labels := []string{"a", "b", "c", "d", "e", "f"}
 	data := make(map[string]struct{})
 	id := 0
@@ -14,8 +14,8 @@ func TestEdgeMap(t *testing.T) {
 		for i := 0; i < 10; i++ {
 			edge := &Edge{label: l, id: id}
 			id++
-			edge.Properties = make(Properties)
-			edge.Properties["index"] = i
+			edge.properties = make(properties)
+			edge.properties["index"] = i
 			m.Add(edge)
 			data[fmt.Sprintf("%s:%d", l, i)] = struct{}{}
 		}
@@ -25,7 +25,7 @@ func TestEdgeMap(t *testing.T) {
 	found := make(map[string]struct{})
 	for itr.Next() {
 		edge := itr.Edge()
-		found[fmt.Sprintf("%s:%d", edge.label, edge.Properties["index"])] = struct{}{}
+		found[fmt.Sprintf("%s:%d", edge.label, edge.properties["index"])] = struct{}{}
 	}
 	if len(found) != len(data) {
 		t.Errorf("found: %v", found)
@@ -40,7 +40,7 @@ func TestEdgeMap(t *testing.T) {
 			if edge.label != label {
 				t.Errorf("Expecting %s got %+v", label, edge)
 			}
-			found[fmt.Sprint(edge.Properties["index"])] = struct{}{}
+			found[fmt.Sprint(edge.properties["index"])] = struct{}{}
 		}
 		if len(found) != 10 {
 			t.Errorf("10 entries were expected, got %v", found)
@@ -54,7 +54,7 @@ func TestEdgeMap(t *testing.T) {
 		if edge.label != "a" && edge.label != "c" && edge.label != "e" {
 			t.Errorf("Unexpected label: %s", edge.label)
 		}
-		found[fmt.Sprintf("%s:%d", edge.label, edge.Properties["index"])] = struct{}{}
+		found[fmt.Sprintf("%s:%d", edge.label, edge.properties["index"])] = struct{}{}
 	}
 	if len(found) != 30 {
 		t.Errorf("Expecting 30, got %v", found)
@@ -62,7 +62,7 @@ func TestEdgeMap(t *testing.T) {
 }
 
 func TestNodeMap(t *testing.T) {
-	m := NodeMap{}
+	m := NewNodeMap()
 	labels := [][]string{{"a"}, {"b", "c", "d"}, {"e", "f"}}
 	data := make(map[string]struct{})
 	id := 0
@@ -70,8 +70,8 @@ func TestNodeMap(t *testing.T) {
 		for i := 0; i < 10; i++ {
 			node := &Node{labels: NewStringSet(l...), id: id}
 			id++
-			node.Properties = make(Properties)
-			node.Properties["index"] = i
+			node.properties = make(properties)
+			node.properties["index"] = i
 			m.Add(node)
 			data[fmt.Sprintf("%d:%d", len(l), i)] = struct{}{}
 		}
@@ -81,7 +81,7 @@ func TestNodeMap(t *testing.T) {
 	found := make(map[string]struct{})
 	for itr.Next() {
 		node := itr.Node()
-		found[fmt.Sprintf("%d:%d", node.labels.Len(), node.Properties["index"])] = struct{}{}
+		found[fmt.Sprintf("%d:%d", node.labels.Len(), node.properties["index"])] = struct{}{}
 	}
 	if len(found) != len(data) {
 		t.Errorf("found: %v", found)
@@ -96,7 +96,7 @@ func TestNodeMap(t *testing.T) {
 			if !node.labels.HasAll(label...) {
 				t.Errorf("Expecting %v got %+v", label, node)
 			}
-			found[fmt.Sprint(node.Properties["index"])] = struct{}{}
+			found[fmt.Sprint(node.properties["index"])] = struct{}{}
 		}
 		if len(found) != 10 {
 			t.Errorf("10 entries were expected, got %v", found)

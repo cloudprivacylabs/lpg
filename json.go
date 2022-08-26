@@ -199,7 +199,7 @@ func (j JSON) Encode(g *Graph, out io.Writer) error {
 
 	encodeEdge := func(edge *Edge, writeFrom bool) error {
 		var e interface{}
-		properties, err := marshalProperties(edge.Properties)
+		properties, err := marshalProperties(edge.properties)
 		if err != nil {
 			return err
 		}
@@ -278,14 +278,14 @@ func (j JSON) Encode(g *Graph, out io.Writer) error {
 					return err
 				}
 			}
-			if len(node.Properties) > 0 {
+			if len(node.properties) > 0 {
 				if _, err := out.Write(comma); err != nil {
 					return err
 				}
 				if _, err := out.Write(propertiesKey); err != nil {
 					return err
 				}
-				data, err := json.Marshal(node.Properties)
+				data, err := json.Marshal(node.properties)
 				if err != nil {
 					return err
 				}

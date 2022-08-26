@@ -22,7 +22,7 @@ import (
 // A Node represents a graph node.
 type Node struct {
 	labels StringSet
-	Properties
+	properties
 	graph    *Graph
 	incoming EdgeMap
 	outgoing EdgeMap
@@ -118,7 +118,7 @@ func (node *Node) String() string {
 	if node.labels.Len() > 0 {
 		labels = ":" + labels
 	}
-	return fmt.Sprintf("(%s %s)", labels, node.Properties)
+	return fmt.Sprintf("(%s %s)", labels, node.properties)
 }
 
 // NextNodesWith returns the nodes reachable from source with the given label at one step
