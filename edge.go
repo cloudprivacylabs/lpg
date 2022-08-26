@@ -15,7 +15,6 @@
 package lpg
 
 import (
-	"container/list"
 	"fmt"
 )
 
@@ -25,7 +24,6 @@ type Edge struct {
 	label    string
 	properties
 	id int
-	el *list.Element
 }
 
 // EdgeDir is used to show edge direction

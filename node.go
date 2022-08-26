@@ -26,8 +26,8 @@ type Node struct {
 	properties
 	graph    *Graph
 	el       *list.Element
-	incoming *edgeMap
-	outgoing *edgeMap
+	incoming EdgeMap
+	outgoing EdgeMap
 	id       int
 }
 
@@ -48,12 +48,12 @@ func (node *Node) GetID() int { return node.id }
 func (node *Node) GetEdges(dir EdgeDir) EdgeIterator {
 	switch dir {
 	case IncomingEdge:
-		return node.incoming.iterator()
+		return node.incoming.Iterator()
 	case OutgoingEdge:
-		return node.outgoing.iterator()
+		return node.outgoing.Iterator()
 	}
-	i1 := node.incoming.iterator()
-	i2 := node.outgoing.iterator()
+	i1 := node.incoming.Iterator()
+	i2 := node.outgoing.Iterator()
 	return &edgeIterator{withSize(MultiIterator(i1, i2), i1.MaxSize()+i2.MaxSize())}
 }
 
@@ -61,12 +61,12 @@ func (node *Node) GetEdges(dir EdgeDir) EdgeIterator {
 func (node *Node) GetEdgesWithLabel(dir EdgeDir, label string) EdgeIterator {
 	switch dir {
 	case IncomingEdge:
-		return node.incoming.iteratorLabel(label)
+		return node.incoming.IteratorLabel(label)
 	case OutgoingEdge:
-		return node.outgoing.iteratorLabel(label)
+		return node.outgoing.IteratorLabel(label)
 	}
-	i1 := node.incoming.iteratorLabel(label)
-	i2 := node.outgoing.iteratorLabel(label)
+	i1 := node.incoming.IteratorLabel(label)
+	i2 := node.outgoing.IteratorLabel(label)
 	return &edgeIterator{withSize(MultiIterator(i1, i2), i1.MaxSize()+i2.MaxSize())}
 }
 
@@ -75,14 +75,14 @@ func (node *Node) GetEdgesWithAnyLabel(dir EdgeDir, labels StringSet) EdgeIterat
 	switch dir {
 	case IncomingEdge:
 		if labels.Len() == 0 {
-			return node.incoming.iterator()
+			return node.incoming.Iterator()
 		}
-		return node.incoming.iteratorAnyLabel(labels)
+		return node.incoming.IteratorAnyLabel(labels)
 	case OutgoingEdge:
 		if labels.Len() == 0 {
-			return node.outgoing.iterator()
+			return node.outgoing.Iterator()
 		}
-		return node.outgoing.iteratorAnyLabel(labels)
+		return node.outgoing.IteratorAnyLabel(labels)
 	}
 	i1 := node.GetEdgesWithAnyLabel(IncomingEdge, labels)
 	i2 := node.GetEdgesWithAnyLabel(OutgoingEdge, labels)

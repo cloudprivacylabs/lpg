@@ -36,7 +36,7 @@ import (
 type Graph struct {
 	index    graphIndex
 	allNodes *list.List
-	allEdges *edgeMap
+	allEdges EdgeMap
 	idBase   int
 }
 
@@ -46,7 +46,7 @@ func NewGraph() *Graph {
 	return &Graph{
 		index:    newGraphIndex(),
 		allNodes: list.New(),
-		allEdges: newEdgeMap(),
+		allEdges: *NewEdgeMap(),
 	}
 }
 
@@ -56,8 +56,8 @@ func (g *Graph) NewNode(labels []string, props map[string]interface{}) *Node {
 		labels:     NewStringSet(labels...),
 		properties: properties(props),
 		graph:      g,
-		incoming:   newEdgeMap(),
-		outgoing:   newEdgeMap(),
+		incoming:   *NewEdgeMap(),
+		outgoing:   *NewEdgeMap(),
 	}
 	node.id = g.idBase
 	g.idBase++
@@ -82,7 +82,7 @@ func (g *Graph) NewEdge(from, to *Node, label string, props map[string]interface
 		id:         g.idBase,
 	}
 	g.idBase++
-	g.allEdges.add(newEdge)
+	g.allEdges.Add(newEdge)
 	g.connect(newEdge)
 	g.index.addEdgeToIndex(newEdge)
 	return newEdge
@@ -95,7 +95,7 @@ func (g *Graph) NumNodes() int {
 
 // NumEdges returns the number of edges in the graph
 func (g *Graph) NumEdges() int {
-	return g.allEdges.size()
+	return g.allEdges.Len()
 }
 
 // GetNodes returns a node iterator that goes through all the nodes of
@@ -120,7 +120,7 @@ func (g *Graph) GetNodesWithAllLabels(labels StringSet) NodeIterator {
 // during iteration edges are updated, new edges are added, or
 // existing edges are deleted.
 func (g *Graph) GetEdges() EdgeIterator {
-	return g.allEdges.iterator()
+	return g.allEdges.Iterator()
 }
 
 // GetEdgesWithAnyLabel returns an iterator that goes through the
@@ -129,7 +129,7 @@ func (g *Graph) GetEdges() EdgeIterator {
 // during iteration edges are updated, new edges are added, or
 // existing edges are deleted.
 func (g *Graph) GetEdgesWithAnyLabel(set StringSet) EdgeIterator {
-	return g.allEdges.iteratorAnyLabel(set)
+	return g.allEdges.IteratorAnyLabel(set)
 }
 
 // AddEdgePropertyIndex adds an index for the given edge property
@@ -413,8 +413,8 @@ func (g *Graph) cloneNode(node *Node, cloneProperty func(string, interface{}) in
 		labels:     node.labels.Clone(),
 		properties: node.properties.clone(cloneProperty),
 		graph:      g,
-		incoming:   newEdgeMap(),
-		outgoing:   newEdgeMap(),
+		incoming:   *NewEdgeMap(),
+		outgoing:   *NewEdgeMap(),
 	}
 	newNode.id = g.idBase
 	g.idBase++
@@ -449,18 +449,18 @@ func (g *Graph) detachRemoveNode(node *Node) {
 }
 
 func (g *Graph) detachNode(node *Node) {
-	for _, edge := range EdgeSlice(node.incoming.iterator()) {
+	for _, edge := range EdgeSlice(node.incoming.Iterator()) {
 		g.disconnect(edge)
-		g.allEdges.remove(edge)
+		g.allEdges.Remove(edge)
 		g.index.removeEdgeFromIndex(edge)
 	}
-	node.incoming = newEdgeMap()
-	for _, edge := range EdgeSlice(node.outgoing.iterator()) {
+	node.incoming.Clear()
+	for _, edge := range EdgeSlice(node.outgoing.Iterator()) {
 		g.disconnect(edge)
-		g.allEdges.remove(edge)
+		g.allEdges.Remove(edge)
 		g.index.removeEdgeFromIndex(edge)
 	}
-	node.outgoing = newEdgeMap()
+	node.outgoing.Clear()
 }
 
 func (g *Graph) cloneEdge(from, to *Node, edge *Edge, cloneProperty func(string, interface{}) interface{}) *Edge {
@@ -478,20 +478,20 @@ func (g *Graph) cloneEdge(from, to *Node, edge *Edge, cloneProperty func(string,
 		id:         g.idBase,
 	}
 	g.idBase++
-	g.allEdges.add(newEdge)
+	g.allEdges.Add(newEdge)
 	g.connect(newEdge)
 	g.index.addEdgeToIndex(newEdge)
 	return newEdge
 }
 
 func (g *Graph) connect(edge *Edge) {
-	edge.to.incoming.add(edge)
-	edge.from.outgoing.add(edge)
+	edge.to.incoming.Add(edge)
+	edge.from.outgoing.Add(edge)
 }
 
 func (g *Graph) disconnect(edge *Edge) {
-	edge.to.incoming.remove(edge)
-	edge.from.outgoing.remove(edge)
+	edge.to.incoming.Remove(edge)
+	edge.from.outgoing.Remove(edge)
 }
 
 func (g *Graph) setEdgeLabel(edge *Edge, label string) {
@@ -502,7 +502,7 @@ func (g *Graph) setEdgeLabel(edge *Edge, label string) {
 
 func (g *Graph) removeEdge(edge *Edge) {
 	g.disconnect(edge)
-	g.allEdges.remove(edge)
+	g.allEdges.Remove(edge)
 }
 
 func (g *Graph) setEdgeProperty(edge *Edge, key string, value interface{}) {
