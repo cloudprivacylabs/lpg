@@ -51,6 +51,21 @@ func BenchmarkAddNode(b *testing.B) {
 	}
 }
 
+func benchmarkAddEdge(numNodes, numLabels int, b *testing.B) {
+	g := NewGraph()
+	nodes := make([]*Node, 0, numNodes)
+	for i := 0; i < numNodes; i++ {
+		nodes = append(nodes, g.NewNode([]string{"a", "b", "c"}, map[string]interface{}{"a": "b", "c": "d"}))
+	}
+	for n := 0; n < b.N; n++ {
+		for i := 0; i < len(nodes)-1; i++ {
+			g.NewEdge(nodes[i], nodes[i+1], fmt.Sprintf("label%d", i%numLabels), map[string]interface{}{"a": i})
+		}
+	}
+}
+
+func BenchmarkAddEdge1000_5(b *testing.B) { benchmarkAddEdge(1000, 5, b) }
+
 func benchmarkItrNodes(numNodes int, b *testing.B) {
 	g := NewGraph()
 	var x *Node
