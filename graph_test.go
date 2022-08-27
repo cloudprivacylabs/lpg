@@ -84,3 +84,63 @@ func benchmarkItrNodesViaIndex(numNodes int, b *testing.B) {
 
 func BenchmarkItrNodesViaIndex1000(b *testing.B)  { benchmarkItrNodesViaIndex(1000, b) }
 func BenchmarkItrNodesViaIndex10000(b *testing.B) { benchmarkItrNodesViaIndex(10000, b) }
+
+func BenchmarkCreateEdge(b *testing.B) {
+	g := NewGraph()
+	nodes := make([]*Node, 0)
+	for i := 0; i < 1000; i++ {
+		nodes = append(nodes, g.NewNode([]string{fmt.Sprint(i)}, nil))
+	}
+	labels := []string{"a", "b", "c", "d"}
+
+	for n := 0; n < b.N; n++ {
+		for i := 0; i < len(nodes)-1; i++ {
+			g.NewEdge(nodes[i], nodes[i+1], labels[i%4], nil)
+		}
+	}
+}
+
+func BenchmarkItrAllEdge(b *testing.B) {
+	g := NewGraph()
+	nodes := make([]*Node, 0)
+	for i := 0; i < 1000; i++ {
+		nodes = append(nodes, g.NewNode([]string{fmt.Sprint(i)}, nil))
+	}
+	labels := []string{"a", "b", "c", "d"}
+	for i := 0; i < len(nodes)-1; i++ {
+		g.NewEdge(nodes[i], nodes[i+1], labels[i%4], nil)
+	}
+	var edge *Edge
+
+	for n := 0; n < b.N; n++ {
+		for edges := g.GetEdges(); edges.Next(); {
+			edge = edges.Edge()
+		}
+	}
+	_ = edge
+}
+
+func BenchmarkItrNodeEdges(b *testing.B) {
+	g := NewGraph()
+	nodes := make([]*Node, 0)
+	for i := 0; i < 1000; i++ {
+		nodes = append(nodes, g.NewNode([]string{fmt.Sprint(i)}, nil))
+	}
+	labels := []string{"a", "b", "c", "d"}
+	for i := 0; i < len(nodes)-1; i++ {
+		for _, label := range labels {
+			g.NewEdge(nodes[i], nodes[i+1], label, nil)
+		}
+	}
+	var edge *Edge
+
+	for n := 0; n < b.N; n++ {
+		for nodes := g.GetNodes(); nodes.Next(); {
+			node := nodes.Node()
+			for edges := node.GetEdges(OutgoingEdge); edges.Next(); {
+				edge = edges.Edge()
+			}
+		}
+	}
+	_ = edge
+}

@@ -36,7 +36,7 @@ import (
 type Graph struct {
 	index    graphIndex
 	allNodes *list.List
-	allEdges EdgeMap
+	allEdges edgeMap
 	idBase   int
 }
 
@@ -46,7 +46,7 @@ func NewGraph() *Graph {
 	return &Graph{
 		index:    newGraphIndex(),
 		allNodes: list.New(),
-		allEdges: *NewEdgeMap(),
+		allEdges: *newEdgeMap(),
 	}
 }
 
@@ -82,7 +82,7 @@ func (g *Graph) NewEdge(from, to *Node, label string, props map[string]interface
 		id:         g.idBase,
 	}
 	g.idBase++
-	g.allEdges.Add(newEdge)
+	newEdge.el = g.allEdges.add(newEdge)
 	g.connect(newEdge)
 	g.index.addEdgeToIndex(newEdge)
 	return newEdge
@@ -95,7 +95,7 @@ func (g *Graph) NumNodes() int {
 
 // NumEdges returns the number of edges in the graph
 func (g *Graph) NumEdges() int {
-	return g.allEdges.Len()
+	return g.allEdges.size()
 }
 
 // GetNodes returns a node iterator that goes through all the nodes of
@@ -120,7 +120,7 @@ func (g *Graph) GetNodesWithAllLabels(labels StringSet) NodeIterator {
 // during iteration edges are updated, new edges are added, or
 // existing edges are deleted.
 func (g *Graph) GetEdges() EdgeIterator {
-	return g.allEdges.Iterator()
+	return g.allEdges.iterator()
 }
 
 // GetEdgesWithAnyLabel returns an iterator that goes through the
@@ -129,7 +129,7 @@ func (g *Graph) GetEdges() EdgeIterator {
 // during iteration edges are updated, new edges are added, or
 // existing edges are deleted.
 func (g *Graph) GetEdgesWithAnyLabel(set StringSet) EdgeIterator {
-	return g.allEdges.IteratorAnyLabel(set)
+	return g.allEdges.iteratorAnyLabel(set)
 }
 
 // AddEdgePropertyIndex adds an index for the given edge property
@@ -451,13 +451,13 @@ func (g *Graph) detachRemoveNode(node *Node) {
 func (g *Graph) detachNode(node *Node) {
 	for _, edge := range EdgeSlice(node.incoming.Iterator()) {
 		g.disconnect(edge)
-		g.allEdges.Remove(edge)
+		g.allEdges.remove(edge.el)
 		g.index.removeEdgeFromIndex(edge)
 	}
 	node.incoming.Clear()
 	for _, edge := range EdgeSlice(node.outgoing.Iterator()) {
 		g.disconnect(edge)
-		g.allEdges.Remove(edge)
+		g.allEdges.remove(edge.el)
 		g.index.removeEdgeFromIndex(edge)
 	}
 	node.outgoing.Clear()
@@ -478,7 +478,7 @@ func (g *Graph) cloneEdge(from, to *Node, edge *Edge, cloneProperty func(string,
 		id:         g.idBase,
 	}
 	g.idBase++
-	g.allEdges.Add(newEdge)
+	newEdge.el = g.allEdges.add(newEdge)
 	g.connect(newEdge)
 	g.index.addEdgeToIndex(newEdge)
 	return newEdge
@@ -502,7 +502,7 @@ func (g *Graph) setEdgeLabel(edge *Edge, label string) {
 
 func (g *Graph) removeEdge(edge *Edge) {
 	g.disconnect(edge)
-	g.allEdges.Remove(edge)
+	g.allEdges.remove(edge.el)
 }
 
 func (g *Graph) setEdgeProperty(edge *Edge, key string, value interface{}) {
