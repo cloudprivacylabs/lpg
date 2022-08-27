@@ -56,8 +56,8 @@ func (g *Graph) NewNode(labels []string, props map[string]interface{}) *Node {
 		labels:     NewStringSet(labels...),
 		properties: properties(props),
 		graph:      g,
-		incoming:   *NewEdgeMap(),
-		outgoing:   *NewEdgeMap(),
+		incoming:   *newEdgeMap(),
+		outgoing:   *newEdgeMap(),
 	}
 	node.id = g.idBase
 	g.idBase++
@@ -413,8 +413,8 @@ func (g *Graph) cloneNode(node *Node, cloneProperty func(string, interface{}) in
 		labels:     node.labels.Clone(),
 		properties: node.properties.clone(cloneProperty),
 		graph:      g,
-		incoming:   *NewEdgeMap(),
-		outgoing:   *NewEdgeMap(),
+		incoming:   *newEdgeMap(),
+		outgoing:   *newEdgeMap(),
 	}
 	newNode.id = g.idBase
 	g.idBase++
@@ -449,18 +449,18 @@ func (g *Graph) detachRemoveNode(node *Node) {
 }
 
 func (g *Graph) detachNode(node *Node) {
-	for _, edge := range EdgeSlice(node.incoming.Iterator()) {
+	for _, edge := range EdgeSlice(node.incoming.iterator()) {
 		g.disconnect(edge)
 		g.allEdges.remove(edge.el)
 		g.index.removeEdgeFromIndex(edge)
 	}
-	node.incoming.Clear()
-	for _, edge := range EdgeSlice(node.outgoing.Iterator()) {
+	node.incoming = *newEdgeMap()
+	for _, edge := range EdgeSlice(node.outgoing.iterator()) {
 		g.disconnect(edge)
 		g.allEdges.remove(edge.el)
 		g.index.removeEdgeFromIndex(edge)
 	}
-	node.outgoing.Clear()
+	node.outgoing = *newEdgeMap()
 }
 
 func (g *Graph) cloneEdge(from, to *Node, edge *Edge, cloneProperty func(string, interface{}) interface{}) *Edge {
@@ -485,13 +485,13 @@ func (g *Graph) cloneEdge(from, to *Node, edge *Edge, cloneProperty func(string,
 }
 
 func (g *Graph) connect(edge *Edge) {
-	edge.to.incoming.Add(edge)
-	edge.from.outgoing.Add(edge)
+	edge.inEl = edge.to.incoming.add(edge)
+	edge.outEl = edge.from.outgoing.add(edge)
 }
 
 func (g *Graph) disconnect(edge *Edge) {
-	edge.to.incoming.Remove(edge)
-	edge.from.outgoing.Remove(edge)
+	edge.to.incoming.remove(edge.inEl)
+	edge.from.outgoing.remove(edge.outEl)
 }
 
 func (g *Graph) setEdgeLabel(edge *Edge, label string) {

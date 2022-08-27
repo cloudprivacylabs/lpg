@@ -24,8 +24,10 @@ type Edge struct {
 	from, to *Node
 	label    string
 	properties
-	id int
-	el *list.Element
+	id    int
+	el    *list.Element
+	outEl *list.Element
+	inEl  *list.Element
 }
 
 // EdgeDir is used to show edge direction
