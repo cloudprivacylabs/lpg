@@ -2,7 +2,7 @@ package lpg
 
 // Sources finds all the source nodes in the graph
 func SourcesItr(graph *Graph) NodeIterator {
-	return &nodeIterator{
+	return nodeIterator{
 		&filterIterator{
 			itr: graph.GetNodes(),
 			filter: func(item interface{}) bool {

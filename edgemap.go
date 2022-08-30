@@ -92,15 +92,15 @@ func (em edgeMap) iterator() EdgeIterator {
 func (em edgeMap) iteratorLabel(label string) EdgeIterator {
 	l := em.labelMap[label]
 	if l == nil {
-		return &edgeIterator{&emptyIterator{}}
+		return edgeIterator{&emptyIterator{}}
 	}
 	ell := l.Value.(*edgeLabelList)
-	return &edgeIterator{&listIterator{next: ell.edges.Front(), size: ell.edges.Len()}}
+	return edgeIterator{&listIterator{next: ell.edges.Front(), size: ell.edges.Len()}}
 }
 
 func (em edgeMap) iteratorAnyLabel(labels StringSet) EdgeIterator {
 	strings := labels.Slice()
-	return &edgeIterator{&funcIterator{
+	return edgeIterator{&funcIterator{
 		iteratorFunc: func() Iterator {
 			for len(strings) != 0 {
 				if _, found := em.labelMap[strings[0]]; !found {

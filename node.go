@@ -54,7 +54,7 @@ func (node *Node) GetEdges(dir EdgeDir) EdgeIterator {
 	}
 	i1 := node.incoming.iterator()
 	i2 := node.outgoing.iterator()
-	return &edgeIterator{withSize(MultiIterator(i1, i2), i1.MaxSize()+i2.MaxSize())}
+	return edgeIterator{withSize(MultiIterator(i1, i2), i1.MaxSize()+i2.MaxSize())}
 }
 
 // Returns an edge iterator for incoming or outgoing edges with the given label
@@ -67,7 +67,7 @@ func (node *Node) GetEdgesWithLabel(dir EdgeDir, label string) EdgeIterator {
 	}
 	i1 := node.incoming.iteratorLabel(label)
 	i2 := node.outgoing.iteratorLabel(label)
-	return &edgeIterator{withSize(MultiIterator(i1, i2), i1.MaxSize()+i2.MaxSize())}
+	return edgeIterator{withSize(MultiIterator(i1, i2), i1.MaxSize()+i2.MaxSize())}
 }
 
 // Returns an edge iterator for incoming or outgoingn edges that has the given labels
@@ -86,7 +86,7 @@ func (node *Node) GetEdgesWithAnyLabel(dir EdgeDir, labels StringSet) EdgeIterat
 	}
 	i1 := node.GetEdgesWithAnyLabel(IncomingEdge, labels)
 	i2 := node.GetEdgesWithAnyLabel(OutgoingEdge, labels)
-	return &edgeIterator{withSize(MultiIterator(i1, i2), i1.MaxSize()+i2.MaxSize())}
+	return edgeIterator{withSize(MultiIterator(i1, i2), i1.MaxSize()+i2.MaxSize())}
 }
 
 // SetLabels sets the node labels

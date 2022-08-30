@@ -182,7 +182,7 @@ type nodeIterator struct {
 	Iterator
 }
 
-func (n *nodeIterator) Node() *Node {
+func (n nodeIterator) Node() *Node {
 	return n.Value().(*Node)
 }
 
@@ -191,38 +191,8 @@ type edgeIterator struct {
 	Iterator
 }
 
-func (n *edgeIterator) Edge() *Edge {
+func (n edgeIterator) Edge() *Edge {
 	return n.Value().(*Edge)
-}
-
-type arrEdgeIterator struct {
-	edges   []*Edge
-	current *Edge
-}
-
-func (n *arrEdgeIterator) Next() bool {
-	if len(n.edges) == 0 {
-		return false
-	}
-	n.current = n.edges[0]
-	n.edges = n.edges[1:]
-	return true
-}
-
-func (n *arrEdgeIterator) Value() interface{} {
-	return n.current
-}
-
-func (n *arrEdgeIterator) Edge() *Edge {
-	return n.current
-}
-
-func (n *arrEdgeIterator) MaxSize() int {
-	return len(n.edges)
-}
-
-func NewEdgeIterator(edges ...*Edge) EdgeIterator {
-	return &arrEdgeIterator{edges: edges}
 }
 
 type iteratorWithoutSize interface {

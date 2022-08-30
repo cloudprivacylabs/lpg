@@ -31,7 +31,7 @@ type iterateNodes struct {
 func (processor *iterateNodes) init(ctx *MatchContext) error {
 	if !processor.initialized {
 		nodeFilter := processor.patternItem.getNodeFilter()
-		processor.itr = &nodeIterator{
+		processor.itr = nodeIterator{
 			&filterIterator{
 				itr: processor.itr,
 				filter: func(item interface{}) bool {
@@ -44,7 +44,7 @@ func (processor *iterateNodes) init(ctx *MatchContext) error {
 			return err
 		}
 		if nodes != nil {
-			processor.itr = &nodeIterator{
+			processor.itr = nodeIterator{
 				&filterIterator{
 					itr: processor.itr,
 					filter: func(item interface{}) bool {
@@ -89,7 +89,7 @@ func (processor *iterateEdges) init(ctx *MatchContext) {
 	if !processor.initialized {
 		processor.initialized = true
 		filterFunc := processor.patternItem.getEdgeFilter()
-		processor.itr = &edgeIterator{
+		processor.itr = edgeIterator{
 			&filterIterator{
 				itr: processor.itr,
 				filter: func(edge interface{}) bool {
@@ -142,7 +142,7 @@ func (processor *iterateConnectedEdges) init(ctx *MatchContext) {
 
 func (processor *iterateConnectedEdges) Run(ctx *MatchContext, next matchAccumulator) error {
 	node := processor.source.GetResult().(*Node)
-	processor.edgeItr = &edgeIterator{
+	processor.edgeItr = edgeIterator{
 		&filterIterator{
 			itr: node.GetEdgesWithAnyLabel(processor.dir, processor.patternItem.Labels),
 			filter: func(item interface{}) bool {

@@ -66,7 +66,7 @@ func CollectAllPaths(graph *Graph, fromNode *Node, firstLeg EdgeIterator, edgeFi
 		if isLoop(endNode, prefix[:len(prefix)-1]) {
 			return true
 		}
-		itr := &edgeIterator{
+		itr := edgeIterator{
 			&filterIterator{
 				itr: endNode.GetEdges(dir),
 				filter: func(item interface{}) bool {

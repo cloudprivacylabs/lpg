@@ -140,7 +140,7 @@ func (itr *nodeMapIterator) Next() bool {
 	itr.seenLabels = append(itr.seenLabels, itr.labels.Key().(string))
 	set := itr.labels.Value().(*FastSet)
 	setItr := set.Iterator()
-	itr.current = &nodeIterator{withSize(setItr, -1)}
+	itr.current = nodeIterator{withSize(setItr, -1)}
 	itr.current.Next()
 	return true
 }
@@ -157,7 +157,7 @@ func (nm NodeMap) Iterator() NodeIterator {
 	i := nm.m.Iterator()
 
 	nmIterator := &nodeMapIterator{labels: &i}
-	return &nodeIterator{
+	return nodeIterator{
 		MultiIterator(
 			&filterIterator{
 				itr: withSize(nmIterator, -1),
@@ -186,7 +186,7 @@ func (nm NodeMap) IteratorAllLabels(labels StringSet) NodeIterator {
 	for label := range labels.M {
 		v, found := nm.m.Get(label)
 		if !found {
-			return &nodeIterator{&emptyIterator{}}
+			return nodeIterator{&emptyIterator{}}
 		}
 		mp := v.(*FastSet)
 		if minSet == nil || minSet.Len() > mp.Len() {
@@ -201,5 +201,5 @@ func (nm NodeMap) IteratorAllLabels(labels StringSet) NodeIterator {
 			return onode.labels.HasAllSet(labels)
 		},
 	}
-	return &nodeIterator{flt}
+	return nodeIterator{flt}
 }

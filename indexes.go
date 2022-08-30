@@ -132,7 +132,7 @@ func (g *graphIndex) GetIteratorForNodeProperty(key string, value interface{}) N
 		return nil
 	}
 	itr := index.find(value)
-	return &nodeIterator{itr}
+	return nodeIterator{itr}
 }
 
 // NodesWithProperty returns an iterator that will go through the
@@ -142,7 +142,7 @@ func (g *graphIndex) NodesWithProperty(key string) NodeIterator {
 	if !found {
 		return nil
 	}
-	return &nodeIterator{index.valueItr()}
+	return nodeIterator{index.valueItr()}
 }
 
 // EdgesWithProperty returns an iterator that will go through the
@@ -152,7 +152,7 @@ func (g *graphIndex) EdgesWithProperty(key string) EdgeIterator {
 	if !found {
 		return nil
 	}
-	return &edgeIterator{index.valueItr()}
+	return edgeIterator{index.valueItr()}
 }
 
 func (g *graphIndex) addNodeToIndex(node *Node) {
@@ -226,5 +226,5 @@ func (g *graphIndex) GetIteratorForEdgeProperty(key string, value interface{}) E
 		return nil
 	}
 	itr := index.find(value)
-	return &edgeIterator{itr}
+	return edgeIterator{itr}
 }

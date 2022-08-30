@@ -103,7 +103,7 @@ func (g *Graph) NumEdges() int {
 // during iteration nodes are updated, new nodes are added, or
 // existing nodes are deleted.
 func (g *Graph) GetNodes() NodeIterator {
-	return &nodeIterator{&listIterator{next: g.allNodes.Front(), size: g.allNodes.Len()}}
+	return nodeIterator{&listIterator{next: g.allNodes.Front(), size: g.allNodes.Len()}}
 }
 
 // GetNodesWithAllLabels returns an iterator that goes through the
@@ -153,7 +153,7 @@ func (g *Graph) GetNodesWithProperty(property string) NodeIterator {
 	if itr != nil {
 		return itr
 	}
-	return &nodeIterator{&filterIterator{
+	return nodeIterator{&filterIterator{
 		itr: g.GetNodes(),
 		filter: func(v interface{}) bool {
 			wp, ok := v.(*Node)
@@ -235,7 +235,7 @@ func (g *Graph) FindNodes(allLabels StringSet, properties map[string]interface{}
 	if nodesByLabelSize != -1 && (minPropertySize == -1 || minPropertySize > nodesByLabelSize) {
 		// Iterate by node label
 		// build a filter from properties
-		return &nodeIterator{
+		return nodeIterator{
 			&filterIterator{
 				itr: nodesByLabelItr,
 				filter: func(item interface{}) bool {
@@ -246,7 +246,7 @@ func (g *Graph) FindNodes(allLabels StringSet, properties map[string]interface{}
 	}
 	if minPropertySize != -1 {
 		// Iterate by property
-		return &nodeIterator{
+		return nodeIterator{
 			&filterIterator{
 				itr: propertyIterators[minimumPropertyItrKey],
 				filter: func(item interface{}) bool {
