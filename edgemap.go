@@ -20,7 +20,7 @@ import (
 
 type edgeLabelList struct {
 	label string
-	edges *list.List
+	edges edgeList
 	el    *list.Element
 }
 
@@ -40,14 +40,13 @@ func newEdgeMap() *edgeMap {
 	}
 }
 
-func (em *edgeMap) add(edge *Edge) *list.Element {
+func (em *edgeMap) add(edge *Edge, listIndex int) {
 	var ell *edgeLabelList
 
 	el := em.labelMap[edge.label]
 	if el == nil {
 		ell = &edgeLabelList{
 			label: edge.label,
-			edges: list.New(),
 		}
 		ell.el = em.edgeLabelLists.PushBack(ell)
 		em.labelMap[edge.label] = ell.el
@@ -55,18 +54,17 @@ func (em *edgeMap) add(edge *Edge) *list.Element {
 		ell = el.Value.(*edgeLabelList)
 	}
 	em.n++
-	return ell.edges.PushBack(edge)
+	ell.edges.add(edge, listIndex)
 }
 
-func (em *edgeMap) remove(edgeEl *list.Element) {
-	edge := edgeEl.Value.(*Edge)
+func (em *edgeMap) remove(edge *Edge, listIndex int) {
 	el := em.labelMap[edge.label]
 	if el == nil {
 		return
 	}
 	ell := el.Value.(*edgeLabelList)
-	ell.edges.Remove(edgeEl)
-	if ell.edges.Len() == 0 {
+	ell.edges.remove(edge, listIndex)
+	if ell.edges.n == 0 {
 		em.edgeLabelLists.Remove(ell.el)
 		delete(em.labelMap, edge.label)
 	}
@@ -77,28 +75,29 @@ func (em *edgeMap) isEmpty() bool { return em.n == 0 }
 
 func (em *edgeMap) size() int { return em.n }
 
-func (em edgeMap) iterator() EdgeIterator {
+func (em edgeMap) iterator(listIndex int) EdgeIterator {
 	ret := &allEdgesItr{
 		labelListCurrent: em.edgeLabelLists.Front(),
+		ix:               listIndex,
 	}
 	if ret.labelListCurrent != nil {
 		ret.labelListNext = ret.labelListCurrent.Next()
-		ret.next = ret.labelListCurrent.Value.(*edgeLabelList).edges.Front()
+		ret.next = ret.labelListCurrent.Value.(*edgeLabelList).edges.head
 	}
 	ret.size = em.n
 	return ret
 }
 
-func (em edgeMap) iteratorLabel(label string) EdgeIterator {
+func (em edgeMap) iteratorLabel(label string, listIndex int) EdgeIterator {
 	l := em.labelMap[label]
 	if l == nil {
 		return edgeIterator{&emptyIterator{}}
 	}
 	ell := l.Value.(*edgeLabelList)
-	return edgeIterator{&listIterator{next: ell.edges.Front(), size: ell.edges.Len()}}
+	return edgeIterator{&edgeListIterator{next: ell.edges.head, n: ell.edges.n, ix: listIndex}}
 }
 
-func (em edgeMap) iteratorAnyLabel(labels StringSet) EdgeIterator {
+func (em edgeMap) iteratorAnyLabel(labels StringSet, listIndex int) EdgeIterator {
 	strings := labels.Slice()
 	return edgeIterator{&funcIterator{
 		iteratorFunc: func() Iterator {
@@ -107,7 +106,7 @@ func (em edgeMap) iteratorAnyLabel(labels StringSet) EdgeIterator {
 					strings = strings[1:]
 					continue
 				}
-				itr := em.iteratorLabel(strings[0])
+				itr := em.iteratorLabel(strings[0], listIndex)
 				strings = strings[1:]
 				return withSize(itr, -1)
 			}
@@ -119,22 +118,23 @@ func (em edgeMap) iteratorAnyLabel(labels StringSet) EdgeIterator {
 
 type allEdgesItr struct {
 	labelListNext, labelListCurrent *list.Element
-	next, current                   *list.Element
+	next, current                   *Edge
 	size                            int
+	ix                              int
 }
 
 func (itr *allEdgesItr) Next() bool {
 top:
 	itr.current = itr.next
 	if itr.next != nil {
-		itr.next = itr.next.Next()
+		itr.next = itr.next.listElements[itr.ix].next
 	} else {
 		itr.labelListCurrent = itr.labelListNext
 		if itr.labelListNext != nil {
 			itr.labelListNext = itr.labelListNext.Next()
 		}
 		if itr.labelListCurrent != nil {
-			itr.next = itr.labelListCurrent.Value.(*edgeLabelList).edges.Front()
+			itr.next = itr.labelListCurrent.Value.(*edgeLabelList).edges.head
 			goto top
 		}
 		return false
@@ -143,11 +143,11 @@ top:
 }
 
 func (itr *allEdgesItr) Value() interface{} {
-	return itr.current.Value
+	return itr.current
 }
 
 func (itr *allEdgesItr) Edge() *Edge {
-	return itr.current.Value.(*Edge)
+	return itr.current
 }
 
 func (itr *allEdgesItr) MaxSize() int { return itr.size }

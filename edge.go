@@ -28,6 +28,8 @@ type Edge struct {
 	el    *list.Element
 	outEl *list.Element
 	inEl  *list.Element
+
+	listElements [3]edgeElement
 }
 
 // EdgeDir is used to show edge direction

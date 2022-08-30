@@ -48,12 +48,12 @@ func (node *Node) GetID() int { return node.id }
 func (node *Node) GetEdges(dir EdgeDir) EdgeIterator {
 	switch dir {
 	case IncomingEdge:
-		return node.incoming.iterator()
+		return node.incoming.iterator(2)
 	case OutgoingEdge:
-		return node.outgoing.iterator()
+		return node.outgoing.iterator(1)
 	}
-	i1 := node.incoming.iterator()
-	i2 := node.outgoing.iterator()
+	i1 := node.incoming.iterator(2)
+	i2 := node.outgoing.iterator(1)
 	return edgeIterator{withSize(MultiIterator(i1, i2), i1.MaxSize()+i2.MaxSize())}
 }
 
@@ -61,12 +61,12 @@ func (node *Node) GetEdges(dir EdgeDir) EdgeIterator {
 func (node *Node) GetEdgesWithLabel(dir EdgeDir, label string) EdgeIterator {
 	switch dir {
 	case IncomingEdge:
-		return node.incoming.iteratorLabel(label)
+		return node.incoming.iteratorLabel(label, 2)
 	case OutgoingEdge:
-		return node.outgoing.iteratorLabel(label)
+		return node.outgoing.iteratorLabel(label, 1)
 	}
-	i1 := node.incoming.iteratorLabel(label)
-	i2 := node.outgoing.iteratorLabel(label)
+	i1 := node.incoming.iteratorLabel(label, 2)
+	i2 := node.outgoing.iteratorLabel(label, 1)
 	return edgeIterator{withSize(MultiIterator(i1, i2), i1.MaxSize()+i2.MaxSize())}
 }
 
@@ -75,14 +75,14 @@ func (node *Node) GetEdgesWithAnyLabel(dir EdgeDir, labels StringSet) EdgeIterat
 	switch dir {
 	case IncomingEdge:
 		if labels.Len() == 0 {
-			return node.incoming.iterator()
+			return node.incoming.iterator(2)
 		}
-		return node.incoming.iteratorAnyLabel(labels)
+		return node.incoming.iteratorAnyLabel(labels, 2)
 	case OutgoingEdge:
 		if labels.Len() == 0 {
-			return node.outgoing.iterator()
+			return node.outgoing.iterator(1)
 		}
-		return node.outgoing.iteratorAnyLabel(labels)
+		return node.outgoing.iteratorAnyLabel(labels, 1)
 	}
 	i1 := node.GetEdgesWithAnyLabel(IncomingEdge, labels)
 	i2 := node.GetEdgesWithAnyLabel(OutgoingEdge, labels)
