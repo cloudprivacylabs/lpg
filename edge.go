@@ -15,7 +15,6 @@
 package lpg
 
 import (
-	"container/list"
 	"fmt"
 )
 
@@ -24,11 +23,7 @@ type Edge struct {
 	from, to *Node
 	label    string
 	properties
-	id    int
-	el    *list.Element
-	outEl *list.Element
-	inEl  *list.Element
-
+	id           int
 	listElements [3]edgeElement
 }
 
