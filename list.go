@@ -18,7 +18,6 @@ func (list *edgeList) add(edge *Edge, ix int) {
 	}
 	list.tail = edge
 
-	edge.listElements[ix].next = nil
 	if list.head == nil {
 		list.head = edge
 	}
@@ -26,13 +25,15 @@ func (list *edgeList) add(edge *Edge, ix int) {
 }
 
 func (list *edgeList) remove(edge *Edge, ix int) {
-	if edge.listElements[ix].prev != nil {
-		edge.listElements[ix].prev.listElements[ix].next = edge.listElements[ix].next
+	el := &edge.listElements[ix]
+
+	if el.prev != nil {
+		el.prev.listElements[ix].next = el.next
 	} else {
-		list.head = edge.listElements[ix].next
+		list.head = el.next
 	}
-	if edge.listElements[ix].next != nil {
-		edge.listElements[ix].next.listElements[ix].prev = edge.listElements[ix].prev
+	if el.next != nil {
+		el.next.listElements[ix].prev = el.prev
 	} else {
 		list.tail = edge
 	}
@@ -49,9 +50,9 @@ func (e *edgeListIterator) Next() bool {
 	e.current = e.next
 	if e.next != nil {
 		e.next = e.next.listElements[e.ix].next
+		return true
 	}
-	return e.current != nil
-
+	return false
 }
 
 func (e *edgeListIterator) Value() interface{} {
@@ -64,4 +65,69 @@ func (e *edgeListIterator) Edge() *Edge {
 
 func (e *edgeListIterator) MaxSize() int {
 	return e.n
+}
+
+type nodeList struct {
+	head *Node
+	tail *Node
+	n    int
+}
+
+type nodeElement struct {
+	next *Node
+	prev *Node
+}
+
+func (list *nodeList) add(node *Node) {
+	node.prev = list.tail
+	if list.tail != nil {
+		list.tail.next = node
+	}
+	list.tail = node
+
+	if list.head == nil {
+		list.head = node
+	}
+	list.n++
+}
+
+func (list *nodeList) remove(node *Node) {
+	if node.prev != nil {
+		node.prev.next = node.next
+	} else {
+		list.head = node.next
+	}
+	if node.next != nil {
+		node.next.prev = node.prev
+	} else {
+		list.tail = node
+	}
+	list.n--
+}
+
+type nodeListIterator struct {
+	current, next *Node
+	n             int
+	ix            int
+}
+
+func (n *nodeListIterator) Next() bool {
+	n.current = n.next
+	if n.next != nil {
+		n.next = n.next.next
+		return true
+	}
+	return false
+}
+
+func (n *nodeListIterator) Value() interface{} {
+	return n.current
+}
+
+func (n *nodeListIterator) Node() *Node {
+	return n.current
+}
+
+func (n *nodeListIterator) MaxSize() int {
+	return n.n
 }

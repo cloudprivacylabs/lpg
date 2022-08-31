@@ -15,17 +15,16 @@
 package lpg
 
 import (
-	"container/list"
 	"fmt"
 	"strings"
 )
 
 // A Node represents a graph node.
 type Node struct {
-	labels StringSet
+	next, prev *Node
+	labels     StringSet
 	properties
 	graph    *Graph
-	el       *list.Element
 	incoming edgeMap
 	outgoing edgeMap
 	id       int

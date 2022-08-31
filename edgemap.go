@@ -128,18 +128,17 @@ top:
 	itr.current = itr.next
 	if itr.next != nil {
 		itr.next = itr.next.listElements[itr.ix].next
-	} else {
-		itr.labelListCurrent = itr.labelListNext
-		if itr.labelListNext != nil {
-			itr.labelListNext = itr.labelListNext.Next()
-		}
-		if itr.labelListCurrent != nil {
-			itr.next = itr.labelListCurrent.Value.(*edgeLabelList).edges.head
-			goto top
-		}
-		return false
+		return true
 	}
-	return itr.current != nil
+	itr.labelListCurrent = itr.labelListNext
+	if itr.labelListNext != nil {
+		itr.labelListNext = itr.labelListNext.Next()
+	}
+	if itr.labelListCurrent != nil {
+		itr.next = itr.labelListCurrent.Value.(*edgeLabelList).edges.head
+		goto top
+	}
+	return false
 }
 
 func (itr *allEdgesItr) Value() interface{} {
