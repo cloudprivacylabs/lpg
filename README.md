@@ -120,7 +120,7 @@ pattern := lpg.Pattern{
 
 This graph library uses the following JSON representation:
 
-```json
+```
 {
   "nodes": [
      {
