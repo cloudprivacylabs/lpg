@@ -29,11 +29,11 @@ func (s *setTree) add(key interface{}, id int, item interface{}) {
 	}
 	v, found := s.tree.Get(key)
 	if !found {
-		v = NewFastSet()
+		v = newFastSet()
 		s.tree.Put(key, v)
 	}
-	set := v.(*FastSet)
-	set.Add(id, item)
+	set := v.(*fastSet)
+	set.add(id, item)
 }
 
 func (s setTree) remove(key interface{}, id int, item interface{}) {
@@ -44,9 +44,9 @@ func (s setTree) remove(key interface{}, id int, item interface{}) {
 	if !found {
 		return
 	}
-	set := v.(*FastSet)
-	set.Remove(id, item)
-	if set.Size() == 0 {
+	set := v.(*fastSet)
+	set.remove(id, item)
+	if set.size() == 0 {
 		s.tree.Remove(key)
 	}
 }
@@ -60,9 +60,9 @@ func (s setTree) find(key interface{}) Iterator {
 	if !found {
 		return emptyIterator{}
 	}
-	set := v.(*FastSet)
-	itr := set.Iterator()
-	return withSize(itr, set.Size())
+	set := v.(*fastSet)
+	itr := set.iterator()
+	return withSize(itr, set.size())
 }
 
 func (s setTree) valueItr() Iterator {
@@ -75,9 +75,9 @@ func (s setTree) valueItr() Iterator {
 			if !treeItr.Next() {
 				return nil
 			}
-			set := treeItr.Value().(*FastSet)
-			itr := set.Iterator()
-			return withSize(itr, set.Size())
+			set := treeItr.Value().(*fastSet)
+			itr := set.iterator()
+			return withSize(itr, set.size())
 		},
 	}
 }

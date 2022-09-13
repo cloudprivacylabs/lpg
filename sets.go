@@ -18,25 +18,24 @@ import (
 	"container/list"
 )
 
-// A FastSet is a set of objects with constant-time
+// A fastSet is a set of objects with constant-time
 // insertion/deletion, with iterator support
-type FastSet struct {
+type fastSet struct {
 	m map[int]*list.Element
 	l *list.List
 }
 
-func NewFastSet() *FastSet {
-	return &FastSet{
+func newFastSet() *fastSet {
+	return &fastSet{
 		m: make(map[int]*list.Element),
 		l: list.New(),
 	}
 }
 
-func (f FastSet) Len() int  { return len(f.m) }
-func (f FastSet) Size() int { return len(f.m) }
+func (f fastSet) size() int { return len(f.m) }
 
 // Add a new item. Returns true if added
-func (f *FastSet) Add(id int, item interface{}) bool {
+func (f *fastSet) add(id int, item interface{}) bool {
 	_, exists := f.m[id]
 	if exists {
 		return false
@@ -47,7 +46,7 @@ func (f *FastSet) Add(id int, item interface{}) bool {
 }
 
 // Remove an item. Returns true if removed
-func (f *FastSet) Remove(id int, item interface{}) bool {
+func (f *fastSet) remove(id int, item interface{}) bool {
 	el := f.m[id]
 	if el == nil {
 		return false
@@ -57,43 +56,43 @@ func (f *FastSet) Remove(id int, item interface{}) bool {
 	return true
 }
 
-func (f FastSet) Has(id int) bool {
+func (f fastSet) has(id int) bool {
 	_, exists := f.m[id]
 	return exists
 }
 
-func (f FastSet) Iterator() Iterator {
-	return &listIterator{next: f.l.Front(), size: f.Len()}
+func (f fastSet) iterator() Iterator {
+	return &listIterator{next: f.l.Front(), size: f.size()}
 }
 
 type NodeSet struct {
-	set FastSet
+	set fastSet
 }
 
 func NewNodeSet() *NodeSet {
 	return &NodeSet{
-		set: *NewFastSet(),
+		set: *newFastSet(),
 	}
 }
 
 func (set *NodeSet) Add(node *Node) {
-	set.set.Add(node.id, node)
+	set.set.add(node.id, node)
 }
 
 func (set NodeSet) Remove(node *Node) {
-	set.set.Remove(node.id, node)
+	set.set.remove(node.id, node)
 }
 
 func (set NodeSet) Has(node *Node) bool {
-	return set.set.Has(node.id)
+	return set.set.has(node.id)
 }
 
 func (set NodeSet) Len() int {
-	return set.set.Len()
+	return set.set.size()
 }
 
 func (set NodeSet) Iterator() NodeIterator {
-	i := set.set.Iterator()
+	i := set.set.iterator()
 	return nodeIterator{i}
 }
 
@@ -103,29 +102,29 @@ func (set NodeSet) Slice() []*Node {
 
 // EdgeSet keeps an unordered set of edges
 type EdgeSet struct {
-	set FastSet
+	set fastSet
 }
 
 func NewEdgeSet() *EdgeSet {
 	return &EdgeSet{
-		set: *NewFastSet(),
+		set: *newFastSet(),
 	}
 }
 
 func (set *EdgeSet) Add(edge *Edge) {
-	set.set.Add(edge.id, edge)
+	set.set.add(edge.id, edge)
 }
 
 func (set EdgeSet) Remove(edge *Edge) {
-	set.set.Remove(edge.id, edge)
+	set.set.remove(edge.id, edge)
 }
 
 func (set EdgeSet) Len() int {
-	return set.set.Len()
+	return set.set.size()
 }
 
 func (set EdgeSet) Iterator() EdgeIterator {
-	i := set.set.Iterator()
+	i := set.set.iterator()
 	return edgeIterator{i}
 }
 
