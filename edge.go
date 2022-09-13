@@ -23,7 +23,10 @@ type Edge struct {
 	from, to *Node
 	label    string
 	properties
-	id           int
+	id int
+	// 0: all edges list
+	// 1: outgoing edges list
+	// 2: incoming edges list
 	listElements [3]edgeElement
 }
 

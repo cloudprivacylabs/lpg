@@ -34,10 +34,14 @@ type edgeMap struct {
 }
 
 func newEdgeMap() *edgeMap {
-	return &edgeMap{
-		edgeLabelLists: list.New(),
-		labelMap:       make(map[string]*list.Element),
-	}
+	em := &edgeMap{}
+	em.init()
+	return em
+}
+
+func (em *edgeMap) init() {
+	em.edgeLabelLists = list.New()
+	em.labelMap = make(map[string]*list.Element)
 }
 
 func (em *edgeMap) add(edge *Edge, listIndex int) {

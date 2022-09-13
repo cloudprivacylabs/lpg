@@ -32,6 +32,11 @@ func newFastSet() *fastSet {
 	}
 }
 
+func (f *fastSet) init() {
+	f.m = make(map[int]*list.Element)
+	f.l = list.New()
+}
+
 func (f fastSet) size() int { return len(f.m) }
 
 // Add a new item. Returns true if added
@@ -70,9 +75,9 @@ type NodeSet struct {
 }
 
 func NewNodeSet() *NodeSet {
-	return &NodeSet{
-		set: *newFastSet(),
-	}
+	nm := &NodeSet{}
+	nm.set.init()
+	return nm
 }
 
 func (set *NodeSet) Add(node *Node) {
@@ -106,9 +111,9 @@ type EdgeSet struct {
 }
 
 func NewEdgeSet() *EdgeSet {
-	return &EdgeSet{
-		set: *newFastSet(),
-	}
+	es := &EdgeSet{}
+	es.set.init()
+	return es
 }
 
 func (set *EdgeSet) Add(edge *Edge) {

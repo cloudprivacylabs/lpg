@@ -26,10 +26,11 @@ type NodeMap struct {
 }
 
 func NewNodeMap() *NodeMap {
-	return &NodeMap{
-		m:        linkedhashmap.New(),
-		nolabels: *newFastSet(),
+	nm := &NodeMap{
+		m: linkedhashmap.New(),
 	}
+	nm.nolabels.init()
+	return nm
 }
 
 func (nm *NodeMap) Replace(node *Node, oldLabels, newLabels StringSet) {
