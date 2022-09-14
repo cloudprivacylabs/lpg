@@ -120,6 +120,22 @@ func (itr *filterIterator) Value() interface{} {
 
 func (itr *filterIterator) MaxSize() int { return itr.itr.MaxSize() }
 
+// ProcIterator calls the function for every element
+type procIterator struct {
+	itr  Iterator
+	proc func(interface{}) interface{}
+}
+
+func (itr *procIterator) Next() bool {
+	return itr.itr.Next()
+}
+
+func (itr *procIterator) Value() interface{} {
+	return itr.proc(itr.itr.Value())
+}
+
+func (itr *procIterator) MaxSize() int { return itr.itr.MaxSize() }
+
 // makeUniqueIterator returns a filter iterator that will filter out duplicates
 func makeUniqueIterator(itr Iterator) Iterator {
 	seenItems := make(map[interface{}]struct{})

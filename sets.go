@@ -50,8 +50,16 @@ func (f *fastSet) add(id int, item interface{}) bool {
 	return true
 }
 
+func (f *fastSet) get(id int) (interface{}, bool) {
+	el, ok := f.m[id]
+	if !ok {
+		return nil, false
+	}
+	return el.Value, true
+}
+
 // Remove an item. Returns true if removed
-func (f *fastSet) remove(id int, item interface{}) bool {
+func (f *fastSet) remove(id int) bool {
 	el := f.m[id]
 	if el == nil {
 		return false
@@ -85,7 +93,7 @@ func (set *NodeSet) Add(node *Node) {
 }
 
 func (set NodeSet) Remove(node *Node) {
-	set.set.remove(node.id, node)
+	set.set.remove(node.id)
 }
 
 func (set NodeSet) Has(node *Node) bool {
@@ -121,7 +129,7 @@ func (set *EdgeSet) Add(edge *Edge) {
 }
 
 func (set EdgeSet) Remove(edge *Edge) {
-	set.set.remove(edge.id, edge)
+	set.set.remove(edge.id)
 }
 
 func (set EdgeSet) Len() int {

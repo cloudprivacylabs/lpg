@@ -131,13 +131,13 @@ func (g *Graph) GetEdgesWithAnyLabel(set StringSet) EdgeIterator {
 }
 
 // AddEdgePropertyIndex adds an index for the given edge property
-func (g *Graph) AddEdgePropertyIndex(propertyName string) {
-	g.index.EdgePropertyIndex(propertyName, g)
+func (g *Graph) AddEdgePropertyIndex(propertyName string, ix IndexType) {
+	g.index.EdgePropertyIndex(propertyName, g, ix)
 }
 
 // AddNodePropertyIndex adds an index for the given node property
-func (g *Graph) AddNodePropertyIndex(propertyName string) {
-	g.index.NodePropertyIndex(propertyName, g)
+func (g *Graph) AddNodePropertyIndex(propertyName string, ix IndexType) {
+	g.index.NodePropertyIndex(propertyName, g, ix)
 }
 
 // GetNodesWithProperty returns an iterator for the nodes that has the
@@ -398,7 +398,7 @@ func (g *Graph) setNodeProperty(node *Node, key string, value interface{}) {
 	oldValue, exists := node.properties[key]
 	nix := g.index.isNodePropertyIndexed(key)
 	if nix != nil && exists {
-		nix.remove(oldValue, node.id, node)
+		nix.remove(oldValue, node.id)
 	}
 	node.properties[key] = value
 	if nix != nil {
@@ -435,7 +435,7 @@ func (g *Graph) removeNodeProperty(node *Node, key string) {
 	}
 	nix := g.index.isNodePropertyIndexed(key)
 	if nix != nil {
-		nix.remove(value, node.id, node)
+		nix.remove(value, node.id)
 	}
 	delete(node.properties, key)
 }
@@ -510,7 +510,7 @@ func (g *Graph) setEdgeProperty(edge *Edge, key string, value interface{}) {
 	oldValue, exists := edge.properties[key]
 	nix := g.index.isEdgePropertyIndexed(key)
 	if nix != nil && exists {
-		nix.remove(oldValue, edge.id, edge)
+		nix.remove(oldValue, edge.id)
 	}
 	edge.properties[key] = value
 	if nix != nil {
@@ -528,7 +528,7 @@ func (g *Graph) removeEdgeProperty(edge *Edge, key string) {
 	}
 	nix := g.index.isEdgePropertyIndexed(key)
 	if nix != nil {
-		nix.remove(oldValue, edge.id, edge)
+		nix.remove(oldValue, edge.id)
 	}
 	delete(edge.properties, key)
 }

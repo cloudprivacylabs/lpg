@@ -19,17 +19,17 @@ import (
 )
 
 type edgeLabelList struct {
-	label string
 	edges edgeList
-	el    *list.Element
+	elem  *list.Element
 }
 
 // An edgeMap stores edges indexed by edge label
 type edgeMap struct {
-	// list of labelstructs
+	// list of edgeLabelList
 	edgeLabelLists *list.List
 	// Map of labels -> *edgeLabelList
 	labelMap map[string]*list.Element
+	only     *Edge
 	n        int
 }
 
@@ -40,28 +40,56 @@ func newEdgeMap() *edgeMap {
 }
 
 func (em *edgeMap) init() {
+}
+
+func (em *edgeMap) lazyInit() {
 	em.edgeLabelLists = list.New()
 	em.labelMap = make(map[string]*list.Element)
 }
 
 func (em *edgeMap) add(edge *Edge, listIndex int) {
-	var ell *edgeLabelList
-
-	el := em.labelMap[edge.label]
-	if el == nil {
-		ell = &edgeLabelList{
-			label: edge.label,
-		}
-		ell.el = em.edgeLabelLists.PushBack(ell)
-		em.labelMap[edge.label] = ell.el
-	} else {
-		ell = el.Value.(*edgeLabelList)
+	if em.n == 0 {
+		em.only = edge
+		em.n = 1
+		return
 	}
-	em.n++
-	ell.edges.add(edge, listIndex)
+
+	doAdd := func(e *Edge) {
+		var ell *edgeLabelList
+
+		el := em.labelMap[e.label]
+		if el == nil {
+			ell = &edgeLabelList{}
+			ell.elem = em.edgeLabelLists.PushBack(ell)
+			em.labelMap[e.label] = ell.elem
+		} else {
+			ell = el.Value.(*edgeLabelList)
+		}
+		em.n++
+		ell.edges.add(e, listIndex)
+	}
+	if em.n == 1 {
+		em.lazyInit()
+		doAdd(em.only)
+		em.only = nil
+		doAdd(edge)
+		return
+	}
+	doAdd(edge)
 }
 
 func (em *edgeMap) remove(edge *Edge, listIndex int) {
+	if em.n == 0 {
+		return
+	}
+	if em.n == 1 {
+		if edge != em.only {
+			return
+		}
+		em.only = nil
+		return
+	}
+
 	el := em.labelMap[edge.label]
 	if el == nil {
 		return
@@ -69,17 +97,46 @@ func (em *edgeMap) remove(edge *Edge, listIndex int) {
 	ell := el.Value.(*edgeLabelList)
 	ell.edges.remove(edge, listIndex)
 	if ell.edges.n == 0 {
-		em.edgeLabelLists.Remove(ell.el)
+		em.edgeLabelLists.Remove(ell.elem)
 		delete(em.labelMap, edge.label)
 	}
 	em.n--
+	if em.n == 1 {
+		for _, v := range em.labelMap {
+			em.only = v.Value.(*edgeLabelList).edges.head
+		}
+		em.lazyInit()
+	}
 }
 
 func (em *edgeMap) isEmpty() bool { return em.n == 0 }
 
 func (em *edgeMap) size() int { return em.n }
 
+type singleEdgeIterator struct {
+	edge *Edge
+	done bool
+}
+
+func (itr *singleEdgeIterator) Next() bool {
+	if itr.done {
+		return false
+	}
+	itr.done = true
+	return true
+}
+
+func (itr *singleEdgeIterator) Value() interface{} { return itr.edge }
+func (itr *singleEdgeIterator) MaxSize() int       { return 1 }
+func (itr *singleEdgeIterator) Edge() *Edge        { return itr.edge }
+
 func (em edgeMap) iterator(listIndex int) EdgeIterator {
+	if em.n == 0 {
+		return edgeIterator{emptyIterator{}}
+	}
+	if em.n == 1 {
+		return &singleEdgeIterator{edge: em.only}
+	}
 	ret := &allEdgesItr{
 		labelListCurrent: em.edgeLabelLists.Front(),
 		ix:               listIndex,
@@ -93,6 +150,12 @@ func (em edgeMap) iterator(listIndex int) EdgeIterator {
 }
 
 func (em edgeMap) iteratorLabel(label string, listIndex int) EdgeIterator {
+	if em.n == 0 {
+		return edgeIterator{emptyIterator{}}
+	}
+	if em.n == 1 && label == em.only.label {
+		return &singleEdgeIterator{edge: em.only}
+	}
 	l := em.labelMap[label]
 	if l == nil {
 		return edgeIterator{&emptyIterator{}}
@@ -102,6 +165,15 @@ func (em edgeMap) iteratorLabel(label string, listIndex int) EdgeIterator {
 }
 
 func (em edgeMap) iteratorAnyLabel(labels StringSet, listIndex int) EdgeIterator {
+	if em.n == 0 {
+		return edgeIterator{emptyIterator{}}
+	}
+	if em.n == 1 {
+		if labels.Has(em.only.label) {
+			return &singleEdgeIterator{edge: em.only}
+		}
+		return edgeIterator{emptyIterator{}}
+	}
 	strings := labels.Slice()
 	return edgeIterator{&funcIterator{
 		iteratorFunc: func() Iterator {

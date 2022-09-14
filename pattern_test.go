@@ -6,7 +6,7 @@ import (
 
 func TestPattern(t *testing.T) {
 	graph := NewGraph()
-	graph.index.NodePropertyIndex("key", graph)
+	graph.index.NodePropertyIndex("key", graph, BtreeIndex)
 	nodes := make([]*Node, 0)
 	for i := 0; i < 10; i++ {
 		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
@@ -73,7 +73,7 @@ func TestPattern(t *testing.T) {
 
 func TestLoopPattern(t *testing.T) {
 	graph := NewGraph()
-	graph.index.NodePropertyIndex("key", graph)
+	graph.index.NodePropertyIndex("key", graph, BtreeIndex)
 	nodes := make([]*Node, 0)
 	for i := 0; i < 10; i++ {
 		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
@@ -114,7 +114,7 @@ func TestLoopPattern(t *testing.T) {
 
 func TestVariableLengthPath(t *testing.T) {
 	graph := NewGraph()
-	graph.index.NodePropertyIndex("key", graph)
+	graph.index.NodePropertyIndex("key", graph, BtreeIndex)
 	nodes := make([]*Node, 0)
 	for i := 0; i < 10; i++ {
 		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))

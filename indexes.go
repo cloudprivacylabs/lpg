@@ -14,112 +14,63 @@
 
 package lpg
 
-import (
-	"github.com/emirpasic/gods/trees/btree"
+type index interface {
+	add(value interface{}, id int, item interface{})
+	remove(value interface{}, id int)
+	find(value interface{}) Iterator
+	valueItr() Iterator
+}
+
+type IndexType int
+
+const (
+	BtreeIndex IndexType = 0
+	HashIndex  IndexType = 1
 )
-
-// A setTree is a B-Tree of linkedhashsets
-type setTree struct {
-	tree *btree.Tree
-}
-
-func (s *setTree) add(key interface{}, id int, item interface{}) {
-	if s.tree == nil {
-		s.tree = btree.NewWith(16, ComparePropertyValue)
-	}
-	v, found := s.tree.Get(key)
-	if !found {
-		v = newFastSet()
-		s.tree.Put(key, v)
-	}
-	set := v.(*fastSet)
-	set.add(id, item)
-}
-
-func (s setTree) remove(key interface{}, id int, item interface{}) {
-	if s.tree == nil {
-		return
-	}
-	v, found := s.tree.Get(key)
-	if !found {
-		return
-	}
-	set := v.(*fastSet)
-	set.remove(id, item)
-	if set.size() == 0 {
-		s.tree.Remove(key)
-	}
-}
-
-// find returns the iterator and expected size.
-func (s setTree) find(key interface{}) Iterator {
-	if s.tree == nil {
-		return emptyIterator{}
-	}
-	v, found := s.tree.Get(key)
-	if !found {
-		return emptyIterator{}
-	}
-	set := v.(*fastSet)
-	itr := set.iterator()
-	return withSize(itr, set.size())
-}
-
-func (s setTree) valueItr() Iterator {
-	if s.tree == nil {
-		return emptyIterator{}
-	}
-	treeItr := s.tree.Iterator()
-	return &funcIterator{
-		iteratorFunc: func() Iterator {
-			if !treeItr.Next() {
-				return nil
-			}
-			set := treeItr.Value().(*fastSet)
-			itr := set.iterator()
-			return withSize(itr, set.size())
-		},
-	}
-}
 
 type graphIndex struct {
 	nodesByLabel NodeMap
 
-	nodeProperties map[string]*setTree
-	edgeProperties map[string]*setTree
+	nodeProperties map[string]index
+	edgeProperties map[string]index
 }
 
 func newGraphIndex() graphIndex {
 	return graphIndex{
 		nodesByLabel:   *NewNodeMap(),
-		nodeProperties: make(map[string]*setTree),
-		edgeProperties: make(map[string]*setTree),
+		nodeProperties: make(map[string]index),
+		edgeProperties: make(map[string]index),
 	}
 }
 
 // NodePropertyIndex sets up an index for the given node property
-func (g *graphIndex) NodePropertyIndex(propertyName string, graph *Graph) {
+func (g *graphIndex) NodePropertyIndex(propertyName string, graph *Graph, it IndexType) {
 	_, exists := g.nodeProperties[propertyName]
 	if exists {
 		return
 	}
-	index := &setTree{}
-	g.nodeProperties[propertyName] = index
+	var ix index
+	if it == BtreeIndex {
+		ix = &setTree{}
+	} else {
+		ix = &hashIndex{}
+	}
+	g.nodeProperties[propertyName] = ix
 	// Reindex
 	for nodes := graph.GetNodes(); nodes.Next(); {
 		node := nodes.Node()
 		value, ok := node.properties[propertyName]
 		if ok {
-			index.add(value, node.id, node)
+			ix.add(value, node.id, node)
 		}
 	}
 }
 
-func (g *graphIndex) isNodePropertyIndexed(propertyName string) *setTree {
+func (g *graphIndex) isNodePropertyIndexed(propertyName string) index {
 	return g.nodeProperties[propertyName]
 }
 
-func (g *graphIndex) isEdgePropertyIndexed(propertyName string) *setTree {
+func (g *graphIndex) isEdgePropertyIndexed(propertyName string) index {
 	return g.edgeProperties[propertyName]
 }
 
@@ -175,24 +126,29 @@ func (g *graphIndex) removeNodeFromIndex(node *Node) {
 		if !found {
 			continue
 		}
-		index.remove(v, node.id, node)
+		index.remove(v, node.id)
 	}
 }
 
 // EdgePropertyIndex sets up an index for the given edge property
-func (g *graphIndex) EdgePropertyIndex(propertyName string, graph *Graph) {
+func (g *graphIndex) EdgePropertyIndex(propertyName string, graph *Graph, it IndexType) {
 	_, exists := g.edgeProperties[propertyName]
 	if exists {
 		return
 	}
-	index := &setTree{}
-	g.edgeProperties[propertyName] = index
+	var ix index
+	if it == BtreeIndex {
+		ix = &setTree{}
+	} else {
+		ix = &hashIndex{}
+	}
+	g.edgeProperties[propertyName] = ix
 	// Reindex
 	for edges := graph.GetEdges(); edges.Next(); {
 		edge := edges.Edge()
 		value, ok := edge.properties[propertyName]
 		if ok {
-			index.add(value, edge.id, edge)
+			ix.add(value, edge.id, edge)
 		}
 	}
 }
@@ -213,7 +169,7 @@ func (g *graphIndex) removeEdgeFromIndex(edge *Edge) {
 		if !found {
 			continue
 		}
-		index.remove(v, edge.id, edge)
+		index.remove(v, edge.id)
 	}
 }
 

@@ -38,7 +38,7 @@ func (nm *NodeMap) Replace(node *Node, oldLabels, newLabels StringSet) {
 		if newLabels.Len() == 0 {
 			return
 		}
-		nm.nolabels.remove(node.id, node)
+		nm.nolabels.remove(node.id)
 	}
 	if newLabels.Len() == 0 {
 		nm.nolabels.add(node.id, node)
@@ -53,7 +53,7 @@ func (nm *NodeMap) Replace(node *Node, oldLabels, newLabels StringSet) {
 				continue
 			}
 			set = v.(*fastSet)
-			set.remove(node.id, node)
+			set.remove(node.id)
 			if set.size() == 0 {
 				nm.m.Remove(label)
 			}
@@ -95,7 +95,7 @@ func (nm *NodeMap) Add(node *Node) {
 
 func (nm NodeMap) Remove(node *Node) {
 	if node.labels.Len() == 0 {
-		nm.nolabels.remove(node.id, node)
+		nm.nolabels.remove(node.id)
 		return
 	}
 	var set *fastSet
@@ -105,7 +105,7 @@ func (nm NodeMap) Remove(node *Node) {
 			continue
 		}
 		set = v.(*fastSet)
-		set.remove(node.id, node)
+		set.remove(node.id)
 		if set.size() == 0 {
 			nm.m.Remove(label)
 		}
