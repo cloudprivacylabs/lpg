@@ -285,7 +285,11 @@ func (j JSON) Encode(g *Graph, out io.Writer) error {
 				if _, err := out.Write(propertiesKey); err != nil {
 					return err
 				}
-				data, err := json.Marshal(node.properties)
+				m, err := marshalProperties(node.properties)
+				if err != nil {
+					return err
+				}
+				data, err := json.Marshal(m)
 				if err != nil {
 					return err
 				}
