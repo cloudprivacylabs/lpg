@@ -30,7 +30,7 @@ func (ix *hashIndex) add(value interface{}, id int, item interface{}) {
 	}
 
 	if native, ok := value.(WithNativeValue); ok {
-		value = native
+		value = native.GetNativeValue()
 	}
 
 	el := ix.elements.PushBack(item)
@@ -47,7 +47,7 @@ func (ix *hashIndex) remove(value interface{}, id int) {
 		return
 	}
 	if native, ok := value.(WithNativeValue); ok {
-		value = native
+		value = native.GetNativeValue()
 	}
 	fs, ok := ix.values[value]
 	if !ok {
@@ -67,7 +67,7 @@ func (ix *hashIndex) find(value interface{}) Iterator {
 		return emptyIterator{}
 	}
 	if native, ok := value.(WithNativeValue); ok {
-		value = native
+		value = native.GetNativeValue()
 	}
 	v, found := ix.values[value]
 	if !found {
