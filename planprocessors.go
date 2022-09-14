@@ -220,6 +220,11 @@ func (processor *iterateConnectedNodes) Run(ctx *MatchContext, next matchAccumul
 	if ctx.variablePathNode != nil {
 		// If this is part of a variable length path, get the last node from the context
 		node = ctx.variablePathNode
+		ctx.variablePathNode = nil
+		defer func() {
+			ctx.variablePathNode = node
+		}()
+		logf("The last node of variable path node: %+v\n", node)
 	} else {
 		switch processor.useNode {
 		case useToNode:

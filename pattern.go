@@ -605,5 +605,6 @@ func (plan MatchPlan) Run(graph *Graph, symbols map[string]*PatternSymbol, resul
 			next: acc,
 		}
 	}
+	logf("Plan run: steps: %+v, ctx: %+v\n", plan.steps, ctx)
 	return plan.steps[0].Run(ctx, acc)
 }
