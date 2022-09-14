@@ -56,7 +56,6 @@ func (em *edgeMap) add(edge *Edge, listIndex int) {
 		} else {
 			ell = el.Value.(*edgeLabelList)
 		}
-		em.n++
 		ell.edges.add(e, listIndex)
 	}
 	if em.n == 1 {
@@ -64,9 +63,11 @@ func (em *edgeMap) add(edge *Edge, listIndex int) {
 		doAdd(em.only)
 		em.only = nil
 		doAdd(edge)
+		em.n = 2
 		return
 	}
 	doAdd(edge)
+	em.n++
 }
 
 func (em *edgeMap) remove(edge *Edge, listIndex int) {
@@ -78,6 +79,7 @@ func (em *edgeMap) remove(edge *Edge, listIndex int) {
 			return
 		}
 		em.only = nil
+		em.n = 0
 		return
 	}
 
