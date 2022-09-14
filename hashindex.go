@@ -29,6 +29,10 @@ func (ix *hashIndex) add(value interface{}, id int, item interface{}) {
 		ix.values = make(map[interface{}]*fastSet)
 	}
 
+	if native, ok := value.(WithNativeValue); ok {
+		value = native
+	}
+
 	el := ix.elements.PushBack(item)
 	fs, ok := ix.values[value]
 	if !ok {
@@ -41,6 +45,9 @@ func (ix *hashIndex) add(value interface{}, id int, item interface{}) {
 func (ix *hashIndex) remove(value interface{}, id int) {
 	if ix.values == nil {
 		return
+	}
+	if native, ok := value.(WithNativeValue); ok {
+		value = native
 	}
 	fs, ok := ix.values[value]
 	if !ok {
@@ -58,6 +65,9 @@ func (ix *hashIndex) remove(value interface{}, id int) {
 func (ix *hashIndex) find(value interface{}) Iterator {
 	if ix.values == nil {
 		return emptyIterator{}
+	}
+	if native, ok := value.(WithNativeValue); ok {
+		value = native
 	}
 	v, found := ix.values[value]
 	if !found {

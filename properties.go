@@ -45,6 +45,14 @@ func (p *properties) ForEachProperty(f func(string, interface{}) bool) bool {
 	return true
 }
 
+// WithNativeValue is used to return a native value for property
+// values. If the property value implements this interface, the
+// underlying native value for indexing and comparison is obtained
+// from this interface.
+type WithNativeValue interface {
+	GetNativeValue() interface{}
+}
+
 // ComparePropertyValue compares a and b. They must be
 // comparable. Supported types are
 //
@@ -61,13 +69,10 @@ func (p *properties) ForEachProperty(f func(string, interface{}) bool) bool {
 //
 func ComparePropertyValue(a, b interface{}) int {
 
-	type withNativeValue interface {
-		GetNativeValue() interface{}
-	}
-	if n, ok := a.(withNativeValue); ok {
+	if n, ok := a.(WithNativeValue); ok {
 		return ComparePropertyValue(n.GetNativeValue(), b)
 	}
-	if n, ok := b.(withNativeValue); ok {
+	if n, ok := b.(WithNativeValue); ok {
 		return ComparePropertyValue(a, n.GetNativeValue())
 	}
 
