@@ -33,15 +33,6 @@ type edgeMap struct {
 	n        int
 }
 
-func newEdgeMap() *edgeMap {
-	em := &edgeMap{}
-	em.init()
-	return em
-}
-
-func (em *edgeMap) init() {
-}
-
 func (em *edgeMap) lazyInit() {
 	em.edgeLabelLists = list.New()
 	em.labelMap = make(map[string]*list.Element)

@@ -44,7 +44,6 @@ func NewGraph() *Graph {
 	return &Graph{
 		index:    newGraphIndex(),
 		allNodes: nodeList{},
-		allEdges: *newEdgeMap(),
 	}
 }
 
@@ -54,8 +53,6 @@ func (g *Graph) NewNode(labels []string, props map[string]interface{}) *Node {
 		labels:     NewStringSet(labels...),
 		properties: properties(props),
 		graph:      g,
-		incoming:   *newEdgeMap(),
-		outgoing:   *newEdgeMap(),
 	}
 	node.id = g.idBase
 	g.idBase++
@@ -411,8 +408,6 @@ func (g *Graph) cloneNode(node *Node, cloneProperty func(string, interface{}) in
 		labels:     node.labels.Clone(),
 		properties: node.properties.clone(cloneProperty),
 		graph:      g,
-		incoming:   *newEdgeMap(),
-		outgoing:   *newEdgeMap(),
 	}
 	newNode.id = g.idBase
 	g.idBase++
@@ -452,13 +447,13 @@ func (g *Graph) detachNode(node *Node) {
 		g.allEdges.remove(edge, 0)
 		g.index.removeEdgeFromIndex(edge)
 	}
-	node.incoming = *newEdgeMap()
+	node.incoming = edgeMap{}
 	for _, edge := range EdgeSlice(node.outgoing.iterator(1)) {
 		g.disconnect(edge)
 		g.allEdges.remove(edge, 0)
 		g.index.removeEdgeFromIndex(edge)
 	}
-	node.outgoing = *newEdgeMap()
+	node.outgoing = edgeMap{}
 }
 
 func (g *Graph) cloneEdge(from, to *Node, edge *Edge, cloneProperty func(string, interface{}) interface{}) *Edge {
