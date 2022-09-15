@@ -15,6 +15,7 @@
 package lpg
 
 import (
+	"encoding/json"
 	"fmt"
 )
 
@@ -82,4 +83,8 @@ func (edge *Edge) Remove() {
 // Returns the string representation of an edge
 func (edge *Edge) String() string {
 	return fmt.Sprintf("[:%s %s]", edge.label, edge.properties)
+}
+
+func (edge *Edge) MarshalJSON() ([]byte, error) {
+	return json.Marshal(edge.String())
 }

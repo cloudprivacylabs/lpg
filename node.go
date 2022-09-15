@@ -15,6 +15,7 @@
 package lpg
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 )
@@ -120,6 +121,10 @@ func (node *Node) String() string {
 		labels = ":" + labels
 	}
 	return fmt.Sprintf("(%s %s)", labels, node.properties)
+}
+
+func (node *Node) MarshalJSON() ([]byte, error) {
+	return json.Marshal(node.String())
 }
 
 // NextNodesWith returns the nodes reachable from source with the given label at one step
