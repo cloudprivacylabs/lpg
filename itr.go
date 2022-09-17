@@ -249,3 +249,44 @@ func (l *listIterator) Value() interface{} {
 }
 
 func (l *listIterator) MaxSize() int { return l.size }
+
+// nodesFromEdgesIterator iterates the nodes of an edge iterator
+type nodesFromEdgesIterator struct {
+	dir  EdgeDir
+	itr  EdgeIterator
+	seen map[int]struct{}
+}
+
+func newNodesFromEdges(itr EdgeIterator, dir EdgeDir) NodeIterator {
+	return &nodesFromEdgesIterator{
+		dir:  dir,
+		itr:  itr,
+		seen: make(map[int]struct{}),
+	}
+}
+
+func (i *nodesFromEdgesIterator) Next() bool {
+	for {
+		if !i.itr.Next() {
+			return false
+		}
+		node := i.Node()
+		if _, seen := i.seen[node.id]; seen {
+			continue
+		}
+		i.seen[node.id] = struct{}{}
+		return true
+	}
+}
+
+func (i *nodesFromEdgesIterator) Value() interface{} { return i.Node() }
+
+func (i *nodesFromEdgesIterator) Node() *Node {
+	e := i.itr.Edge()
+	if i.dir == IncomingEdge {
+		return e.GetFrom()
+	}
+	return e.GetTo()
+}
+
+func (i *nodesFromEdgesIterator) MaxSize() int { return i.itr.MaxSize() }
