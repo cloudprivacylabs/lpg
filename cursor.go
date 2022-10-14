@@ -206,6 +206,7 @@ func (p *Path) IsEmpty() bool {
 // Cursor is a convenience class to move around a graph
 type Cursor struct {
 	node *Node
+	path *Path
 }
 
 // Sets the node cursor is pointing at.
@@ -216,13 +217,16 @@ func (c *Cursor) Set(node *Node) *Cursor {
 
 // StartPath starts a new path at the current node. Panics if the node is not valid.
 func (c *Cursor) StartPath() *Cursor {
-	c.path = PathFromNode(node)
+	c.path = PathFromNode(c.node)
+	return c
 }
 
 func (c *Cursor) PushToPath() *Cursor {
+	return c
 }
 
 func (c *Cursor) PopFromPath() *Cursor {
+	return c
 }
 
 // Edges returns an iterator of edges of the current node. If the
