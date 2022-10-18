@@ -110,9 +110,9 @@ func (p PatternItem) isConstrainedEdges(ctx *MatchContext) (*EdgeSet, error) {
 	return nil, nil
 }
 
-func (p PatternItem) estimateNodeSize(g *Graph, symbols map[string]*PatternSymbol) (Iterator, int) {
+func (p PatternItem) estimateNodeSize(g *Graph, symbols map[string]*PatternSymbol) (NodeIterator, int) {
 	max := -1
-	var ret Iterator
+	var ret NodeIterator
 	if p.Labels.Len() > 0 {
 		itr := g.index.nodesByLabel.IteratorAllLabels(p.Labels)
 		if sz := itr.MaxSize(); sz != -1 {
@@ -139,7 +139,10 @@ func (p PatternItem) estimateNodeSize(g *Graph, symbols map[string]*PatternSymbo
 	if len(p.Name) > 0 {
 		sym, ok := symbols[p.Name]
 		if ok {
-			if max == -1 || sym.Nodes.Len() < max {
+			if sym.Nodes == nil {
+				max = 0
+				ret = &nodeIterator{emptyIterator{}}
+			} else if max == -1 || sym.Nodes.Len() < max {
 				max = sym.Nodes.Len()
 				ret = sym.Nodes.Iterator()
 			}
@@ -154,11 +157,11 @@ func (p PatternItem) estimateNodeSize(g *Graph, symbols map[string]*PatternSymbo
 	return ret, max
 }
 
-func (p PatternItem) estimateEdgeSize(g *Graph, symbols map[string]*PatternSymbol) (Iterator, int) {
+func (p PatternItem) estimateEdgeSize(g *Graph, symbols map[string]*PatternSymbol) (EdgeIterator, int) {
 	max := -1
-	var ret Iterator
+	var ret EdgeIterator
 
-	allEdges := func() (Iterator, int) {
+	allEdges := func() (EdgeIterator, int) {
 		ret := g.GetEdges()
 		max := -1
 		if sz := ret.MaxSize(); sz != -1 {
@@ -197,7 +200,10 @@ func (p PatternItem) estimateEdgeSize(g *Graph, symbols map[string]*PatternSymbo
 	if len(p.Name) > 0 {
 		sym, ok := symbols[p.Name]
 		if ok {
-			if max == -1 || sym.Edges.Len() < max {
+			if sym.Edges == nil {
+				max = 0
+				ret = &edgeIterator{emptyIterator{}}
+			} else if max == -1 || sym.Edges.Len() < max {
 				max = sym.Edges.Len()
 				ret = sym.Edges.Iterator()
 			}
