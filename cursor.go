@@ -14,195 +14,6 @@
 
 package lpg
 
-type Path struct {
-	only *Node
-	// forward path, fwd[i] -> fwd[i+1]
-	fwd []*Edge
-	// backward path, bk[i+1]->bk[i]
-	bk []*Edge
-}
-
-// PathFromNode creates a path containing a single node
-func PathFromNode(node *Node) *Path {
-	if node == nil {
-		panic("Nil node in path")
-	}
-	return &Path{
-		only: node,
-	}
-}
-
-// SetOnlyNode sets the path to a single node
-func (p *Path) SetOnlyNode(node *Node) *Path {
-	p.only = node
-	p.fwd = nil
-	p.bk = nil
-	return p
-}
-
-// Clear the path
-func (p *Path) Clear() *Path {
-	p.only = nil
-	p.fwd = nil
-	p.bk = nil
-	return p
-}
-
-// Last returns the last node of the path
-func (p *Path) Last() *Node {
-	if p.only != nil {
-		return p.only
-	}
-	if len(p.fwd) != 0 {
-		return p.fwd[len(p.fwd)-1].GetTo()
-	}
-	if len(p.bk) != 0 {
-		return p.bk[0].GetTo()
-	}
-	return nil
-}
-
-// First returns the first node of the path
-func (p *Path) First() *Node {
-	if p.only != nil {
-		return p.only
-	}
-	if len(p.bk) != 0 {
-		return p.bk[len(p.bk)-1].GetFrom()
-	}
-	if len(p.fwd) != 0 {
-		return p.fwd[0].GetFrom()
-	}
-	return nil
-}
-
-// Append an edge to the end of the path. The edge must be outgoing from the last node of the path
-func (p *Path) Append(edge ...*Edge) *Path {
-	last := p.Last()
-	if last != nil && last != edge[0].GetFrom() {
-		panic("Appended edge is disconnected from path")
-	}
-	if p.only != nil {
-		p.only = nil
-	}
-	for i := range edge {
-		if i == 0 {
-			continue
-		}
-		if edge[i].GetFrom() != edge[i-1].GetTo() {
-			panic("Appended edges are disconnected")
-		}
-	}
-	p.fwd = append(p.fwd, edge...)
-	return p
-}
-
-// Prepend an edge to tbe beginning of the path. The edge must be
-// incoming to the first node of the path
-func (p *Path) Prepend(edge ...*Edge) *Path {
-	first := p.First()
-	if first != nil && first != edge[0].GetTo() {
-		panic("Prepended edge is disconnected from path")
-	}
-	if p.only != nil {
-		p.only = nil
-	}
-	for i := range edge {
-		if i == 0 {
-			continue
-		}
-		if edge[i].GetTo() != edge[i-1].GetFrom() {
-			panic("Prepended edges are disconnected")
-		}
-	}
-	p.bk = append(p.bk, edge...)
-	return p
-}
-
-// GetEdge returns the nth edge
-func (p *Path) GetEdge(n int) *Edge {
-	if p.only != nil {
-		return nil
-	}
-	if n < len(p.bk) {
-		return p.bk[len(p.bk)-1-n]
-	}
-	n -= len(p.bk)
-	return p.fwd[n]
-}
-
-// GetNode returns the nth node
-func (p *Path) GetNode(n int) *Node {
-	if p.only != nil && n == 0 {
-		return p.only
-	}
-	if n == 0 {
-		e := p.First()
-		if e != nil {
-			return e
-		}
-		panic("Invalid node index")
-	}
-	e := p.GetEdge(n - 1)
-	return e.GetTo()
-}
-
-// RemoveLast removes the last edge from the path. If the path has
-// only a node, path becomes empty
-func (p *Path) RemoveLast() *Path {
-	if p.only != nil {
-		p.only = nil
-		return p
-	}
-	if len(p.fwd) != 0 {
-		p.fwd = p.fwd[:len(p.fwd)-1]
-		return p
-	}
-	if len(p.bk) != 0 {
-		p.fwd = make([]*Edge, len(p.bk))
-		for i := range p.bk {
-			p.fwd[len(p.fwd)-1-i] = p.bk[i]
-		}
-	}
-	return p
-}
-
-// RemoveFirst removes the first edge from the graph. If the path has
-// only a node, path becomes empty
-func (p *Path) RemoveFirst() *Path {
-	if p.only != nil {
-		p.only = nil
-		return p
-	}
-	if len(p.bk) != 0 {
-		p.bk = p.bk[:len(p.bk)-1]
-		return p
-	}
-	if len(p.fwd) != 0 {
-		p.fwd = p.fwd[1:]
-	}
-	return p
-}
-
-func (p *Path) NumEdges() int {
-	return len(p.bk) + len(p.fwd)
-}
-
-func (p *Path) NumNodes() int {
-	if p.only != nil {
-		return 1
-	}
-	n := p.NumEdges()
-	if n == 0 {
-		return 0
-	}
-	return n + 1
-}
-
-func (p *Path) IsEmpty() bool {
-	return p.only == nil && len(p.bk) == 0 && len(p.fwd) == 0
-}
-
 // Cursor is a convenience class to move around a graph
 type Cursor struct {
 	node *Node
@@ -221,11 +32,24 @@ func (c *Cursor) StartPath() *Cursor {
 	return c
 }
 
-func (c *Cursor) PushToPath() *Cursor {
+// PushToPath pushes the edge onto the path. The path must be started,
+// and the pushed edge must be connected to the current node. This
+// also advances the cursor to the target node.
+func (c *Cursor) PushToPath(edge *Edge) *Cursor {
+	c.path.Append(edge)
+	c.node = edge.GetTo()
 	return c
 }
 
+// GetPath returns the recorded path. This is the internal copy of the
+// path, so caller must clone if it changes are necessary
+func (c *Cursor) GetPath() *Path {
+	return c.path
+}
+
+// PopFromPath removes the last edge from the path. This also moves the cursor to the previous node
 func (c *Cursor) PopFromPath() *Cursor {
+	c.path.RemoveLast()
 	return c
 }
 
@@ -284,3 +108,19 @@ func (c *Cursor) ForwardWith(label string) EdgeIterator { return c.EdgesWith(Out
 // current node with the given label. If the current node is invalid,
 // returns an empty iterator
 func (c *Cursor) BackwardWith(label string) EdgeIterator { return c.EdgesWith(IncomingEdge, label) }
+
+// NextNodes returns a node iterator that can be reached at one step
+// from the current node. If current node is invalid, returns an empty iterator.
+func (c *Cursor) NextNodes() NodeIterator { return c.Nodes(OutgoingEdge) }
+
+// NextNodesWith returns a node iterator that can be reached at one step
+// from the current node with the given label. If current node is invalid, returns an empty iterator.
+func (c *Cursor) NextNodesWith(label string) NodeIterator { return c.NodesWith(OutgoingEdge, label) }
+
+// PrevNodes returns a node iterator that can be reached at one step
+// backwards from the current node. If current node is invalid, returns an empty iterator.
+func (c *Cursor) PrevNodes() NodeIterator { return c.Nodes(IncomingEdge) }
+
+// PrevNodesWith returns a node iterator that can be reached at one step
+// backwards from the current node with the given label. If current node is invalid, returns an empty iterator.
+func (c *Cursor) PrevNodesWith(label string) NodeIterator { return c.NodesWith(IncomingEdge, label) }
