@@ -16,6 +16,7 @@ func (list *edgeList) add(edge *Edge, ix int) {
 	if list.tail != nil {
 		list.tail.listElements[ix].next = edge
 	}
+	edge.listElements[ix].next = nil
 	list.tail = edge
 
 	if list.head == nil {
@@ -35,8 +36,10 @@ func (list *edgeList) remove(edge *Edge, ix int) {
 	if el.next != nil {
 		el.next.listElements[ix].prev = el.prev
 	} else {
-		list.tail = edge
+		list.tail = el.prev
 	}
+	el.next = nil
+	el.prev = nil
 	list.n--
 }
 
