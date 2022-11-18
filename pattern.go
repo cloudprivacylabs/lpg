@@ -110,7 +110,7 @@ func (p PatternItem) isConstrainedEdges(ctx *MatchContext) (*EdgeSet, error) {
 	return nil, nil
 }
 
-func (p PatternItem) estimateNodeSize(g *Graph, symbols map[string]*PatternSymbol) (NodeIterator, int) {
+func (p *PatternItem) estimateNodeSize(g *Graph, symbols map[string]*PatternSymbol) (NodeIterator, int) {
 	max := -1
 	var ret NodeIterator
 	if p.Labels.Len() > 0 {

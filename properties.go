@@ -215,6 +215,12 @@ func ComparePropertyValue(a, b interface{}) int {
 func (p properties) String() string {
 	elements := make([]string, 0, len(p))
 	for k, v := range p {
+		if _, node := v.(*Node); node {
+			continue
+		}
+		if _, edge := v.(*Edge); edge {
+			continue
+		}
 		elements = append(elements, fmt.Sprintf("%d:%v", k, v))
 	}
 	return "{" + strings.Join(elements, " ") + "}"
