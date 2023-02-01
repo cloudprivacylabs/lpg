@@ -21,12 +21,32 @@ func Sources(graph *Graph) []*Node {
 	return NodeSlice(SourcesItr(graph))
 }
 
+// Sinks finds all the sink nodes in the graph
+func SinksItr(graph *Graph) NodeIterator {
+	return nodeIterator{
+		&filterIterator{
+			itr: graph.GetNodes(),
+			filter: func(item interface{}) bool {
+				node := item.(*Node)
+				if edges := node.GetEdges(OutgoingEdge); edges.Next() {
+					return false
+				}
+				return true
+			},
+		},
+	}
+}
+
+// Sinks finds all the sink nodes in the graph
+func Sinks(graph *Graph) []*Node {
+	return NodeSlice(SinksItr(graph))
+}
+
 // CheckIsomoprhism checks to see if graphs given are equal as defined
 // by the edge equivalence and node equivalence functions. The
 // nodeEquivalenceFunction will be called for all pairs of nodes. The
 // edgeEquivalenceFunction will be called for edges connecting
 // equivalent nodes.
-//
 func CheckIsomorphism(g1, g2 *Graph, nodeEquivalenceFunc func(n1, n2 *Node) bool, edgeEquivalenceFunc func(e1, e2 *Edge) bool) bool {
 	if g1.NumNodes() != g2.NumNodes() || g1.NumEdges() != g2.NumEdges() {
 		return false
