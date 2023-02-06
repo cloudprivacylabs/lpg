@@ -42,6 +42,18 @@ func Sinks(graph *Graph) []*Node {
 	return NodeSlice(SinksItr(graph))
 }
 
+// EdgesBetweenNodes finds all the edges that go from 'from'  to 'to'
+func EdgesBetweenNodes(from, to *Node) []*Edge {
+	ret := make([]*Edge, 0)
+	for edges := from.GetEdges(OutgoingEdge); edges.Next(); {
+		edge := edges.Edge()
+		if edge.GetTo() == to {
+			ret = append(ret, edge)
+		}
+	}
+	return ret
+}
+
 // CheckIsomoprhism checks to see if graphs given are equal as defined
 // by the edge equivalence and node equivalence functions. The
 // nodeEquivalenceFunction will be called for all pairs of nodes. The
