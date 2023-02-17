@@ -9,10 +9,10 @@ func TestPattern(t *testing.T) {
 	graph.index.NodePropertyIndex("key", graph, BtreeIndex)
 	nodes := make([]*Node, 0)
 	for i := 0; i < 10; i++ {
-		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
+		nodes = append(nodes, graph.NewNode([]string{"a"}, map[string]interface{}{"key": "value"})) // map[string]interface{}{"key": "value"}
 	}
 	for i := 0; i < 8; i++ {
-		graph.NewEdge(nodes[i], nodes[i+1], "label", nil)
+		graph.NewEdge(nodes[i], nodes[i+1], "label", map[string]interface{}{"key": "value"})
 	}
 	nodes[5].SetProperty("key", "value")
 	symbols := make(map[string]*PatternSymbol)

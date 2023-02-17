@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -63,60 +63,57 @@ func (i MapInterner) Intern(s string) string {
 // the "edges" key. If this is false, the graph edges are included
 // under the source node.
 //
-//
 // The JSON representation of nodes use a numeric node index. These
 // indexes are used to refer to nodes in edges.
 //
 // With MarshalEdgesSeparately=false:
 //
-//     {
-//        "nodes": [
-//          {
-//             "n": 0,
-//             "labels": ["lbl1","lbl2"],
-//             "properties": {
-//               "key": "value"
-//             },
-//             "edges": [
-//                {
-//                    "to": 1,
-//                    "label": "edgeLabel"
-//                }
-//             ]
-//          },
-//          {
-//             "n": 1,
-//             "labels": ["lbl1"]
-//          }
-//       ]
-//     }
+//	{
+//	   "nodes": [
+//	     {
+//	        "n": 0,
+//	        "labels": ["lbl1","lbl2"],
+//	        "properties": {
+//	          "key": "value"
+//	        },
+//	        "edges": [
+//	           {
+//	               "to": 1,
+//	               "label": "edgeLabel"
+//	           }
+//	        ]
+//	     },
+//	     {
+//	        "n": 1,
+//	        "labels": ["lbl1"]
+//	     }
+//	  ]
+//	}
 //
 // With MarshalEdgesSeparately=true:
 //
-//     {
-//        "nodes": [
-//          {
-//             "n": 0,
-//             "labels": ["lbl1","lbl2"],
-//             "properties": {
-//               "key": "value"
-//             }
-//          },
-//          {
-//             "n": 1,
-//             "labels": ["lbl1"]
-//          }
-//       ],
-//       "edges": [
-//            {
-//                 "from": 0,
-//                 "to": 1,
-//                 "label": "edgeLabel"
-//           }
-//       ]
-//     }
-//
-//
+//	{
+//	   "nodes": [
+//	     {
+//	        "n": 0,
+//	        "labels": ["lbl1","lbl2"],
+//	        "properties": {
+//	          "key": "value"
+//	        }
+//	     },
+//	     {
+//	        "n": 1,
+//	        "labels": ["lbl1"]
+//	     }
+//	  ],
+//	  "edges": [
+//	       {
+//	            "from": 0,
+//	            "to": 1,
+//	            "label": "edgeLabel"
+//	      }
+//	  ]
+//	}
 type JSON struct {
 	Interner Interner
 
@@ -199,7 +196,11 @@ func (j JSON) Encode(g *Graph, out io.Writer) error {
 
 	encodeEdge := func(edge *Edge, writeFrom bool) error {
 		var e interface{}
-		properties, err := marshalProperties(edge.properties)
+		edgeProps := make(map[string]any)
+		for ix, v := range edge.properties {
+			edgeProps[g.stringTable.str(ix)] = v
+		}
+		properties, err := marshalProperties(edgeProps)
 		if err != nil {
 			return err
 		}
@@ -285,7 +286,11 @@ func (j JSON) Encode(g *Graph, out io.Writer) error {
 				if _, err := out.Write(propertiesKey); err != nil {
 					return err
 				}
-				m, err := marshalProperties(node.properties)
+				nodeProps := make(map[string]any)
+				for ix, v := range node.properties {
+					nodeProps[g.stringTable.str(ix)] = v
+				}
+				m, err := marshalProperties(nodeProps)
 				if err != nil {
 					return err
 				}

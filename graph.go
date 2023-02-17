@@ -14,7 +14,7 @@
 
 package lpg
 
-import ()
+import "fmt"
 
 // A Graph is a labeled property graph containing nodes, and directed
 // edges combining those nodes.
@@ -32,26 +32,34 @@ import ()
 // Zero value for a Graph is not usable. Use `NewGraph` to construct a
 // new graph.
 type Graph struct {
-	index    graphIndex
-	allNodes nodeList
-	allEdges edgeMap
-	idBase   int
+	index       graphIndex
+	allNodes    nodeList
+	allEdges    edgeMap
+	idBase      int
+	stringTable *stringTable
 }
 
 // NewGraph constructs and returns a new graph. The new graph has no
 // nodes or edges.
 func NewGraph() *Graph {
+	st := &stringTable{}
+	st.init()
 	return &Graph{
-		index:    newGraphIndex(),
-		allNodes: nodeList{},
+		index:       newGraphIndex(),
+		allNodes:    nodeList{},
+		stringTable: st,
 	}
 }
 
 // NewNode creates a new node with the given labels and properties
 func (g *Graph) NewNode(labels []string, props map[string]interface{}) *Node {
+	var p properties = make(map[int]any)
+	for k, v := range props {
+		p[g.stringTable.allocate(k)] = v
+	}
 	node := &Node{
 		labels:     NewStringSet(labels...),
-		properties: properties(props),
+		properties: p,
 		graph:      g,
 	}
 	node.id = g.idBase
@@ -69,17 +77,21 @@ func (g *Graph) NewEdge(from, to *Node, label string, props map[string]interface
 	if to.graph != g {
 		panic("to node is not in graph")
 	}
+	var p properties = make(map[int]any)
+	for k, v := range props {
+		p[g.stringTable.allocate(k)] = v
+	}
 	newEdge := &Edge{
 		from:       from,
 		to:         to,
 		label:      label,
-		properties: properties(props),
+		properties: p,
 		id:         g.idBase,
 	}
 	g.idBase++
 	g.allEdges.add(newEdge, 0)
 	g.connect(newEdge)
-	g.index.addEdgeToIndex(newEdge)
+	g.index.addEdgeToIndex(newEdge, g)
 	return newEdge
 }
 
@@ -392,21 +404,25 @@ func (g *Graph) setNodeProperty(node *Node, key string, value interface{}) {
 	if node.properties == nil {
 		node.properties = make(properties)
 	}
-	oldValue, exists := node.properties[key]
+	lookupKey, ok := g.stringTable.lookup(key)
+	if !ok {
+		panic(fmt.Sprintf("lookup for %v does not exist", key))
+	}
+	oldValue, exists := node.properties[lookupKey]
 	nix := g.index.isNodePropertyIndexed(key)
 	if nix != nil && exists {
 		nix.remove(oldValue, node.id)
 	}
-	node.properties[key] = value
+	node.properties[lookupKey] = value
 	if nix != nil {
 		nix.add(value, node.id, node)
 	}
 }
 
-func (g *Graph) cloneNode(node *Node, cloneProperty func(string, interface{}) interface{}) *Node {
+func (g *Graph) cloneNode(targetGraph *Graph, node *Node, cloneProperty func(string, interface{}) interface{}) *Node {
 	newNode := &Node{
 		labels:     node.labels.Clone(),
-		properties: node.properties.clone(cloneProperty),
+		properties: node.properties.clone(g, targetGraph, cloneProperty),
 		graph:      g,
 	}
 	newNode.id = g.idBase
@@ -417,14 +433,18 @@ func (g *Graph) cloneNode(node *Node, cloneProperty func(string, interface{}) in
 
 func (g *Graph) addNode(node *Node) {
 	g.allNodes.add(node)
-	g.index.addNodeToIndex(node)
+	g.index.addNodeToIndex(node, g)
 }
 
 func (g *Graph) removeNodeProperty(node *Node, key string) {
 	if node.properties == nil {
 		return
 	}
-	value, exists := node.properties[key]
+	lookupKey, ok := g.stringTable.lookup(key)
+	if !ok {
+		panic(fmt.Sprintf("lookup for %v does not exist", key))
+	}
+	value, exists := node.properties[lookupKey]
 	if !exists {
 		return
 	}
@@ -432,26 +452,27 @@ func (g *Graph) removeNodeProperty(node *Node, key string) {
 	if nix != nil {
 		nix.remove(value, node.id)
 	}
-	delete(node.properties, key)
+	g.stringTable.free(lookupKey)
+	delete(node.properties, lookupKey)
 }
 
 func (g *Graph) detachRemoveNode(node *Node) {
 	g.detachNode(node)
 	g.allNodes.remove(node)
-	g.index.removeNodeFromIndex(node)
+	g.index.removeNodeFromIndex(node, g)
 }
 
 func (g *Graph) detachNode(node *Node) {
 	for _, edge := range EdgeSlice(node.incoming.iterator(2)) {
 		g.disconnect(edge)
 		g.allEdges.remove(edge, 0)
-		g.index.removeEdgeFromIndex(edge)
+		g.index.removeEdgeFromIndex(edge, g)
 	}
 	node.incoming = edgeMap{}
 	for _, edge := range EdgeSlice(node.outgoing.iterator(1)) {
 		g.disconnect(edge)
 		g.allEdges.remove(edge, 0)
-		g.index.removeEdgeFromIndex(edge)
+		g.index.removeEdgeFromIndex(edge, g)
 	}
 	node.outgoing = edgeMap{}
 }
@@ -467,13 +488,13 @@ func (g *Graph) cloneEdge(from, to *Node, edge *Edge, cloneProperty func(string,
 		from:       from,
 		to:         to,
 		label:      edge.label,
-		properties: edge.properties.clone(cloneProperty),
+		properties: edge.properties.clone(g, to.graph, cloneProperty),
 		id:         g.idBase,
 	}
 	g.idBase++
 	g.allEdges.add(newEdge, 0)
 	g.connect(newEdge)
-	g.index.addEdgeToIndex(newEdge)
+	g.index.addEdgeToIndex(newEdge, g)
 	return newEdge
 }
 
@@ -502,12 +523,16 @@ func (g *Graph) setEdgeProperty(edge *Edge, key string, value interface{}) {
 	if edge.properties == nil {
 		edge.properties = make(properties)
 	}
-	oldValue, exists := edge.properties[key]
+	lookupKey, ok := g.stringTable.lookup(key)
+	if !ok {
+		panic(fmt.Sprintf("lookup for %v does not exist", key))
+	}
+	oldValue, exists := edge.properties[lookupKey]
 	nix := g.index.isEdgePropertyIndexed(key)
 	if nix != nil && exists {
 		nix.remove(oldValue, edge.id)
 	}
-	edge.properties[key] = value
+	edge.properties[lookupKey] = value
 	if nix != nil {
 		nix.add(value, edge.id, edge)
 	}
@@ -517,7 +542,11 @@ func (g *Graph) removeEdgeProperty(edge *Edge, key string) {
 	if edge.properties == nil {
 		return
 	}
-	oldValue, exists := edge.properties[key]
+	lookupKey, ok := g.stringTable.lookup(key)
+	if !ok {
+		panic(fmt.Sprintf("lookup for %v does not exist", key))
+	}
+	oldValue, exists := edge.properties[lookupKey]
 	if !exists {
 		return
 	}
@@ -525,7 +554,8 @@ func (g *Graph) removeEdgeProperty(edge *Edge, key string) {
 	if nix != nil {
 		nix.remove(oldValue, edge.id)
 	}
-	delete(edge.properties, key)
+	g.stringTable.free(lookupKey)
+	delete(edge.properties, lookupKey)
 }
 
 type WithProperties interface {

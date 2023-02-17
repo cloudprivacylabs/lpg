@@ -19,26 +19,30 @@ import (
 	"strings"
 )
 
-type properties map[string]interface{}
+type properties map[int]any
 
 // GetProperty returns the value for the key, and whether or not key
 // exists. p can be nil
-func (p *properties) GetProperty(key string) (interface{}, bool) {
+func (p *properties) getProperty(strTable *stringTable, key string) (interface{}, bool) {
 	if p == nil {
 		return nil, false
 	}
-	x, ok := (*p)[key]
+	lookupIdx, ok := strTable.lookup(key)
+	if !ok {
+		return nil, false
+	}
+	x, ok := (*p)[lookupIdx]
 	return x, ok
 }
 
 // ForEachProperty calls f for each property in p until f returns
 // false. Returns false if f returned false. p can be nil
-func (p *properties) ForEachProperty(f func(string, interface{}) bool) bool {
+func (p *properties) forEachProperty(strTable stringTable, f func(string, interface{}) bool) bool {
 	if p == nil {
 		return true
 	}
 	for k, v := range *p {
-		if !f(k, v) {
+		if !f(strTable.str(k), v) {
 			return false
 		}
 	}
@@ -56,17 +60,16 @@ type WithNativeValue interface {
 // ComparePropertyValue compares a and b. They must be
 // comparable. Supported types are
 //
-//   int
-//   string
-//   []int
-//   []string
-//   []interface
+//	int
+//	string
+//	[]int
+//	[]string
+//	[]interface
 //
 // The []interface must have one of the supported types as its elements
 //
 // If one of the values implement GetNativeValue() method, then it is
 // called to get the underlying value
-//
 func ComparePropertyValue(a, b interface{}) int {
 
 	if n, ok := a.(WithNativeValue); ok {
@@ -212,15 +215,19 @@ func ComparePropertyValue(a, b interface{}) int {
 func (p properties) String() string {
 	elements := make([]string, 0, len(p))
 	for k, v := range p {
-		elements = append(elements, fmt.Sprintf("%s:%v", k, v))
+		elements = append(elements, fmt.Sprintf("%d:%v", k, v))
 	}
 	return "{" + strings.Join(elements, " ") + "}"
 }
 
-func (p properties) clone(cloneProperty func(string, interface{}) interface{}) properties {
+// lookup proprs from source. allocate to target
+func (p properties) clone(sourceGraph, targetGraph *Graph, cloneProperty func(string, interface{}) interface{}) properties {
 	ret := make(properties, len(p))
+	for k := range targetGraph.stringTable.strmap {
+		sourceGraph.stringTable.allocate(k)
+	}
 	for k, v := range p {
-		ret[k] = cloneProperty(k, v)
+		ret[k] = cloneProperty(targetGraph.stringTable.str(k), v)
 	}
 	return ret
 }

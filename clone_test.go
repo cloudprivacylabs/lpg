@@ -39,7 +39,7 @@ func BenchmarkClone(b *testing.B) {
 
 func TestClone(t *testing.T) {
 	source := NewGraph()
-	target := NewGraph()
+	target := NewGraph() // target graph has empty strtable
 	nodes := make([]*Node, 0)
 	for i := 0; i < 10; i++ {
 		nodes = append(nodes, source.NewNode([]string{"a"}, map[string]interface{}{"key": i}))

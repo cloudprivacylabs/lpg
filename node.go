@@ -31,6 +31,15 @@ type Node struct {
 	id       int
 }
 
+// write public func for GetProperty, ForEachProperty
+func (node *Node) GetProperty(key string) (interface{}, bool) {
+	return node.getProperty(node.GetGraph().stringTable, key)
+}
+
+func (node *Node) ForEachProperty(strTable stringTable, f func(string, interface{}) bool) bool {
+	return node.forEachProperty(*node.GetGraph().stringTable, f)
+}
+
 // GetGraph returns the graph owning the node
 func (node *Node) GetGraph() *Graph { return node.graph }
 

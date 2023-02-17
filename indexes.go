@@ -14,6 +14,8 @@
 
 package lpg
 
+import "fmt"
+
 type index interface {
 	add(value interface{}, id int, item interface{})
 	remove(value interface{}, id int)
@@ -59,7 +61,11 @@ func (g *graphIndex) NodePropertyIndex(propertyName string, graph *Graph, it Ind
 	// Reindex
 	for nodes := graph.GetNodes(); nodes.Next(); {
 		node := nodes.Node()
-		value, ok := node.properties[propertyName]
+		lookupKey, ok := graph.stringTable.lookup(propertyName)
+		if !ok {
+			panic(fmt.Sprintf("lookup for %v does not exist", propertyName))
+		}
+		value, ok := node.properties[lookupKey]
 		if ok {
 			ix.add(value, node.id, node)
 		}
@@ -106,11 +112,11 @@ func (g *graphIndex) EdgesWithProperty(key string) EdgeIterator {
 	return edgeIterator{index.valueItr()}
 }
 
-func (g *graphIndex) addNodeToIndex(node *Node) {
+func (g *graphIndex) addNodeToIndex(node *Node, graph *Graph) {
 	g.nodesByLabel.Add(node)
 
 	for k, v := range node.properties {
-		index, found := g.nodeProperties[k]
+		index, found := g.nodeProperties[graph.stringTable.str(k)]
 		if !found {
 			continue
 		}
@@ -118,11 +124,11 @@ func (g *graphIndex) addNodeToIndex(node *Node) {
 	}
 }
 
-func (g *graphIndex) removeNodeFromIndex(node *Node) {
+func (g *graphIndex) removeNodeFromIndex(node *Node, graph *Graph) {
 	g.nodesByLabel.Remove(node)
 
 	for k, v := range node.properties {
-		index, found := g.nodeProperties[k]
+		index, found := g.nodeProperties[graph.stringTable.str(k)]
 		if !found {
 			continue
 		}
@@ -146,16 +152,20 @@ func (g *graphIndex) EdgePropertyIndex(propertyName string, graph *Graph, it Ind
 	// Reindex
 	for edges := graph.GetEdges(); edges.Next(); {
 		edge := edges.Edge()
-		value, ok := edge.properties[propertyName]
+		lookupKey, ok := graph.stringTable.lookup(propertyName)
+		if !ok {
+			panic(fmt.Sprintf("lookup for %v does not exist", propertyName))
+		}
+		value, ok := edge.properties[lookupKey]
 		if ok {
 			ix.add(value, edge.id, edge)
 		}
 	}
 }
 
-func (g *graphIndex) addEdgeToIndex(edge *Edge) {
+func (g *graphIndex) addEdgeToIndex(edge *Edge, graph *Graph) {
 	for k, v := range edge.properties {
-		index, found := g.edgeProperties[k]
+		index, found := g.edgeProperties[graph.stringTable.str(k)]
 		if !found {
 			continue
 		}
@@ -163,9 +173,9 @@ func (g *graphIndex) addEdgeToIndex(edge *Edge) {
 	}
 }
 
-func (g *graphIndex) removeEdgeFromIndex(edge *Edge) {
+func (g *graphIndex) removeEdgeFromIndex(edge *Edge, graph *Graph) {
 	for k, v := range edge.properties {
-		index, found := g.edgeProperties[k]
+		index, found := g.edgeProperties[graph.stringTable.str(k)]
 		if !found {
 			continue
 		}
