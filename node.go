@@ -37,7 +37,7 @@ func (node *Node) GetProperty(key string) (interface{}, bool) {
 }
 
 func (node *Node) ForEachProperty(strTable stringTable, f func(string, interface{}) bool) bool {
-	return node.forEachProperty(*node.GetGraph().stringTable, f)
+	return node.forEachProperty(node.GetGraph().stringTable, f)
 }
 
 // GetGraph returns the graph owning the node

@@ -14,8 +14,6 @@
 
 package lpg
 
-import "fmt"
-
 // A Graph is a labeled property graph containing nodes, and directed
 // edges combining those nodes.
 //
@@ -36,13 +34,13 @@ type Graph struct {
 	allNodes    nodeList
 	allEdges    edgeMap
 	idBase      int
-	stringTable *stringTable
+	stringTable stringTable
 }
 
 // NewGraph constructs and returns a new graph. The new graph has no
 // nodes or edges.
 func NewGraph() *Graph {
-	st := &stringTable{}
+	st := stringTable{}
 	st.init()
 	return &Graph{
 		index:       newGraphIndex(),
@@ -406,7 +404,7 @@ func (g *Graph) setNodeProperty(node *Node, key string, value interface{}) {
 	}
 	lookupKey, ok := g.stringTable.lookup(key)
 	if !ok {
-		panic(fmt.Sprintf("lookup for %v does not exist", key))
+		lookupKey = g.stringTable.allocate(key)
 	}
 	oldValue, exists := node.properties[lookupKey]
 	nix := g.index.isNodePropertyIndexed(key)
@@ -442,7 +440,7 @@ func (g *Graph) removeNodeProperty(node *Node, key string) {
 	}
 	lookupKey, ok := g.stringTable.lookup(key)
 	if !ok {
-		panic(fmt.Sprintf("lookup for %v does not exist", key))
+		return
 	}
 	value, exists := node.properties[lookupKey]
 	if !exists {
@@ -525,7 +523,7 @@ func (g *Graph) setEdgeProperty(edge *Edge, key string, value interface{}) {
 	}
 	lookupKey, ok := g.stringTable.lookup(key)
 	if !ok {
-		panic(fmt.Sprintf("lookup for %v does not exist", key))
+		lookupKey = g.stringTable.allocate(key)
 	}
 	oldValue, exists := edge.properties[lookupKey]
 	nix := g.index.isEdgePropertyIndexed(key)
@@ -544,7 +542,7 @@ func (g *Graph) removeEdgeProperty(edge *Edge, key string) {
 	}
 	lookupKey, ok := g.stringTable.lookup(key)
 	if !ok {
-		panic(fmt.Sprintf("lookup for %v does not exist", key))
+		return
 	}
 	oldValue, exists := edge.properties[lookupKey]
 	if !exists {
