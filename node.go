@@ -36,7 +36,7 @@ func (node *Node) GetProperty(key string) (interface{}, bool) {
 	return node.getProperty(node.GetGraph().stringTable, key)
 }
 
-func (node *Node) ForEachProperty(strTable stringTable, f func(string, interface{}) bool) bool {
+func (node *Node) ForEachProperty(f func(string, interface{}) bool) bool {
 	return node.forEachProperty(node.GetGraph().stringTable, f)
 }
 
