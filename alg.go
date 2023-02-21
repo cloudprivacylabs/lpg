@@ -1,5 +1,9 @@
 package lpg
 
+import (
+	"fmt"
+)
+
 // Sources finds all the source nodes in the graph
 func SourcesItr(graph *Graph) NodeIterator {
 	return nodeIterator{
@@ -26,7 +30,6 @@ func Sources(graph *Graph) []*Node {
 // nodeEquivalenceFunction will be called for all pairs of nodes. The
 // edgeEquivalenceFunction will be called for edges connecting
 // equivalent nodes.
-//
 func CheckIsomorphism(g1, g2 *Graph, nodeEquivalenceFunc func(n1, n2 *Node) bool, edgeEquivalenceFunc func(e1, e2 *Edge) bool) bool {
 	if g1.NumNodes() != g2.NumNodes() || g1.NumEdges() != g2.NumEdges() {
 		return false
@@ -111,6 +114,7 @@ func CheckIsomorphism(g1, g2 *Graph, nodeEquivalenceFunc func(n1, n2 *Node) bool
 		if !next() {
 			break
 		}
+		fmt.Println(nodeEquivalences)
 	}
 	return false
 }
