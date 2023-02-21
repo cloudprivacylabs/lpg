@@ -98,10 +98,12 @@ func CheckIsomorphism(g1, g2 *Graph, nodeEquivalenceFunc func(n1, n2 *Node) bool
 					}
 				}
 				if !found {
+					fmt.Println("Not iso")
 					return false
 				}
 			}
 		}
+		fmt.Print("iso")
 		return true
 	}
 
@@ -114,7 +116,6 @@ func CheckIsomorphism(g1, g2 *Graph, nodeEquivalenceFunc func(n1, n2 *Node) bool
 		if !next() {
 			break
 		}
-		fmt.Println(nodeEquivalences)
 	}
 	return false
 }
