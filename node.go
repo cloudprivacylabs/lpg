@@ -31,7 +31,7 @@ type Node struct {
 	id       int
 }
 
-// write public func for GetProperty, ForEachProperty
+// GetProperty returns the property value in the string table
 func (node *Node) GetProperty(key string) (interface{}, bool) {
 	return node.getProperty(node.GetGraph().stringTable, key)
 }

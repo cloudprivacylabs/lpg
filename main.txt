@@ -1,0 +1,315 @@
+=== RUN   TestClone
+--- PASS: TestClone (0.00s)
+=== RUN   TestGraphCRUD
+--- PASS: TestGraphCRUD (0.00s)
+=== RUN   TestBtreeNodeIndex
+--- PASS: TestBtreeNodeIndex (0.00s)
+=== RUN   TestHashNodeIndex
+--- PASS: TestHashNodeIndex (0.00s)
+=== RUN   TestEncode
+    json_test.go:47: {"nodes":[{"n":0,"labels":["lbl"],"properties":{"key":"value"},"edges":[{"to":1,"label":"edge"}]},{"n":1,"labels":["a","b"]}]}
+--- PASS: TestEncode (0.00s)
+=== RUN   TestNodeMap
+--- PASS: TestNodeMap (0.00s)
+=== RUN   TestPathBasic
+--- PASS: TestPathBasic (0.00s)
+=== RUN   TestPattern
+--- PASS: TestPattern (0.00s)
+=== RUN   TestLoopPattern
+--- PASS: TestLoopPattern (0.00s)
+=== RUN   TestVariableLengthPath
+--- PASS: TestVariableLengthPath (0.00s)
+=== RUN   TestClone
+--- PASS: TestClone (0.00s)
+=== RUN   TestGraphCRUD
+--- PASS: TestGraphCRUD (0.00s)
+=== RUN   TestBtreeNodeIndex
+--- PASS: TestBtreeNodeIndex (0.00s)
+=== RUN   TestHashNodeIndex
+--- PASS: TestHashNodeIndex (0.00s)
+=== RUN   TestEncode
+    json_test.go:47: {"nodes":[{"n":0,"labels":["lbl"],"properties":{"key":"value"},"edges":[{"to":1,"label":"edge"}]},{"n":1,"labels":["a","b"]}]}
+--- PASS: TestEncode (0.00s)
+=== RUN   TestNodeMap
+--- PASS: TestNodeMap (0.00s)
+=== RUN   TestPathBasic
+--- PASS: TestPathBasic (0.00s)
+=== RUN   TestPattern
+--- PASS: TestPattern (0.00s)
+=== RUN   TestLoopPattern
+--- PASS: TestLoopPattern (0.00s)
+=== RUN   TestVariableLengthPath
+--- PASS: TestVariableLengthPath (0.00s)
+=== RUN   TestClone
+--- PASS: TestClone (0.00s)
+=== RUN   TestGraphCRUD
+--- PASS: TestGraphCRUD (0.00s)
+=== RUN   TestBtreeNodeIndex
+--- PASS: TestBtreeNodeIndex (0.00s)
+=== RUN   TestHashNodeIndex
+--- PASS: TestHashNodeIndex (0.00s)
+=== RUN   TestEncode
+    json_test.go:47: {"nodes":[{"n":1,"labels":["a","b"]},{"n":0,"labels":["lbl"],"properties":{"key":"value"},"edges":[{"to":1,"label":"edge"}]}]}
+--- PASS: TestEncode (0.00s)
+=== RUN   TestNodeMap
+--- PASS: TestNodeMap (0.00s)
+=== RUN   TestPathBasic
+--- PASS: TestPathBasic (0.00s)
+=== RUN   TestPattern
+--- PASS: TestPattern (0.00s)
+=== RUN   TestLoopPattern
+--- PASS: TestLoopPattern (0.00s)
+=== RUN   TestVariableLengthPath
+--- PASS: TestVariableLengthPath (0.00s)
+=== RUN   TestClone
+--- PASS: TestClone (0.00s)
+=== RUN   TestGraphCRUD
+--- PASS: TestGraphCRUD (0.00s)
+=== RUN   TestBtreeNodeIndex
+--- PASS: TestBtreeNodeIndex (0.00s)
+=== RUN   TestHashNodeIndex
+--- PASS: TestHashNodeIndex (0.00s)
+=== RUN   TestEncode
+    json_test.go:47: {"nodes":[{"n":0,"labels":["lbl"],"properties":{"key":"value"},"edges":[{"to":1,"label":"edge"}]},{"n":1,"labels":["a","b"]}]}
+--- PASS: TestEncode (0.00s)
+=== RUN   TestNodeMap
+--- PASS: TestNodeMap (0.00s)
+=== RUN   TestPathBasic
+--- PASS: TestPathBasic (0.00s)
+=== RUN   TestPattern
+--- PASS: TestPattern (0.00s)
+=== RUN   TestLoopPattern
+--- PASS: TestLoopPattern (0.00s)
+=== RUN   TestVariableLengthPath
+--- PASS: TestVariableLengthPath (0.00s)
+=== RUN   TestClone
+--- PASS: TestClone (0.00s)
+=== RUN   TestGraphCRUD
+--- PASS: TestGraphCRUD (0.00s)
+=== RUN   TestBtreeNodeIndex
+--- PASS: TestBtreeNodeIndex (0.00s)
+=== RUN   TestHashNodeIndex
+--- PASS: TestHashNodeIndex (0.00s)
+=== RUN   TestEncode
+    json_test.go:47: {"nodes":[{"n":0,"labels":["lbl"],"properties":{"key":"value"},"edges":[{"to":1,"label":"edge"}]},{"n":1,"labels":["b","a"]}]}
+--- PASS: TestEncode (0.00s)
+=== RUN   TestNodeMap
+--- PASS: TestNodeMap (0.00s)
+=== RUN   TestPathBasic
+--- PASS: TestPathBasic (0.00s)
+=== RUN   TestPattern
+--- PASS: TestPattern (0.00s)
+=== RUN   TestLoopPattern
+--- PASS: TestLoopPattern (0.00s)
+=== RUN   TestVariableLengthPath
+--- PASS: TestVariableLengthPath (0.00s)
+=== RUN   TestClone
+--- PASS: TestClone (0.00s)
+=== RUN   TestGraphCRUD
+--- PASS: TestGraphCRUD (0.00s)
+=== RUN   TestBtreeNodeIndex
+--- PASS: TestBtreeNodeIndex (0.00s)
+=== RUN   TestHashNodeIndex
+--- PASS: TestHashNodeIndex (0.00s)
+=== RUN   TestEncode
+    json_test.go:47: {"nodes":[{"n":0,"labels":["lbl"],"properties":{"key":"value"},"edges":[{"to":1,"label":"edge"}]},{"n":1,"labels":["a","b"]}]}
+--- PASS: TestEncode (0.00s)
+=== RUN   TestNodeMap
+--- PASS: TestNodeMap (0.00s)
+=== RUN   TestPathBasic
+--- PASS: TestPathBasic (0.00s)
+=== RUN   TestPattern
+--- PASS: TestPattern (0.00s)
+=== RUN   TestLoopPattern
+--- PASS: TestLoopPattern (0.00s)
+=== RUN   TestVariableLengthPath
+--- PASS: TestVariableLengthPath (0.00s)
+=== RUN   TestClone
+--- PASS: TestClone (0.00s)
+=== RUN   TestGraphCRUD
+--- PASS: TestGraphCRUD (0.00s)
+=== RUN   TestBtreeNodeIndex
+--- PASS: TestBtreeNodeIndex (0.00s)
+=== RUN   TestHashNodeIndex
+--- PASS: TestHashNodeIndex (0.00s)
+=== RUN   TestEncode
+    json_test.go:47: {"nodes":[{"n":0,"labels":["lbl"],"properties":{"key":"value"},"edges":[{"to":1,"label":"edge"}]},{"n":1,"labels":["a","b"]}]}
+--- PASS: TestEncode (0.00s)
+=== RUN   TestNodeMap
+--- PASS: TestNodeMap (0.00s)
+=== RUN   TestPathBasic
+--- PASS: TestPathBasic (0.00s)
+=== RUN   TestPattern
+--- PASS: TestPattern (0.00s)
+=== RUN   TestLoopPattern
+--- PASS: TestLoopPattern (0.00s)
+=== RUN   TestVariableLengthPath
+--- PASS: TestVariableLengthPath (0.00s)
+=== RUN   TestClone
+--- PASS: TestClone (0.00s)
+=== RUN   TestGraphCRUD
+--- PASS: TestGraphCRUD (0.00s)
+=== RUN   TestBtreeNodeIndex
+--- PASS: TestBtreeNodeIndex (0.00s)
+=== RUN   TestHashNodeIndex
+--- PASS: TestHashNodeIndex (0.00s)
+=== RUN   TestEncode
+    json_test.go:47: {"nodes":[{"n":0,"labels":["lbl"],"properties":{"key":"value"},"edges":[{"to":1,"label":"edge"}]},{"n":1,"labels":["b","a"]}]}
+--- PASS: TestEncode (0.00s)
+=== RUN   TestNodeMap
+--- PASS: TestNodeMap (0.00s)
+=== RUN   TestPathBasic
+--- PASS: TestPathBasic (0.00s)
+=== RUN   TestPattern
+--- PASS: TestPattern (0.00s)
+=== RUN   TestLoopPattern
+--- PASS: TestLoopPattern (0.00s)
+=== RUN   TestVariableLengthPath
+--- PASS: TestVariableLengthPath (0.00s)
+=== RUN   TestClone
+--- PASS: TestClone (0.00s)
+=== RUN   TestGraphCRUD
+--- PASS: TestGraphCRUD (0.00s)
+=== RUN   TestBtreeNodeIndex
+--- PASS: TestBtreeNodeIndex (0.00s)
+=== RUN   TestHashNodeIndex
+--- PASS: TestHashNodeIndex (0.00s)
+=== RUN   TestEncode
+    json_test.go:47: {"nodes":[{"n":0,"labels":["lbl"],"properties":{"key":"value"},"edges":[{"to":1,"label":"edge"}]},{"n":1,"labels":["a","b"]}]}
+--- PASS: TestEncode (0.00s)
+=== RUN   TestNodeMap
+--- PASS: TestNodeMap (0.00s)
+=== RUN   TestPathBasic
+--- PASS: TestPathBasic (0.00s)
+=== RUN   TestPattern
+--- PASS: TestPattern (0.00s)
+=== RUN   TestLoopPattern
+--- PASS: TestLoopPattern (0.00s)
+=== RUN   TestVariableLengthPath
+--- PASS: TestVariableLengthPath (0.00s)
+=== RUN   TestClone
+--- PASS: TestClone (0.00s)
+=== RUN   TestGraphCRUD
+--- PASS: TestGraphCRUD (0.00s)
+=== RUN   TestBtreeNodeIndex
+--- PASS: TestBtreeNodeIndex (0.00s)
+=== RUN   TestHashNodeIndex
+--- PASS: TestHashNodeIndex (0.00s)
+=== RUN   TestEncode
+    json_test.go:47: {"nodes":[{"n":1,"labels":["a","b"]},{"n":0,"labels":["lbl"],"properties":{"key":"value"},"edges":[{"to":1,"label":"edge"}]}]}
+--- PASS: TestEncode (0.00s)
+=== RUN   TestNodeMap
+--- PASS: TestNodeMap (0.00s)
+=== RUN   TestPathBasic
+--- PASS: TestPathBasic (0.00s)
+=== RUN   TestPattern
+--- PASS: TestPattern (0.00s)
+=== RUN   TestLoopPattern
+--- PASS: TestLoopPattern (0.00s)
+=== RUN   TestVariableLengthPath
+--- PASS: TestVariableLengthPath (0.00s)
+goos: darwin
+goarch: amd64
+pkg: github.com/cloudprivacylabs/lpg
+cpu: Intel(R) Core(TM) i5-8257U CPU @ 1.40GHz
+BenchmarkClone
+BenchmarkClone-8                   	  117447	     11599 ns/op	    4637 B/op	      52 allocs/op
+BenchmarkClone-8                   	  164959	      9338 ns/op	    4454 B/op	      52 allocs/op
+BenchmarkClone-8                   	  158962	      8787 ns/op	    4469 B/op	      52 allocs/op
+BenchmarkClone-8                   	  162631	      8680 ns/op	    4460 B/op	      52 allocs/op
+BenchmarkClone-8                   	  159240	      8402 ns/op	    4468 B/op	      52 allocs/op
+BenchmarkClone-8                   	  155055	     15491 ns/op	    4480 B/op	      52 allocs/op
+BenchmarkClone-8                   	  114904	     11713 ns/op	    4653 B/op	      52 allocs/op
+BenchmarkClone-8                   	  124270	     15057 ns/op	    4597 B/op	      52 allocs/op
+BenchmarkClone-8                   	   99354	     16006 ns/op	    4770 B/op	      52 allocs/op
+BenchmarkClone-8                   	  131995	     16924 ns/op	    4558 B/op	      52 allocs/op
+BenchmarkAddNode
+BenchmarkAddNode-8                 	  676879	      2499 ns/op	     975 B/op	       8 allocs/op
+BenchmarkAddNode-8                 	  706112	      2071 ns/op	     968 B/op	       8 allocs/op
+BenchmarkAddNode-8                 	  713560	      2280 ns/op	     967 B/op	       8 allocs/op
+BenchmarkAddNode-8                 	  757537	      2757 ns/op	     958 B/op	       8 allocs/op
+BenchmarkAddNode-8                 	  567211	      2379 ns/op	    1010 B/op	       8 allocs/op
+BenchmarkAddNode-8                 	  780561	      2131 ns/op	     955 B/op	       8 allocs/op
+BenchmarkAddNode-8                 	  877964	      2016 ns/op	    1076 B/op	       8 allocs/op
+BenchmarkAddNode-8                 	  866313	      1832 ns/op	    1080 B/op	       8 allocs/op
+BenchmarkAddNode-8                 	  914824	      2516 ns/op	    1065 B/op	       8 allocs/op
+BenchmarkAddNode-8                 	  573565	      2047 ns/op	    1008 B/op	       8 allocs/op
+BenchmarkItrNodes1000
+BenchmarkItrNodes1000-8            	  222213	      5179 ns/op	       4 B/op	       0 allocs/op
+BenchmarkItrNodes1000-8            	  256692	      4573 ns/op	       4 B/op	       0 allocs/op
+BenchmarkItrNodes1000-8            	  269022	      4501 ns/op	       3 B/op	       0 allocs/op
+BenchmarkItrNodes1000-8            	  268344	      4434 ns/op	       3 B/op	       0 allocs/op
+BenchmarkItrNodes1000-8            	  269545	      4906 ns/op	       3 B/op	       0 allocs/op
+BenchmarkItrNodes1000-8            	  271730	      4357 ns/op	       3 B/op	       0 allocs/op
+BenchmarkItrNodes1000-8            	  272700	      4378 ns/op	       3 B/op	       0 allocs/op
+BenchmarkItrNodes1000-8            	  271522	      4365 ns/op	       3 B/op	       0 allocs/op
+BenchmarkItrNodes1000-8            	  267553	      4423 ns/op	       3 B/op	       0 allocs/op
+BenchmarkItrNodes1000-8            	  269980	      4372 ns/op	       3 B/op	       0 allocs/op
+BenchmarkItrNodes10000
+BenchmarkItrNodes10000-8           	   23632	     49256 ns/op	     417 B/op	       3 allocs/op
+BenchmarkItrNodes10000-8           	   23428	     49908 ns/op	     421 B/op	       3 allocs/op
+BenchmarkItrNodes10000-8           	   23200	     49419 ns/op	     425 B/op	       3 allocs/op
+BenchmarkItrNodes10000-8           	   19940	     51606 ns/op	     494 B/op	       4 allocs/op
+BenchmarkItrNodes10000-8           	   24127	     48813 ns/op	     409 B/op	       3 allocs/op
+BenchmarkItrNodes10000-8           	   23750	     48764 ns/op	     415 B/op	       3 allocs/op
+BenchmarkItrNodes10000-8           	   23636	     48629 ns/op	     417 B/op	       3 allocs/op
+BenchmarkItrNodes10000-8           	   23518	     48948 ns/op	     419 B/op	       3 allocs/op
+BenchmarkItrNodes10000-8           	   23734	     49446 ns/op	     415 B/op	       3 allocs/op
+BenchmarkItrNodes10000-8           	   23462	     49455 ns/op	     420 B/op	       3 allocs/op
+BenchmarkItrNodesViaIndex1000
+BenchmarkItrNodesViaIndex1000-8    	    9909	    109455 ns/op	     713 B/op	      23 allocs/op
+BenchmarkItrNodesViaIndex1000-8    	   10941	    129936 ns/op	     703 B/op	      23 allocs/op
+BenchmarkItrNodesViaIndex1000-8    	    9936	    109311 ns/op	     712 B/op	      23 allocs/op
+BenchmarkItrNodesViaIndex1000-8    	   10988	    111318 ns/op	     702 B/op	      23 allocs/op
+BenchmarkItrNodesViaIndex1000-8    	    9850	    108817 ns/op	     713 B/op	      23 allocs/op
+BenchmarkItrNodesViaIndex1000-8    	    9910	    118524 ns/op	     713 B/op	      23 allocs/op
+BenchmarkItrNodesViaIndex1000-8    	   10000	    121922 ns/op	     712 B/op	      23 allocs/op
+BenchmarkItrNodesViaIndex1000-8    	   10000	    111689 ns/op	     712 B/op	      23 allocs/op
+BenchmarkItrNodesViaIndex1000-8    	   10000	    109518 ns/op	     712 B/op	      23 allocs/op
+BenchmarkItrNodesViaIndex1000-8    	   10000	    113034 ns/op	     712 B/op	      23 allocs/op
+BenchmarkItrNodesViaIndex10000
+BenchmarkItrNodesViaIndex10000-8   	     852	   1716507 ns/op	   12191 B/op	     117 allocs/op
+BenchmarkItrNodesViaIndex10000-8   	     796	   1298847 ns/op	   13008 B/op	     124 allocs/op
+BenchmarkItrNodesViaIndex10000-8   	     739	   1353751 ns/op	   13962 B/op	     132 allocs/op
+BenchmarkItrNodesViaIndex10000-8   	     853	   1317626 ns/op	   12180 B/op	     117 allocs/op
+BenchmarkItrNodesViaIndex10000-8   	     760	   2014848 ns/op	   13589 B/op	     129 allocs/op
+BenchmarkItrNodesViaIndex10000-8   	     759	   1344444 ns/op	   13611 B/op	     129 allocs/op
+BenchmarkItrNodesViaIndex10000-8   	     820	   1263641 ns/op	   12653 B/op	     121 allocs/op
+BenchmarkItrNodesViaIndex10000-8   	     967	   1239625 ns/op	   10808 B/op	     106 allocs/op
+BenchmarkItrNodesViaIndex10000-8   	     954	   1267389 ns/op	   10957 B/op	     107 allocs/op
+BenchmarkItrNodesViaIndex10000-8   	     829	   1275621 ns/op	   12513 B/op	     120 allocs/op
+BenchmarkCreateEdge
+BenchmarkCreateEdge-8              	    6578	    322022 ns/op	   96152 B/op	    1002 allocs/op
+BenchmarkCreateEdge-8              	    6495	    236045 ns/op	   96155 B/op	    1002 allocs/op
+BenchmarkCreateEdge-8              	    6664	    237073 ns/op	   96148 B/op	    1002 allocs/op
+BenchmarkCreateEdge-8              	    5574	    250697 ns/op	   96196 B/op	    1002 allocs/op
+BenchmarkCreateEdge-8              	    6350	    253090 ns/op	   96160 B/op	    1002 allocs/op
+BenchmarkCreateEdge-8              	    5406	    257074 ns/op	   96205 B/op	    1003 allocs/op
+BenchmarkCreateEdge-8              	    6025	    250938 ns/op	   96174 B/op	    1002 allocs/op
+BenchmarkCreateEdge-8              	    6434	    250522 ns/op	   96157 B/op	    1002 allocs/op
+BenchmarkCreateEdge-8              	    6626	    218527 ns/op	   96150 B/op	    1002 allocs/op
+BenchmarkCreateEdge-8              	    6506	    250063 ns/op	   96154 B/op	    1002 allocs/op
+BenchmarkItrAllEdge
+BenchmarkItrAllEdge-8              	  213645	      5144 ns/op	      52 B/op	       1 allocs/op
+BenchmarkItrAllEdge-8              	  234696	      4928 ns/op	      52 B/op	       1 allocs/op
+BenchmarkItrAllEdge-8              	  239251	      5134 ns/op	      52 B/op	       1 allocs/op
+BenchmarkItrAllEdge-8              	  241077	      4969 ns/op	      51 B/op	       1 allocs/op
+BenchmarkItrAllEdge-8              	  234252	      4902 ns/op	      52 B/op	       1 allocs/op
+BenchmarkItrAllEdge-8              	  242667	      4852 ns/op	      51 B/op	       1 allocs/op
+BenchmarkItrAllEdge-8              	  250374	      4828 ns/op	      51 B/op	       1 allocs/op
+BenchmarkItrAllEdge-8              	  239480	      4902 ns/op	      51 B/op	       1 allocs/op
+BenchmarkItrAllEdge-8              	  241579	      4756 ns/op	      51 B/op	       1 allocs/op
+BenchmarkItrAllEdge-8              	  239356	      5282 ns/op	      52 B/op	       1 allocs/op
+BenchmarkItrNodeEdges
+BenchmarkItrNodeEdges-8            	   11440	    102857 ns/op	   48186 B/op	    1003 allocs/op
+BenchmarkItrNodeEdges-8            	   11936	    102049 ns/op	   48177 B/op	    1003 allocs/op
+BenchmarkItrNodeEdges-8            	   11454	    109730 ns/op	   48186 B/op	    1003 allocs/op
+BenchmarkItrNodeEdges-8            	   10744	    110459 ns/op	   48200 B/op	    1003 allocs/op
+BenchmarkItrNodeEdges-8            	   10905	    119008 ns/op	   48197 B/op	    1003 allocs/op
+BenchmarkItrNodeEdges-8            	   10845	    111822 ns/op	   48198 B/op	    1003 allocs/op
+BenchmarkItrNodeEdges-8            	   10567	    114976 ns/op	   48204 B/op	    1003 allocs/op
+BenchmarkItrNodeEdges-8            	    8106	    124863 ns/op	   48276 B/op	    1004 allocs/op
+BenchmarkItrNodeEdges-8            	    7227	    143703 ns/op	   48313 B/op	    1005 allocs/op
+BenchmarkItrNodeEdges-8            	    6541	    228653 ns/op	   48349 B/op	    1005 allocs/op
+PASS
+ok  	github.com/cloudprivacylabs/lpg	141.909s

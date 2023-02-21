@@ -1,0 +1,44 @@
+goos: darwin
+goarch: amd64
+pkg: github.com/cloudprivacylabs/lpg
+cpu: Intel(R) Core(TM) i5-8257U CPU @ 1.40GHz
+                        │ strtable.txt │               main.txt               │
+                        │    sec/op    │    sec/op     vs base                │
+Clone-8                   11.23µ ± 37%   11.66µ ± 37%        ~ (p=1.000 n=10)
+AddNode-8                 2.002µ ± 19%   2.206µ ± 14%        ~ (p=0.075 n=10)
+ItrNodes1000-8            6.009µ ± 20%   4.429µ ± 11%  -26.30% (p=0.000 n=10)
+ItrNodes10000-8           73.58µ ± 15%   49.34µ ±  1%  -32.95% (p=0.000 n=10)
+ItrNodesViaIndex1000-8    150.5µ ± 16%   111.5µ ±  9%  -25.94% (p=0.000 n=10)
+ItrNodesViaIndex10000-8   1.303m ± 15%   1.308m ± 31%        ~ (p=0.739 n=10)
+CreateEdge-8              355.8µ ± 17%   250.6µ ±  6%  -29.56% (p=0.000 n=10)
+ItrAllEdge-8              4.822µ ±  6%   4.915µ ±  5%        ~ (p=0.343 n=10)
+ItrNodeEdges-8            111.4µ ±  3%   113.4µ ± 27%        ~ (p=0.579 n=10)
+geomean                   41.60µ         36.48µ        -12.30%
+
+                        │  strtable.txt  │               main.txt                │
+                        │      B/op      │     B/op       vs base                │
+Clone-8                    4.510Ki ±  5%   4.413Ki ±  3%        ~ (p=0.190 n=10)
+AddNode-8                    879.0 ±  2%     991.5 ±  9%  +12.80% (p=0.000 n=10)
+ItrNodes1000-8               4.000 ± 50%     3.000 ± 33%        ~ (p=0.052 n=10)
+ItrNodes10000-8              556.0 ± 25%     418.0 ±  2%  -24.82% (p=0.006 n=10)
+ItrNodesViaIndex1000-8       726.5 ±  3%     712.0 ±  1%   -2.00% (p=0.014 n=10)
+ItrNodesViaIndex10000-8    11.72Ki ±  8%   12.29Ki ± 13%        ~ (p=0.165 n=10)
+CreateEdge-8              140.85Ki ±  0%   93.90Ki ±  0%  -33.33% (p=0.000 n=10)
+ItrAllEdge-8                 52.00 ±  0%     51.50 ±  1%   -0.96% (p=0.033 n=10)
+ItrNodeEdges-8             47.09Ki ±  0%   47.07Ki ±  0%        ~ (p=0.138 n=10)
+geomean                    1.417Ki         1.287Ki         -9.14%
+
+                        │  strtable.txt  │                main.txt                │
+                        │   allocs/op    │  allocs/op    vs base                  │
+Clone-8                    52.00 ±  0%      52.00 ±  0%        ~ (p=1.000 n=10) ¹
+AddNode-8                  8.000 ±  0%      8.000 ±  0%        ~ (p=1.000 n=10) ¹
+ItrNodes1000-8             0.000 ±  0%      0.000 ±  0%        ~ (p=1.000 n=10) ¹
+ItrNodes10000-8            4.500 ± 33%      3.000 ±  0%  -33.33% (p=0.003 n=10)
+ItrNodesViaIndex1000-8     23.50 ±  2%      23.00 ±  0%   -2.13% (p=0.033 n=10)
+ItrNodesViaIndex10000-8    124.0 ±  6%      120.5 ± 11%        ~ (p=0.323 n=10)
+CreateEdge-8              2.002k ±  0%     1.002k ±  0%  -49.96% (p=0.000 n=10)
+ItrAllEdge-8               1.000 ±  0%      1.000 ±  0%        ~ (p=1.000 n=10) ¹
+ItrNodeEdges-8            1.004k ±  0%     1.003k ±  0%        ~ (p=0.650 n=10)
+geomean                                ²                 -11.98%                ²
+¹ all samples are equal
+² summaries must be >0 to compute geomean

@@ -24,7 +24,7 @@ type properties map[int]any
 // GetProperty returns the value for the key, and whether or not key
 // exists. p can be nil
 func (p *properties) getProperty(strTable stringTable, key string) (interface{}, bool) {
-	if p == nil {
+	if *p == nil {
 		return nil, false
 	}
 	lookupIdx, ok := strTable.lookup(key)
@@ -38,7 +38,7 @@ func (p *properties) getProperty(strTable stringTable, key string) (interface{},
 // ForEachProperty calls f for each property in p until f returns
 // false. Returns false if f returned false. p can be nil
 func (p *properties) forEachProperty(strTable stringTable, f func(string, interface{}) bool) bool {
-	if p == nil {
+	if *p == nil {
 		return true
 	}
 	for k, v := range *p {

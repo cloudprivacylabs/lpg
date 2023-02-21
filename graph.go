@@ -51,13 +51,9 @@ func NewGraph() *Graph {
 
 // NewNode creates a new node with the given labels and properties
 func (g *Graph) NewNode(labels []string, props map[string]interface{}) *Node {
-	var p properties = make(map[int]any)
-	for k, v := range props {
-		p[g.stringTable.allocate(k)] = v
-	}
 	node := &Node{
 		labels:     NewStringSet(labels...),
-		properties: p,
+		properties: make(properties),
 		graph:      g,
 	}
 	node.id = g.idBase
@@ -75,15 +71,15 @@ func (g *Graph) NewEdge(from, to *Node, label string, props map[string]interface
 	if to.graph != g {
 		panic("to node is not in graph")
 	}
-	var p properties = make(map[int]any)
-	for k, v := range props {
-		p[g.stringTable.allocate(k)] = v
-	}
+	// var p properties = make(map[int]any)
+	// for k, v := range props {
+	// 	p[g.stringTable.allocate(k)] = v
+	// }
 	newEdge := &Edge{
 		from:       from,
 		to:         to,
 		label:      label,
-		properties: p,
+		properties: make(properties),
 		id:         g.idBase,
 	}
 	g.idBase++
@@ -402,6 +398,7 @@ func (g *Graph) setNodeProperty(node *Node, key string, value interface{}) {
 	if node.properties == nil {
 		node.properties = make(properties)
 	}
+	node.properties[g.stringTable.allocate(key)] = value
 	lookupKey, ok := g.stringTable.lookup(key)
 	if !ok {
 		lookupKey = g.stringTable.allocate(key)
@@ -521,6 +518,7 @@ func (g *Graph) setEdgeProperty(edge *Edge, key string, value interface{}) {
 	if edge.properties == nil {
 		edge.properties = make(properties)
 	}
+	edge.properties[g.stringTable.allocate(key)] = value
 	lookupKey, ok := g.stringTable.lookup(key)
 	if !ok {
 		lookupKey = g.stringTable.allocate(key)
