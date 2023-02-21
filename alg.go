@@ -1,8 +1,6 @@
 package lpg
 
-import (
-	"fmt"
-)
+import ()
 
 // Sources finds all the source nodes in the graph
 func SourcesItr(graph *Graph) NodeIterator {
@@ -98,12 +96,10 @@ func CheckIsomorphism(g1, g2 *Graph, nodeEquivalenceFunc func(n1, n2 *Node) bool
 					}
 				}
 				if !found {
-					fmt.Println("Not iso")
 					return false
 				}
 			}
 		}
-		fmt.Print("iso")
 		return true
 	}
 

@@ -52,9 +52,14 @@ func NewGraph() *Graph {
 // NewNode creates a new node with the given labels and properties
 func (g *Graph) NewNode(labels []string, props map[string]interface{}) *Node {
 	node := &Node{
-		labels:     NewStringSet(labels...),
-		properties: make(properties),
-		graph:      g,
+		labels: NewStringSet(labels...),
+		graph:  g,
+	}
+	if len(props) > 0 {
+		node.properties = make(properties)
+		for k, v := range props {
+			node.properties[g.stringTable.allocate(k)] = v
+		}
 	}
 	node.id = g.idBase
 	g.idBase++
@@ -76,11 +81,16 @@ func (g *Graph) NewEdge(from, to *Node, label string, props map[string]interface
 	// 	p[g.stringTable.allocate(k)] = v
 	// }
 	newEdge := &Edge{
-		from:       from,
-		to:         to,
-		label:      label,
-		properties: make(properties),
-		id:         g.idBase,
+		from:  from,
+		to:    to,
+		label: label,
+		id:    g.idBase,
+	}
+	if len(props) > 0 {
+		newEdge.properties = make(properties)
+		for k, v := range props {
+			newEdge.properties[g.stringTable.allocate(k)] = v
+		}
 	}
 	g.idBase++
 	g.allEdges.add(newEdge, 0)
@@ -398,7 +408,6 @@ func (g *Graph) setNodeProperty(node *Node, key string, value interface{}) {
 	if node.properties == nil {
 		node.properties = make(properties)
 	}
-	node.properties[g.stringTable.allocate(key)] = value
 	lookupKey, ok := g.stringTable.lookup(key)
 	if !ok {
 		lookupKey = g.stringTable.allocate(key)
@@ -416,9 +425,11 @@ func (g *Graph) setNodeProperty(node *Node, key string, value interface{}) {
 
 func (g *Graph) cloneNode(targetGraph *Graph, node *Node, cloneProperty func(string, interface{}) interface{}) *Node {
 	newNode := &Node{
-		labels:     node.labels.Clone(),
-		properties: node.properties.clone(g, targetGraph, cloneProperty),
-		graph:      g,
+		labels: node.labels.Clone(),
+		graph:  g,
+	}
+	if node.properties != nil {
+		newNode.properties = node.properties.clone(g, targetGraph, cloneProperty)
 	}
 	newNode.id = g.idBase
 	g.idBase++
@@ -480,11 +491,13 @@ func (g *Graph) cloneEdge(from, to *Node, edge *Edge, cloneProperty func(string,
 		panic("to node is not in graph")
 	}
 	newEdge := &Edge{
-		from:       from,
-		to:         to,
-		label:      edge.label,
-		properties: edge.properties.clone(g, to.graph, cloneProperty),
-		id:         g.idBase,
+		from:  from,
+		to:    to,
+		label: edge.label,
+		id:    g.idBase,
+	}
+	if edge.properties != nil {
+		newEdge.properties = edge.properties.clone(g, to.graph, cloneProperty)
 	}
 	g.idBase++
 	g.allEdges.add(newEdge, 0)
@@ -518,7 +531,6 @@ func (g *Graph) setEdgeProperty(edge *Edge, key string, value interface{}) {
 	if edge.properties == nil {
 		edge.properties = make(properties)
 	}
-	edge.properties[g.stringTable.allocate(key)] = value
 	lookupKey, ok := g.stringTable.lookup(key)
 	if !ok {
 		lookupKey = g.stringTable.allocate(key)
