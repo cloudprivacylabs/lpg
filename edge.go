@@ -80,7 +80,7 @@ func (edge *Edge) GetProperty(key string) (interface{}, bool) {
 	return edge.getProperty(edge.GetGraph().stringTable, key)
 }
 
-func (edge *Edge) ForEachProperty(strTable stringTable, f func(string, interface{}) bool) bool {
+func (edge *Edge) ForEachProperty(f func(string, interface{}) bool) bool {
 	return edge.forEachProperty(edge.GetGraph().stringTable, f)
 }
 
