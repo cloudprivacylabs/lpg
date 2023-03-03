@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,9 +13,7 @@
 // limitations under the License.
 package lpg
 
-import (
 //	"fmt"
-)
 
 func logf(pattern string, args ...interface{}) {
 	//	fmt.Printf(pattern, args...)
@@ -172,6 +170,9 @@ func (processor *iterateConnectedEdges) Run(ctx *MatchContext, next matchAccumul
 		logf("IterateConnectedEdges testing len=%d %+v\n", len(path), processor.result)
 		ctx.recordStepResult(processor)
 		ctx.variablePathNode = endNode
+		// filterUniquePaths := func() {
+
+		// }
 		if err = next.Run(ctx); err != nil {
 			return false
 		}
@@ -179,6 +180,7 @@ func (processor *iterateConnectedEdges) Run(ctx *MatchContext, next matchAccumul
 		ctx.resetStepResult(processor)
 		return true
 	})
+
 	return err
 }
 

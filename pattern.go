@@ -14,6 +14,10 @@
 
 package lpg
 
+import (
+	sm "github.com/bserdar/slicemap"
+)
+
 type ErrNodeVariableExpected string
 
 func (e ErrNodeVariableExpected) Error() string {
@@ -558,7 +562,14 @@ type DefaultMatchAccumulator struct {
 }
 
 func (acc *DefaultMatchAccumulator) StoreResult(_ *MatchContext, path interface{}, symbols map[string]interface{}) {
-	acc.Paths = append(acc.Paths, path)
+	set := sm.SliceMap[*Edge, struct{}]{}
+	for _, p := range acc.Paths {
+		set.Put([]*Edge{p.([]*Edge)[0]}, struct{}{})
+	}
+	_, seen := set.Get(path.([]*Edge))
+	if !seen {
+		acc.Paths = append(acc.Paths, path)
+	}
 	acc.Symbols = append(acc.Symbols, symbols)
 }
 

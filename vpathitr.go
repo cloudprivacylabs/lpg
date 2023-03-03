@@ -19,9 +19,10 @@ package lpg
 // function. If the edge is accepted, it recursively descends and
 // calls accumulator.AddPath for each discovered path until AddPath
 // returns false
+// lineGraph. nodes[2], firstLeg=outgoing nodes[2].GetEdges(outgoing), edgeFilter = return true, dir=Outgoing, min=1, max=-1, accum=remember the path (add to slice)
+// make sure that accumulator did not receive the path of the form 2->2->2
 func CollectAllPaths(graph *Graph, fromNode *Node, firstLeg EdgeIterator, edgeFilter func(*Edge) bool, dir EdgeDir, min, max int, accumulator func([]*Edge, *Node) bool) {
 	var recurse func([]*Edge, *Node) bool
-
 	isLoop := func(node *Node, edges []*Edge) bool {
 		for _, e := range edges {
 			if e.GetFrom() == node {
@@ -29,13 +30,14 @@ func CollectAllPaths(graph *Graph, fromNode *Node, firstLeg EdgeIterator, edgeFi
 			}
 		}
 		if len(edges) > 0 {
+			// fmt.Println(edges[len(edges)-1].GetTo() == node)
+			// fmt.Println(edges[len(edges)-1].GetTo(), node)
 			return edges[len(edges)-1].GetTo() == node
 		}
 		return false
 	}
 
 	recurse = func(prefix []*Edge, lastNode *Node) bool {
-
 		var endNode *Node
 		switch dir {
 		case OutgoingEdge:
@@ -76,6 +78,10 @@ func CollectAllPaths(graph *Graph, fromNode *Node, firstLeg EdgeIterator, edgeFi
 		}
 		for itr.Next() {
 			edge := itr.Edge()
+			//
+			// if edge.GetFrom() == edge.GetTo() {
+			// 	return false
+			// }
 			if !recurse(append(prefix, edge), endNode) {
 				return false
 			}
