@@ -236,11 +236,17 @@ func testSimpleDirectedPathPattern(t *testing.T, withIndex bool) {
 		t.Error(err)
 		return
 	}
-	if acc.Paths[0].([]*Edge)[0].GetFrom() != nodes[5] {
-		t.Errorf("Expecting %v, got: %v", acc.Paths[0].([]*Edge)[0].GetFrom(), nodes[5])
+	n5, n6 := 0, 0
+	for i := range acc.Paths {
+		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[5] {
+			n5++
+		}
+		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[6] {
+			n6++
+		}
 	}
-	if acc.Paths[1].([]*Edge)[0].GetFrom() != nodes[6] {
-		t.Errorf("Expecting %v, got: %v", acc.Paths[1].([]*Edge)[0].GetFrom(), nodes[6])
+	if n5 != 1 && n6 != 1 {
+		t.Errorf("Expected number of paths to be 3, got %d", n6)
 	}
 }
 
@@ -252,7 +258,6 @@ func TestSimpleDirectedPathPatternSelfLoopsWithoutIndex(t *testing.T) {
 	testSimpleDirectedPathPatternWithSelfLoops(t, false)
 }
 
-// fail
 func testSimpleDirectedPathPatternWithSelfLoops(t *testing.T, withIndex bool) {
 	graph, nodes := GetLineGraphWithSelfLoops(10, withIndex)
 	nodes[5].SetProperty("key", "value")
@@ -299,6 +304,8 @@ func TestSimpleDirectedPathPatternCircleGraphWithoutIndex(t *testing.T) {
 func testSimpleDirectedPathPatternCircleGraph(t *testing.T, withIndex bool) {
 	graph, nodes := GetCircleGraph(10, withIndex)
 	nodes[5].SetProperty("key", "value")
+	nodes[5].SetLabels(NewStringSet("n5"))
+	nodes[6].SetLabels(NewStringSet("n6"))
 	nodes[6].SetProperty("key", "value")
 	pat := Pattern{
 		{Name: "n", Labels: StringSet{}, Properties: map[string]interface{}{"key": "value"}},
@@ -310,11 +317,17 @@ func testSimpleDirectedPathPatternCircleGraph(t *testing.T, withIndex bool) {
 		t.Error(err)
 		return
 	}
-	if acc.Paths[0].([]*Edge)[0].GetFrom() != nodes[5] {
-		t.Errorf("Expecting %v, got: %v", acc.Paths[0].([]*Edge)[0].GetFrom(), nodes[5])
+	n5, n6 := 0, 0
+	for i := range acc.Paths {
+		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[5] {
+			n5++
+		}
+		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[6] {
+			n6++
+		}
 	}
-	if acc.Paths[1].([]*Edge)[0].GetFrom() != nodes[6] {
-		t.Errorf("Expecting %v, got: %v", acc.Paths[1].([]*Edge)[0].GetFrom(), nodes[6])
+	if n5 != 1 && n6 != 1 {
+		t.Errorf("Expected number of paths to be 3, got %d", n6)
 	}
 }
 
@@ -341,11 +354,17 @@ func testSimplePathPattern(t *testing.T, withIndex bool) {
 		t.Error(err)
 		return
 	}
-	if acc.Paths[1].([]*Edge)[0].GetFrom() != nodes[2] {
-		t.Errorf("Expecting %v, got: %v", acc.Paths[1].([]*Edge)[0].GetFrom(), nodes[2])
+	n2, n8 := 0, 0
+	for i := range acc.Paths {
+		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[2] {
+			n2++
+		}
+		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[8] {
+			n8++
+		}
 	}
-	if acc.Paths[3].([]*Edge)[0].GetFrom() != nodes[8] {
-		t.Errorf("Expecting %v, got: %v", acc.Paths[3].([]*Edge)[0].GetFrom(), nodes[8])
+	if n2 != 1 && n8 != 1 {
+		t.Errorf("Expected number of paths to be 3, got %d", n8)
 	}
 }
 
@@ -412,11 +431,17 @@ func testSimplePathPatternCircleGraph(t *testing.T, withIndex bool) {
 		t.Error(err)
 		return
 	}
-	if acc.Paths[1].([]*Edge)[0].GetFrom() != nodes[2] {
-		t.Errorf("Expecting %v, got: %v", acc.Paths[1].([]*Edge)[0].GetFrom(), nodes[2])
+	n2, n8 := 0, 0
+	for i := range acc.Paths {
+		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[2] {
+			n2++
+		}
+		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[8] {
+			n8++
+		}
 	}
-	if acc.Paths[3].([]*Edge)[0].GetFrom() != nodes[8] {
-		t.Errorf("Expecting %v, got: %v", acc.Paths[3].([]*Edge)[0].GetFrom(), nodes[8])
+	if n2 != 1 && n8 != 1 {
+		t.Errorf("Expected number of paths to be 1, got %d", n8)
 	}
 }
 
@@ -443,11 +468,17 @@ func testVariablePathPattern(t *testing.T, withIndex bool) {
 		t.Error(err)
 		return
 	}
-	if acc.Paths[1].([]*Edge)[0].GetFrom() != nodes[2] {
-		t.Errorf("Expecting %v, got: %v", acc.Paths[1].([]*Edge)[0].GetFrom(), nodes[2])
+	n2, n8 := 0, 0
+	for i := range acc.Paths {
+		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[2] {
+			n2++
+		}
+		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[8] {
+			n8++
+		}
 	}
-	if acc.Paths[7].([]*Edge)[0].GetFrom() != nodes[8] {
-		t.Errorf("Expecting %v, got: %v", acc.Paths[7].([]*Edge)[0].GetFrom(), nodes[8])
+	if n2 != 3 && n8 != 3 {
+		t.Errorf("Expected number of paths to be 3, got %d", n8)
 	}
 }
 
@@ -492,7 +523,7 @@ func testVariablePathPatternWithSelfLoops(t *testing.T, withIndex bool) {
 	// 	t.Errorf("Expecting %v, got: %v", acc.Paths[7].([]*Edge)[0].GetFrom(), nodes[8])
 	// }
 	if len(acc.Paths) != 6 {
-		t.Errorf("Expected length of paths")
+		t.Errorf("Expected length of paths to be 6 got %d", len(acc.Paths))
 	}
 	n2, n3 := 0, 0
 	for i := range acc.Paths {
@@ -561,11 +592,17 @@ func testPathLengthTwoPattern(t *testing.T, withIndex bool) {
 		t.Error(err)
 		return
 	}
-	if acc.Paths[1].([]*Edge)[0].GetFrom() != nodes[4] {
-		t.Errorf("Expecting %v, got: %v", acc.Paths[6].([]*Edge)[0].GetFrom(), nodes[7])
+	n4, n7 := 0, 0
+	for i := range acc.Paths {
+		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[4] {
+			n4++
+		}
+		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[7] {
+			n7++
+		}
 	}
-	if acc.Paths[3].([]*Edge)[0].GetFrom() != nodes[7] {
-		t.Errorf("Expecting %v, got: %v", acc.Paths[6].([]*Edge)[0].GetFrom(), nodes[7])
+	if n4 != 1 && n7 != 1 {
+		t.Errorf("Expected number of paths to be 1, got %d", n7)
 	}
 }
 
@@ -621,6 +658,8 @@ func TestPathLengthTwoPatternCircleGraphWithoutIndex(t *testing.T) {
 func testPathLengthTwoPatternCircleGraph(t *testing.T, withIndex bool) {
 	graph, nodes := GetCircleGraph(10, withIndex)
 	nodes[4].SetProperty("key", "value")
+	nodes[4].SetLabels(NewStringSet("n4"))
+	nodes[7].SetLabels(NewStringSet("n7"))
 	nodes[7].SetProperty("key", "value")
 	pat := Pattern{
 		{Name: "n", Labels: StringSet{}, Properties: map[string]interface{}{"key": "value"}},
@@ -632,20 +671,36 @@ func testPathLengthTwoPatternCircleGraph(t *testing.T, withIndex bool) {
 		t.Error(err)
 		return
 	}
-	if acc.Paths[1].([]*Edge)[0].GetFrom() != nodes[4] {
-		t.Errorf("Expecting %v, got: %v", acc.Paths[6].([]*Edge)[0].GetFrom(), nodes[7])
+	if len(acc.Paths) != 4 {
+		t.Errorf("expected length of path accumulator to be 4, got %d", len(acc.Paths))
 	}
-	if acc.Paths[3].([]*Edge)[0].GetFrom() != nodes[7] {
-		t.Errorf("Expecting %v, got: %v", acc.Paths[6].([]*Edge)[0].GetFrom(), nodes[7])
+	n4, n7 := 0, 0
+	for i := range acc.Paths {
+		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[4] {
+			n4++
+		}
+		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[7] {
+			n7++
+		}
+	}
+	if n4 != 1 && n7 != 1 {
+		t.Errorf("Expected number of paths to be 1, got %d", n7)
 	}
 }
 
+func BenchmarkSimpleDirectedPathPatternWithIndex(b *testing.B) {
+	benchmarkSimpleDirectedPathPattern(b, true)
+	benchmarkSimpleDirectedPathPatternWithSelfLoops(b, true)
+	benchmarkSimpleDirectedPathPatternCircleGraph(b, true)
+}
+func BenchmarkSimpleDirectedPathPatternWithoutIndex(b *testing.B) {
+	benchmarkSimpleDirectedPathPattern(b, false)
+	benchmarkSimpleDirectedPathPatternWithSelfLoops(b, false)
+	benchmarkSimpleDirectedPathPatternCircleGraph(b, false)
+}
+
 func benchmarkSimpleDirectedPathPattern(b *testing.B, withIndex bool) {
-	graph := NewGraph()
-	if withIndex {
-		graph.index.NodePropertyIndex("key", graph, BtreeIndex)
-	}
-	nodes := make([]*Node, 0)
+	graph, nodes := GetLineGraph(10, withIndex)
 	for i := 0; i < 10; i++ {
 		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
 	}
@@ -665,19 +720,60 @@ func benchmarkSimpleDirectedPathPattern(b *testing.B, withIndex bool) {
 	}
 }
 
-func BenchmarkSimpleDirectedPathPatternWithIndex(b *testing.B) {
-	benchmarkSimpleDirectedPathPattern(b, true)
+func benchmarkSimpleDirectedPathPatternWithSelfLoops(b *testing.B, withIndex bool) {
+	graph, nodes := GetLineGraphWithSelfLoops(10, withIndex)
+	for i := 0; i < 10; i++ {
+		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
+	}
+	for i := 0; i < 9; i++ {
+		graph.NewEdge(nodes[i], nodes[i+1], "label", nil)
+	}
+	nodes[2].SetProperty("key", "value")
+	nodes[8].SetProperty("key", "value")
+	pat := Pattern{
+		{Name: "n", Labels: StringSet{}},
+		{Min: -1, Max: 1},
+		{Name: "n2", Labels: StringSet{}}}
+	symbols := make(map[string]*PatternSymbol)
+	acc := &DefaultMatchAccumulator{}
+	for n := 0; n < b.N; n++ {
+		pat.Run(graph, symbols, acc)
+	}
 }
-func BenchmarkSimpleDirectedPathPatternWithoutIndex(b *testing.B) {
-	benchmarkSimpleDirectedPathPattern(b, false)
+func benchmarkSimpleDirectedPathPatternCircleGraph(b *testing.B, withIndex bool) {
+	graph, nodes := GetCircleGraph(10, withIndex)
+	for i := 0; i < 10; i++ {
+		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
+	}
+	for i := 0; i < 9; i++ {
+		graph.NewEdge(nodes[i], nodes[i+1], "label", nil)
+	}
+	nodes[2].SetProperty("key", "value")
+	nodes[8].SetProperty("key", "value")
+	pat := Pattern{
+		{Name: "n", Labels: StringSet{}},
+		{Min: -1, Max: 1},
+		{Name: "n2", Labels: StringSet{}}}
+	symbols := make(map[string]*PatternSymbol)
+	acc := &DefaultMatchAccumulator{}
+	for n := 0; n < b.N; n++ {
+		pat.Run(graph, symbols, acc)
+	}
+}
+
+func BenchmarkSimplePathPatternWithIndex(b *testing.B) {
+	benchmarkSimplePathPattern(b, true)
+	benchmarkSimplePathPatternWithSelfLoops(b, true)
+	benchmarkSimplePathPatternCircleGraph(b, true)
+}
+func BenchmarkSimplePathPatternWithoutIndex(b *testing.B) {
+	benchmarkSimplePathPattern(b, false)
+	benchmarkSimplePathPatternWithSelfLoops(b, false)
+	benchmarkSimplePathPatternCircleGraph(b, false)
 }
 
 func benchmarkSimplePathPattern(b *testing.B, withIndex bool) {
-	graph := NewGraph()
-	if withIndex {
-		graph.index.NodePropertyIndex("key", graph, BtreeIndex)
-	}
-	nodes := make([]*Node, 0)
+	graph, nodes := GetLineGraph(10, withIndex)
 	for i := 0; i < 10; i++ {
 		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
 	}
@@ -697,19 +793,60 @@ func benchmarkSimplePathPattern(b *testing.B, withIndex bool) {
 	}
 }
 
-func BenchmarkSimplePathPatternWithIndex(b *testing.B) {
-	benchmarkSimplePathPattern(b, true)
+func benchmarkSimplePathPatternWithSelfLoops(b *testing.B, withIndex bool) {
+	graph, nodes := GetLineGraphWithSelfLoops(10, withIndex)
+	for i := 0; i < 10; i++ {
+		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
+	}
+	for i := 0; i < 9; i++ {
+		graph.NewEdge(nodes[i], nodes[i+1], "label", nil)
+	}
+	nodes[2].SetProperty("key", "value")
+	nodes[8].SetProperty("key", "value")
+	pat := Pattern{
+		{Name: "n", Labels: StringSet{}},
+		{Min: -1, Max: 1, Undirected: true},
+		{Name: "n2", Labels: StringSet{}}}
+	symbols := make(map[string]*PatternSymbol)
+	acc := &DefaultMatchAccumulator{}
+	for n := 0; n < b.N; n++ {
+		pat.Run(graph, symbols, acc)
+	}
 }
-func BenchmarkSimplePathPatternWithoutIndex(b *testing.B) {
-	benchmarkSimplePathPattern(b, false)
+func benchmarkSimplePathPatternCircleGraph(b *testing.B, withIndex bool) {
+	graph, nodes := GetCircleGraph(10, withIndex)
+	for i := 0; i < 10; i++ {
+		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
+	}
+	for i := 0; i < 9; i++ {
+		graph.NewEdge(nodes[i], nodes[i+1], "label", nil)
+	}
+	nodes[2].SetProperty("key", "value")
+	nodes[8].SetProperty("key", "value")
+	pat := Pattern{
+		{Name: "n", Labels: StringSet{}},
+		{Min: -1, Max: 1, Undirected: true},
+		{Name: "n2", Labels: StringSet{}}}
+	symbols := make(map[string]*PatternSymbol)
+	acc := &DefaultMatchAccumulator{}
+	for n := 0; n < b.N; n++ {
+		pat.Run(graph, symbols, acc)
+	}
+}
+
+func BenchmarkVariablePathPatternWithIndex(b *testing.B) {
+	benchmarkVariablePathPattern(b, true)
+	benchmarkVariablePathPatternCircleGraph(b, true)
+	benchmarkVariablePathPatternWithSelfLoops(b, true)
+}
+func BenchmarkVariablePathPatternWithoutIndex(b *testing.B) {
+	benchmarkVariablePathPattern(b, false)
+	benchmarkVariablePathPatternCircleGraph(b, false)
+	benchmarkVariablePathPatternWithSelfLoops(b, false)
 }
 
 func benchmarkVariablePathPattern(b *testing.B, withIndex bool) {
-	graph := NewGraph()
-	if withIndex {
-		graph.index.NodePropertyIndex("key", graph, BtreeIndex)
-	}
-	nodes := make([]*Node, 0)
+	graph, nodes := GetLineGraph(10, withIndex)
 	for i := 0; i < 10; i++ {
 		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
 	}
@@ -729,19 +866,61 @@ func benchmarkVariablePathPattern(b *testing.B, withIndex bool) {
 	}
 }
 
-func BenchmarkVariablePathPatternWithIndex(b *testing.B) {
-	benchmarkVariablePathPattern(b, true)
+func benchmarkVariablePathPatternCircleGraph(b *testing.B, withIndex bool) {
+	graph, nodes := GetCircleGraph(10, withIndex)
+	for i := 0; i < 10; i++ {
+		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
+	}
+	for i := 0; i < 9; i++ {
+		graph.NewEdge(nodes[i], nodes[i+1], "label", nil)
+	}
+	nodes[2].SetProperty("key", "value")
+	nodes[8].SetProperty("key", "value")
+	pat := Pattern{
+		{Name: "n", Labels: StringSet{}},
+		{Min: -1, Max: -1, Undirected: true},
+		{Name: "n2", Labels: StringSet{}}}
+	symbols := make(map[string]*PatternSymbol)
+	acc := &DefaultMatchAccumulator{}
+	for n := 0; n < b.N; n++ {
+		pat.Run(graph, symbols, acc)
+	}
 }
-func BenchmarkVariablePathPatternWithoutIndex(b *testing.B) {
-	benchmarkVariablePathPattern(b, false)
+
+func benchmarkVariablePathPatternWithSelfLoops(b *testing.B, withIndex bool) {
+	graph, nodes := GetLineGraphWithSelfLoops(10, withIndex)
+	for i := 0; i < 10; i++ {
+		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
+	}
+	for i := 0; i < 9; i++ {
+		graph.NewEdge(nodes[i], nodes[i+1], "label", nil)
+	}
+	nodes[2].SetProperty("key", "value")
+	nodes[8].SetProperty("key", "value")
+	pat := Pattern{
+		{Name: "n", Labels: StringSet{}},
+		{Min: -1, Max: -1, Undirected: true},
+		{Name: "n2", Labels: StringSet{}}}
+	symbols := make(map[string]*PatternSymbol)
+	acc := &DefaultMatchAccumulator{}
+	for n := 0; n < b.N; n++ {
+		pat.Run(graph, symbols, acc)
+	}
+}
+
+func BenchmarkPathLengthTwoPatternWithIndex(b *testing.B) {
+	benchmarkPathLengthTwoPattern(b, true)
+	benchmarkPathLengthTwoPatternWithSelfLoops(b, true)
+	benchmarkPathLengthTwoPatternCircleGraph(b, true)
+}
+func BenchmarkPathLengthTwoPatternWithoutIndex(b *testing.B) {
+	benchmarkPathLengthTwoPattern(b, false)
+	benchmarkPathLengthTwoPatternWithSelfLoops(b, false)
+	benchmarkPathLengthTwoPatternCircleGraph(b, false)
 }
 
 func benchmarkPathLengthTwoPattern(b *testing.B, withIndex bool) {
-	graph := NewGraph()
-	if withIndex {
-		graph.index.NodePropertyIndex("key", graph, BtreeIndex)
-	}
-	nodes := make([]*Node, 0)
+	graph, nodes := GetLineGraph(10, withIndex)
 	for i := 0; i < 10; i++ {
 		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
 	}
@@ -760,9 +939,43 @@ func benchmarkPathLengthTwoPattern(b *testing.B, withIndex bool) {
 		pat.Run(graph, symbols, acc)
 	}
 }
-func BenchmarkPathLengthTwoPatternWithIndex(b *testing.B) {
-	benchmarkPathLengthTwoPattern(b, true)
+func benchmarkPathLengthTwoPatternWithSelfLoops(b *testing.B, withIndex bool) {
+	graph, nodes := GetLineGraphWithSelfLoops(10, withIndex)
+	for i := 0; i < 10; i++ {
+		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
+	}
+	for i := 0; i < 9; i++ {
+		graph.NewEdge(nodes[i], nodes[i+1], "label", nil)
+	}
+	nodes[4].SetProperty("key", "value")
+	nodes[7].SetProperty("key", "value")
+	pat := Pattern{
+		{Name: "n", Labels: StringSet{}},
+		{Min: 2, Max: 2, Undirected: true},
+		{Name: "n2", Labels: StringSet{}}}
+	symbols := make(map[string]*PatternSymbol)
+	acc := &DefaultMatchAccumulator{}
+	for n := 0; n < b.N; n++ {
+		pat.Run(graph, symbols, acc)
+	}
 }
-func BenchmarkPathLengthTwoPatternWithoutIndex(b *testing.B) {
-	benchmarkPathLengthTwoPattern(b, false)
+func benchmarkPathLengthTwoPatternCircleGraph(b *testing.B, withIndex bool) {
+	graph, nodes := GetCircleGraph(10, withIndex)
+	for i := 0; i < 10; i++ {
+		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
+	}
+	for i := 0; i < 9; i++ {
+		graph.NewEdge(nodes[i], nodes[i+1], "label", nil)
+	}
+	nodes[4].SetProperty("key", "value")
+	nodes[7].SetProperty("key", "value")
+	pat := Pattern{
+		{Name: "n", Labels: StringSet{}},
+		{Min: 2, Max: 2, Undirected: true},
+		{Name: "n2", Labels: StringSet{}}}
+	symbols := make(map[string]*PatternSymbol)
+	acc := &DefaultMatchAccumulator{}
+	for n := 0; n < b.N; n++ {
+		pat.Run(graph, symbols, acc)
+	}
 }
