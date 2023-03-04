@@ -14,28 +14,63 @@
 
 package lpg
 
+import (
+	"reflect"
+)
+
 // CollectAllPaths iterates the variable length paths that have the
 // edges in firstLeg. For each edge, it calls the edgeFilter
 // function. If the edge is accepted, it recursively descends and
 // calls accumulator.AddPath for each discovered path until AddPath
 // returns false
-// lineGraph. nodes[2], firstLeg=outgoing nodes[2].GetEdges(outgoing), edgeFilter = return true, dir=Outgoing, min=1, max=-1, accum=remember the path (add to slice)
-// make sure that accumulator did not receive the path of the form 2->2->2
+
+// 4 - 7 - 7 - 8 - 3 - 3 - 2 - 2 - 1
+// 4 - 7 - 7 - 8 - 3 - 4 - 4 - 7 - 8 - 3 - 3 - 2 - 2 - 1
+// 4 - 7 - 7 - 8 - 3 - 3 - 2 - 2 - 1 - 3 - 4 - 4 - 7 - 8
+// 3 - 3 - 2 - 2 - 1
 func CollectAllPaths(graph *Graph, fromNode *Node, firstLeg EdgeIterator, edgeFilter func(*Edge) bool, dir EdgeDir, min, max int, accumulator func([]*Edge, *Node) bool) {
 	var recurse func([]*Edge, *Node) bool
-	isLoop := func(node *Node, edges []*Edge) bool {
-		for _, e := range edges {
-			if e.GetFrom() == node {
-				return true
-			}
+	// return if all edges of p2 exist in p1
+	prefixPath := func(p1, p2 []*Edge) bool {
+		if len(p2) == 0 {
+			return false
 		}
-		if len(edges) > 0 {
-			// fmt.Println(edges[len(edges)-1].GetTo() == node)
-			// fmt.Println(edges[len(edges)-1].GetTo(), node)
-			return edges[len(edges)-1].GetTo() == node
+	path1Start:
+		for path1Idx, e1 := range p1 {
+			for _, e2 := range p2 {
+				if e2 == e1 {
+					if len(p1[path1Idx:]) < len(p2) {
+						return false
+					}
+					if !reflect.DeepEqual(p2, p1[path1Idx:path1Idx+len(p2)]) {
+						continue path1Start
+					}
+					return true
+				}
+			}
 		}
 		return false
 	}
+	isLoop := func(nextEdge *Edge, path []*Edge) bool {
+		cmpPath := make([]*Edge, 0)
+		for _, step := range path {
+			if nextEdge.GetTo() == step.GetFrom() {
+				cmpPath = append(cmpPath, nextEdge)
+			}
+		}
+		return prefixPath(path, cmpPath)
+	}
+	// isLoop := func(node *Node, edges []*Edge) bool {
+	// 	for _, e := range edges {
+	// 		if e.GetFrom() == node {
+	// 			return true
+	// 		}
+	// 	}
+	// 	if len(edges) > 0 {
+	// 		return edges[len(edges)-1].GetTo() == node
+	// 	}
+	// 	return false
+	// }
 
 	recurse = func(prefix []*Edge, lastNode *Node) bool {
 		var endNode *Node
@@ -65,9 +100,9 @@ func CollectAllPaths(graph *Graph, fromNode *Node, firstLeg EdgeIterator, edgeFi
 			return true
 		}
 
-		if isLoop(endNode, prefix[:len(prefix)-1]) {
-			return true
-		}
+		// if isLoop(endNode, prefix[:len(prefix)-1]) {
+		// 	return true
+		// }
 		itr := edgeIterator{
 			&filterIterator{
 				itr: endNode.GetEdges(dir),
@@ -78,8 +113,10 @@ func CollectAllPaths(graph *Graph, fromNode *Node, firstLeg EdgeIterator, edgeFi
 		}
 		for itr.Next() {
 			edge := itr.Edge()
-			//
-			// if edge.GetFrom() == edge.GetTo() {
+			if isLoop(edge, prefix) {
+				return false
+			}
+			// if isLoop(edge, prefix[:len(prefix)-1]) {
 			// 	return false
 			// }
 			if !recurse(append(prefix, edge), endNode) {

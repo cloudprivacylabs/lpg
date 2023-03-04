@@ -561,12 +561,20 @@ func testVariablePathPatternCircleGraph(t *testing.T, withIndex bool) {
 	}
 	// 16 paths
 	// 4, 5, 6, 7
-	if acc.Paths[2].([]*Edge)[0].GetFrom() != nodes[2] {
-		t.Errorf("Expecting %v, got: %v", acc.Paths[1].([]*Edge)[0].GetFrom(), nodes[2])
+	if len(acc.Paths) != 6 {
+		t.Errorf("Expected length of paths to be 6 got %d", len(acc.Paths))
 	}
-	// 12, 13, 14, 15
-	if acc.Paths[7].([]*Edge)[0].GetFrom() != nodes[8] {
-		t.Errorf("Expecting %v, got: %v", acc.Paths[7].([]*Edge)[0].GetFrom(), nodes[8])
+	n2, n8 := 0, 0
+	for i := range acc.Paths {
+		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[2] {
+			n2++
+		}
+		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[8] {
+			n8++
+		}
+	}
+	if n2 != 3 && n8 != 3 {
+		t.Errorf("Expected number of paths to be 3, got %d", n8)
 	}
 }
 
