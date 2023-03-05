@@ -14,9 +14,7 @@
 
 package lpg
 
-import (
-	"reflect"
-)
+import "reflect"
 
 // CollectAllPaths iterates the variable length paths that have the
 // edges in firstLeg. For each edge, it calls the edgeFilter
@@ -51,11 +49,32 @@ func CollectAllPaths(graph *Graph, fromNode *Node, firstLeg EdgeIterator, edgeFi
 		}
 		return false
 	}
+	// prefixPath := func(p1, p2 []*Edge) bool {
+	// 	if len(p2) == 0 {
+	// 		return false
+	// 	}
+	// 	if len(p2) > len(p1) {
+	// 		return false
+	// 	}
+	// 	for path2Idx, e2 := range p2 {
+	// 		if e2 != p1[path2Idx] {
+	// 			return false
+	// 		}
+	// 	}
+	// 	return true
+	// }
 	isLoop := func(nextEdge *Edge, path []*Edge) bool {
 		cmpPath := make([]*Edge, 0)
-		for _, step := range path {
-			if nextEdge.GetTo() == step.GetFrom() {
-				cmpPath = append(cmpPath, nextEdge)
+		// for _, step := range path {
+		// 	if nextEdge.GetTo() == step.GetFrom() {
+		// 		cmpPath = append(cmpPath, nextEdge)
+		// 	}
+		// }
+		for i := 0; i < len(path); i++ {
+			if i < len(path)-2 {
+				if nextEdge.GetTo() == path[i+2].GetFrom() {
+					cmpPath = append(cmpPath, nextEdge)
+				}
 			}
 		}
 		return prefixPath(path, cmpPath)
