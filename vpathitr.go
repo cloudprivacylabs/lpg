@@ -14,71 +14,43 @@
 
 package lpg
 
-import "reflect"
-
 // CollectAllPaths iterates the variable length paths that have the
 // edges in firstLeg. For each edge, it calls the edgeFilter
 // function. If the edge is accepted, it recursively descends and
 // calls accumulator.AddPath for each discovered path until AddPath
 // returns false
-
-// 4 - 7 - 7 - 8 - 3 - 3 - 2 - 2 - 1
-// 4 - 7 - 7 - 8 - 3 - 4 - 4 - 7 - 8 - 3 - 3 - 2 - 2 - 1
-// 4 - 7 - 7 - 8 - 3 - 3 - 2 - 2 - 1 - 3 - 4 - 4 - 7 - 8
-// 3 - 3 - 2 - 2 - 1
 func CollectAllPaths(graph *Graph, fromNode *Node, firstLeg EdgeIterator, edgeFilter func(*Edge) bool, dir EdgeDir, min, max int, accumulator func([]*Edge, *Node) bool) {
 	var recurse func([]*Edge, *Node) bool
-	// return if all edges of p2 exist in p1
-	prefixPath := func(p1, p2 []*Edge) bool {
-		if len(p2) == 0 {
-			return false
-		}
-	path1Start:
-		for path1Idx, e1 := range p1 {
-			for _, e2 := range p2 {
-				if e2 == e1 {
-					if len(p1[path1Idx:]) < len(p2) {
-						return false
-					}
-					if !reflect.DeepEqual(p2, p1[path1Idx:path1Idx+len(p2)]) {
-						continue path1Start
-					}
-					return true
-				}
-			}
-		}
-		return false
+	isLoop := func(path Path) {
+
 	}
-	// prefixPath := func(p1, p2 []*Edge) bool {
-	// 	if len(p2) == 0 {
-	// 		return false
-	// 	}
-	// 	if len(p2) > len(p1) {
-	// 		return false
-	// 	}
-	// 	for path2Idx, e2 := range p2 {
-	// 		if e2 != p1[path2Idx] {
-	// 			return false
+	// isLoop := func(path []PathElement) bool {
+	// 	// cmpPath := make([]*Edge, 0)
+	// 	var lastOccurrenceIdx int
+	// 	var loopCount int
+	// 	for i := 0; i < len(path); i++ {
+	// 		// if nextNode == path[i].GetFrom()
+	// 		if nextEdge.GetTo() == path[i].GetFrom() {
+	// 			lastOccurrenceIdx = i
+	// 			loopCount++
+	// 			// cmpPath = append(cmpPath, nextEdge)
 	// 		}
 	// 	}
-	// 	return true
+	// 	if loopCount < 2 {
+	// 		return false
+	// 	}
+	// 	for i := 0; i < len(path); i++ {
+	// 		if nextEdge.GetTo() == path[i].GetFrom() {
+	// 			if i == lastOccurrenceIdx {
+	// 				return false
+	// 			}
+	// 			if prefixPath(path[i:], append(path[lastOccurrenceIdx:], nextEdge)) {
+	// 				return true
+	// 			}
+	// 		}
+	// 	}
+	// 	return false
 	// }
-	isLoop := func(nextEdge *Edge, path []*Edge) bool {
-		cmpPath := make([]*Edge, 0)
-		// for _, step := range path {
-		// 	if nextEdge.GetTo() == step.GetFrom() {
-		// 		cmpPath = append(cmpPath, nextEdge)
-		// 	}
-		// }
-		for i := 0; i < len(path); i++ {
-			if i < len(path)-2 {
-				if nextEdge.GetTo() == path[i+2].GetFrom() {
-					cmpPath = append(cmpPath, nextEdge)
-				}
-			}
-		}
-		return prefixPath(path, cmpPath)
-	}
 	// isLoop := func(node *Node, edges []*Edge) bool {
 	// 	for _, e := range edges {
 	// 		if e.GetFrom() == node {
@@ -93,17 +65,21 @@ func CollectAllPaths(graph *Graph, fromNode *Node, firstLeg EdgeIterator, edgeFi
 
 	recurse = func(prefix []*Edge, lastNode *Node) bool {
 		var endNode *Node
+		// var endEdge *Edge
 		switch dir {
 		case OutgoingEdge:
 			endNode = prefix[len(prefix)-1].GetTo()
+			// endEdge = prefix[len(prefix)-1]
 		case IncomingEdge:
 			endNode = prefix[len(prefix)-1].GetFrom()
+			// endEdge = prefix[len(prefix)-1]
 		case AnyEdge:
 			if prefix[len(prefix)-1].GetTo() == lastNode {
 				endNode = prefix[len(prefix)-1].GetFrom()
 			} else {
 				endNode = prefix[len(prefix)-1].GetTo()
 			}
+			// endEdge = prefix[len(prefix)-1]
 		}
 
 		if (min == -1 || len(prefix) >= min) && (max == -1 || len(prefix) <= max) {
@@ -119,7 +95,7 @@ func CollectAllPaths(graph *Graph, fromNode *Node, firstLeg EdgeIterator, edgeFi
 			return true
 		}
 
-		// if isLoop(endNode, prefix[:len(prefix)-1]) {
+		// if isLoop(endEdge, prefix[:len(prefix)-1], endNode) {
 		// 	return true
 		// }
 		itr := edgeIterator{
@@ -132,12 +108,6 @@ func CollectAllPaths(graph *Graph, fromNode *Node, firstLeg EdgeIterator, edgeFi
 		}
 		for itr.Next() {
 			edge := itr.Edge()
-			if isLoop(edge, prefix) {
-				return false
-			}
-			// if isLoop(edge, prefix[:len(prefix)-1]) {
-			// 	return false
-			// }
 			if !recurse(append(prefix, edge), endNode) {
 				return false
 			}

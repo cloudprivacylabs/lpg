@@ -17,10 +17,12 @@ package lpg
 // A Path can be a node, or node-edge-node...-edge-node sequence.
 type Path struct {
 	only *Node
-	// forward path, fwd[i] -> fwd[i+1]
-	fwd []*Edge
-	// backward path, bk[i+1]->bk[i]
-	bk []*Edge
+	path []PathElement
+}
+
+type PathElement struct {
+	Edge      *Edge
+	isReverse bool
 }
 
 // PathFromNode creates a path containing a single node
@@ -37,30 +39,22 @@ func PathFromNode(node *Node) *Path {
 func (p *Path) Clone() *Path {
 	ret := Path{
 		only: p.only,
-		fwd:  make([]*Edge, len(p.fwd)+len(p.bk)),
+		path: make([]PathElement, len(p.path)),
 	}
-	j := 0
-	for i := len(p.bk) - 1; i >= 0; i-- {
-		ret.fwd[j] = p.bk[i]
-		j++
-	}
-	copy(ret.fwd[j:], p.fwd)
+	copy(ret.path, p.path)
 	return &ret
 }
 
 // SetOnlyNode sets the path to a single node
 func (p *Path) SetOnlyNode(node *Node) *Path {
 	p.only = node
-	p.fwd = nil
-	p.bk = nil
 	return p
 }
 
 // Clear the path
 func (p *Path) Clear() *Path {
 	p.only = nil
-	p.fwd = nil
-	p.bk = nil
+	p.path = make([]PathElement, 0)
 	return p
 }
 
@@ -69,11 +63,8 @@ func (p *Path) Last() *Node {
 	if p.only != nil {
 		return p.only
 	}
-	if len(p.fwd) != 0 {
-		return p.fwd[len(p.fwd)-1].GetTo()
-	}
-	if len(p.bk) != 0 {
-		return p.bk[0].GetTo()
+	if len(p.path) != 0 {
+		return p.path[len(p.path)-1].Edge.GetTo()
 	}
 	return nil
 }
@@ -83,55 +74,44 @@ func (p *Path) First() *Node {
 	if p.only != nil {
 		return p.only
 	}
-	if len(p.bk) != 0 {
-		return p.bk[len(p.bk)-1].GetFrom()
-	}
-	if len(p.fwd) != 0 {
-		return p.fwd[0].GetFrom()
+	if len(p.path) != 0 {
+		return p.path[0].Edge.GetFrom()
 	}
 	return nil
 }
 
+func (p *Path) GetSourceNode() *Node {
+	if p.path[0].isReverse {
+		return p.path[0].Edge.GetTo()
+	}
+	return p.path[0].Edge.GetFrom()
+}
+
+func (p *Path) GetTargetNode() *Node {
+	if p.path[1].isReverse {
+		return p.path[1].Edge.GetFrom()
+	}
+	return p.path[1].Edge.GetTo()
+}
+
 // Append an edge to the end of the path. The edge must be outgoing from the last node of the path
-func (p *Path) Append(edge ...*Edge) *Path {
+func (p *Path) Append(path []PathElement) *Path {
 	last := p.Last()
-	if last != nil && last != edge[0].GetFrom() {
+	if last != nil && last != path[0].Edge.GetFrom() {
 		panic("Appended edge is disconnected from path")
 	}
 	if p.only != nil {
 		p.only = nil
 	}
-	for i := range edge {
+	for i := range path {
 		if i == 0 {
 			continue
 		}
-		if edge[i].GetFrom() != edge[i-1].GetTo() {
+		if path[i].Edge.GetFrom() != path[i-1].Edge.GetTo() {
 			panic("Appended edges are disconnected")
 		}
 	}
-	p.fwd = append(p.fwd, edge...)
-	return p
-}
-
-// Prepend an edge to tbe beginning of the path. The edge must be
-// incoming to the first node of the path
-func (p *Path) Prepend(edge ...*Edge) *Path {
-	first := p.First()
-	if first != nil && first != edge[0].GetTo() {
-		panic("Prepended edge is disconnected from path")
-	}
-	if p.only != nil {
-		p.only = nil
-	}
-	for i := range edge {
-		if i == 0 {
-			continue
-		}
-		if edge[i].GetTo() != edge[i-1].GetFrom() {
-			panic("Prepended edges are disconnected")
-		}
-	}
-	p.bk = append(p.bk, edge...)
+	p.path = append(p.path, path...)
 	return p
 }
 
@@ -140,11 +120,10 @@ func (p *Path) GetEdge(n int) *Edge {
 	if p.only != nil {
 		return nil
 	}
-	if n < len(p.bk) {
-		return p.bk[len(p.bk)-1-n]
+	if n < len(p.path) {
+		return p.path[n].Edge
 	}
-	n -= len(p.bk)
-	return p.fwd[n]
+	return nil
 }
 
 // GetNode returns the nth node
@@ -163,6 +142,29 @@ func (p *Path) GetNode(n int) *Node {
 	return e.GetTo()
 }
 
+// return if all edges of p2 exist in p1
+func (p *Path) IsPrefix(p1, p2 []PathElement) bool {
+	if len(p2) == 0 {
+		return false
+	}
+	if len(p2) > len(p1) {
+		return false
+	}
+	for path2Idx, e2 := range p2 {
+		if e2 != p1[path2Idx] {
+			return false
+		}
+	}
+	return true
+}
+
+func (p *Path) Slice(startNodeIndex, endNodeIndex int) []PathElement {
+	if startNodeIndex > 0 && startNodeIndex < len(p.path) && endNodeIndex > startNodeIndex && endNodeIndex <= len(p.path) {
+		return p.path[startNodeIndex : endNodeIndex+1]
+	}
+	return nil
+}
+
 // RemoveLast removes the last edge from the path. If the path has one
 // edge, the path becomes a single node containing the source. If the
 // path has only a node, path becomes empty
@@ -171,26 +173,30 @@ func (p *Path) RemoveLast() *Path {
 		p.only = nil
 		return p
 	}
-	if len(p.fwd)+len(p.bk) == 1 {
-		if len(p.fwd) == 1 {
-			p.only = p.fwd[0].GetFrom()
-			p.fwd = p.fwd[:0]
-		} else {
-			p.only = p.bk[0].GetTo()
-			p.bk = p.bk[:0]
-		}
-		return p
+	if len(p.path) > 0 {
+		p.path[len(p.path)-1].Edge.Remove()
+		p.path = p.path[:len(p.path)-1]
 	}
-	if len(p.fwd) != 0 {
-		p.fwd = p.fwd[:len(p.fwd)-1]
-		return p
-	}
-	if len(p.bk) != 0 {
-		p.fwd = make([]*Edge, len(p.bk))
-		for i := range p.bk {
-			p.fwd[len(p.fwd)-1-i] = p.bk[i]
-		}
-	}
+	// if len(p.fwd)+len(p.bk) == 1 {
+	// 	if len(p.fwd) == 1 {
+	// 		p.only = p.fwd[0].GetFrom()
+	// 		p.fwd = p.fwd[:0]
+	// 	} else {
+	// 		p.only = p.bk[0].GetTo()
+	// 		p.bk = p.bk[:0]
+	// 	}
+	// 	return p
+	// }
+	// if len(p.fwd) != 0 {
+	// 	p.fwd = p.fwd[:len(p.fwd)-1]
+	// 	return p
+	// }
+	// if len(p.bk) != 0 {
+	// 	p.fwd = make([]*Edge, len(p.bk))
+	// 	for i := range p.bk {
+	// 		p.fwd[len(p.fwd)-1-i] = p.bk[i]
+	// 	}
+	// }
 	return p
 }
 
@@ -201,28 +207,32 @@ func (p *Path) RemoveFirst() *Path {
 		p.only = nil
 		return p
 	}
-	if len(p.fwd)+len(p.bk) == 1 {
-		if len(p.fwd) == 1 {
-			p.only = p.fwd[0].GetTo()
-			p.fwd = p.fwd[:0]
-		} else {
-			p.only = p.bk[0].GetFrom()
-			p.bk = p.bk[:0]
-		}
-		return p
+	if len(p.path) > 0 {
+		p.path[0].Edge.Remove()
+		p.path = p.path[1:]
 	}
-	if len(p.bk) != 0 {
-		p.bk = p.bk[:len(p.bk)-1]
-		return p
-	}
-	if len(p.fwd) != 0 {
-		p.fwd = p.fwd[1:]
-	}
+	// if len(p.fwd)+len(p.bk) == 1 {
+	// 	if len(p.fwd) == 1 {
+	// 		p.only = p.fwd[0].GetTo()
+	// 		p.fwd = p.fwd[:0]
+	// 	} else {
+	// 		p.only = p.bk[0].GetFrom()
+	// 		p.bk = p.bk[:0]
+	// 	}
+	// 	return p
+	// }
+	// if len(p.bk) != 0 {
+	// 	p.bk = p.bk[:len(p.bk)-1]
+	// 	return p
+	// }
+	// if len(p.fwd) != 0 {
+	// 	p.fwd = p.fwd[1:]
+	// }
 	return p
 }
 
 func (p *Path) NumEdges() int {
-	return len(p.bk) + len(p.fwd)
+	return len(p.path)
 }
 
 func (p *Path) NumNodes() int {
@@ -237,5 +247,5 @@ func (p *Path) NumNodes() int {
 }
 
 func (p *Path) IsEmpty() bool {
-	return p.only == nil && len(p.bk) == 0 && len(p.fwd) == 0
+	return p.only == nil && len(p.path) == 0
 }
