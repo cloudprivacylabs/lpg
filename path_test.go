@@ -16,7 +16,9 @@ package lpg
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
+	"reflect"
 	"testing"
 )
 
@@ -60,5 +62,79 @@ func TestPathBasic(t *testing.T) {
 	if cursor.GetPath().NumEdges() != 1 {
 		t.Errorf("Wrong numEdges: %v", cursor.GetPath())
 	}
+}
+
+func TestPathSlice(t *testing.T) {
+	f, err := os.Open("testdata/g1.json")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	target := NewGraph()
+	err = JSON{}.Decode(target, json.NewDecoder(f))
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	path := Path{path: make([]PathElement, 0)}
+	for itr := target.GetEdges(); itr.Next(); {
+		path.path = append(path.path, PathElement{
+			Edge: itr.Edge(),
+		})
+	}
+	ps := []struct {
+		start    int
+		end      int
+		expected Path
+	}{
+		{
+			start:    0,
+			end:      -1,
+			expected: Path{path: path.path},
+		},
+		{
+			start:    0,
+			end:      1,
+			expected: Path{path: path.path[0:0]},
+		},
+	}
+	for _, sp := range ps {
+		if !reflect.DeepEqual(sp.expected, path.Slice(sp.start, sp.end)) {
+			t.Errorf("expected %v, got: %v", sp.expected, path.Slice(sp.start, sp.end))
+		}
+	}
+}
+
+func TestPathHasPrefix(t *testing.T) {
 
 }
+
+func TestAppend(t *testing.T) {
+	f, err := os.Open("testdata/g1.json")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	target := NewGraph()
+	err = JSON{}.Decode(target, json.NewDecoder(f))
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	path := Path{path: make([]PathElement, 0)}
+	for itr := target.GetEdges(); itr.Next(); {
+		path.path = append(path.path, PathElement{
+			Edge: itr.Edge(),
+		})
+	}
+	cp := make([]PathElement, len(path.path))
+	copy(cp, path.path)
+	fmt.Println(cp)
+	fmt.Println(path.path)
+	path.Append(cp...)
+	t.Error()
+}
+
+// test
+// slice
+// hasprefix

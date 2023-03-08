@@ -14,6 +14,11 @@
 
 package lpg
 
+import (
+	"fmt"
+	"strings"
+)
+
 // A Path can be a node, or node-edge-node...-edge-node sequence.
 type Path struct {
 	only *Node
@@ -21,8 +26,20 @@ type Path struct {
 }
 
 type PathElement struct {
-	Edge      *Edge
-	isReverse bool
+	Edge    *Edge
+	Reverse bool
+}
+
+func NewPathFromElements(elements ...PathElement) *Path {
+	return &Path{path: elements}
+}
+
+func NewPathElementsFromEdges(edges []*Edge) []PathElement {
+	pe := make([]PathElement, len(edges))
+	for idx, e := range edges {
+		pe[idx].Edge = e
+	}
+	return pe
 }
 
 // PathFromNode creates a path containing a single node
@@ -48,13 +65,14 @@ func (p *Path) Clone() *Path {
 // SetOnlyNode sets the path to a single node
 func (p *Path) SetOnlyNode(node *Node) *Path {
 	p.only = node
+	p.path = nil
 	return p
 }
 
 // Clear the path
 func (p *Path) Clear() *Path {
 	p.only = nil
-	p.path = make([]PathElement, 0)
+	p.path = nil
 	return p
 }
 
@@ -64,7 +82,7 @@ func (p *Path) Last() *Node {
 		return p.only
 	}
 	if len(p.path) != 0 {
-		return p.path[len(p.path)-1].Edge.GetTo()
+		return p.path[len(p.path)-1].GetTargetNode()
 	}
 	return nil
 }
@@ -75,44 +93,60 @@ func (p *Path) First() *Node {
 		return p.only
 	}
 	if len(p.path) != 0 {
-		return p.path[0].Edge.GetFrom()
+		return p.path[0].GetSourceNode()
 	}
 	return nil
 }
 
-func (p *Path) GetSourceNode() *Node {
-	if p.path[0].isReverse {
-		return p.path[0].Edge.GetTo()
+func (p PathElement) GetSourceNode() *Node {
+	if p.Reverse {
+		return p.Edge.GetTo()
 	}
-	return p.path[0].Edge.GetFrom()
+	return p.Edge.GetFrom()
 }
 
-func (p *Path) GetTargetNode() *Node {
-	if p.path[1].isReverse {
-		return p.path[1].Edge.GetFrom()
+func (p PathElement) GetTargetNode() *Node {
+	if p.Reverse {
+		return p.Edge.GetFrom()
 	}
-	return p.path[1].Edge.GetTo()
+	return p.Edge.GetTo()
 }
 
 // Append an edge to the end of the path. The edge must be outgoing from the last node of the path
-func (p *Path) Append(path []PathElement) *Path {
+func (p *Path) Append(path ...PathElement) *Path {
+	if len(path) == 0 {
+		return p
+	}
+	if p.NumNodes() == 0 {
+		copy(p.path, path)
+		return p
+	}
 	last := p.Last()
-	if last != nil && last != path[0].Edge.GetFrom() {
+	if last != nil && last != path[0].GetSourceNode() {
+		fmt.Println(last, path[0].GetSourceNode())
 		panic("Appended edge is disconnected from path")
 	}
 	if p.only != nil {
 		p.only = nil
 	}
-	for i := range path {
-		if i == 0 {
-			continue
-		}
-		if path[i].Edge.GetFrom() != path[i-1].Edge.GetTo() {
+	for _, pe := range path {
+		if pe.GetSourceNode() != last {
 			panic("Appended edges are disconnected")
 		}
+		last = pe.GetTargetNode()
 	}
 	p.path = append(p.path, path...)
 	return p
+}
+
+// can append a single node
+func (p *Path) AppendPath(path Path) *Path {
+	// switch
+	if p.NumNodes() == 0 {
+		copy(p.path, path.path)
+		return p
+	}
+	return p.Append(p.path...)
 }
 
 // GetEdge returns the nth edge
@@ -138,31 +172,99 @@ func (p *Path) GetNode(n int) *Node {
 		}
 		panic("Invalid node index")
 	}
-	e := p.GetEdge(n - 1)
-	return e.GetTo()
+	return p.path[n].GetTargetNode()
 }
 
-// return if all edges of p2 exist in p1
-func (p *Path) IsPrefix(p1, p2 []PathElement) bool {
-	if len(p2) == 0 {
+// String returns the path as a string
+func (p *Path) String() string {
+	sb := strings.Builder{}
+	for _, p := range p.path {
+		if p.Reverse {
+			sb.WriteString(p.GetSourceNode().String() + "<-" + p.GetTargetNode().String())
+		} else {
+			sb.WriteString(p.GetSourceNode().String() + "->" + p.GetTargetNode().String())
+		}
+	}
+	return sb.String()
+}
+
+// HasPrefix return if all edges of p1 exist in path
+func (p *Path) HasPrefix(p1 []PathElement) bool {
+	if p.NumNodes() < 2 {
 		return false
 	}
-	if len(p2) > len(p1) {
+	if len(p1) == 0 {
+		return true
+	}
+	if len(p1) > p.NumEdges() {
 		return false
 	}
-	for path2Idx, e2 := range p2 {
-		if e2 != p1[path2Idx] {
+	for path1Idx, e1 := range p1 {
+		if e1 != p.path[path1Idx] {
 			return false
 		}
 	}
 	return true
 }
 
-func (p *Path) Slice(startNodeIndex, endNodeIndex int) []PathElement {
-	if startNodeIndex > 0 && startNodeIndex < len(p.path) && endNodeIndex > startNodeIndex && endNodeIndex <= len(p.path) {
-		return p.path[startNodeIndex : endNodeIndex+1]
+// HasPrefixPaths returns if all paths elements of p1 exist in path
+func (p *Path) HasPrefixPath(p1 *Path) bool {
+	switch p.NumNodes() {
+	case 0:
+		return p1.NumNodes() == 0
+	case 1:
+		switch p1.NumNodes() {
+		case 0:
+			return true
+		case 1:
+			return p.only == p1.only
+		default:
+			return false
+		}
+	default:
+		switch p1.NumNodes() {
+		case 0:
+			return true
+		case 1:
+			return p.First() == p1.First()
+		default:
+			return p.HasPrefix(p1.path)
+		}
 	}
-	return nil
+}
+
+// Slice returns a copy of p partitioned by the args start and end index
+func (p *Path) Slice(startNodeIndex, endNodeIndex int) *Path {
+	if p.NumNodes() == 0 {
+		panic("index error")
+	}
+	if startNodeIndex == 0 && endNodeIndex == 0 {
+		return &Path{
+			only: p.First(),
+		}
+	}
+	if startNodeIndex > p.NumNodes() {
+		panic("start index greater than length of num nodes")
+	}
+	if endNodeIndex > p.NumNodes() || endNodeIndex == -1 {
+		endNodeIndex = p.NumNodes()
+	}
+	if endNodeIndex < startNodeIndex {
+		panic("")
+	}
+	if startNodeIndex == endNodeIndex {
+		return &Path{
+			only: p.path[startNodeIndex].GetSourceNode(),
+		}
+	}
+	if startNodeIndex == p.NumNodes()-1 {
+		return &Path{
+			only: p.Last(),
+		}
+	}
+	pth := make([]PathElement, endNodeIndex-startNodeIndex-1)
+	copy(pth, p.path[startNodeIndex:endNodeIndex-1])
+	return &Path{path: pth}
 }
 
 // RemoveLast removes the last edge from the path. If the path has one
@@ -177,26 +279,6 @@ func (p *Path) RemoveLast() *Path {
 		p.path[len(p.path)-1].Edge.Remove()
 		p.path = p.path[:len(p.path)-1]
 	}
-	// if len(p.fwd)+len(p.bk) == 1 {
-	// 	if len(p.fwd) == 1 {
-	// 		p.only = p.fwd[0].GetFrom()
-	// 		p.fwd = p.fwd[:0]
-	// 	} else {
-	// 		p.only = p.bk[0].GetTo()
-	// 		p.bk = p.bk[:0]
-	// 	}
-	// 	return p
-	// }
-	// if len(p.fwd) != 0 {
-	// 	p.fwd = p.fwd[:len(p.fwd)-1]
-	// 	return p
-	// }
-	// if len(p.bk) != 0 {
-	// 	p.fwd = make([]*Edge, len(p.bk))
-	// 	for i := range p.bk {
-	// 		p.fwd[len(p.fwd)-1-i] = p.bk[i]
-	// 	}
-	// }
 	return p
 }
 
@@ -211,23 +293,6 @@ func (p *Path) RemoveFirst() *Path {
 		p.path[0].Edge.Remove()
 		p.path = p.path[1:]
 	}
-	// if len(p.fwd)+len(p.bk) == 1 {
-	// 	if len(p.fwd) == 1 {
-	// 		p.only = p.fwd[0].GetTo()
-	// 		p.fwd = p.fwd[:0]
-	// 	} else {
-	// 		p.only = p.bk[0].GetFrom()
-	// 		p.bk = p.bk[:0]
-	// 	}
-	// 	return p
-	// }
-	// if len(p.bk) != 0 {
-	// 	p.bk = p.bk[:len(p.bk)-1]
-	// 	return p
-	// }
-	// if len(p.fwd) != 0 {
-	// 	p.fwd = p.fwd[1:]
-	// }
 	return p
 }
 
