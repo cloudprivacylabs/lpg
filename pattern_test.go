@@ -188,6 +188,7 @@ func GetLineGraphWithSelfLoops(n int, withIndex bool) (*Graph, []*Node) {
 		graph.NewEdge(nodes[i], nodes[i+1], "label", nil)
 		graph.NewEdge(nodes[i], nodes[i], "label", nil)
 	}
+	graph.NewEdge(nodes[n-1], nodes[n-1], "label", nil)
 	return graph, nodes
 }
 

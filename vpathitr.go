@@ -19,18 +19,13 @@ package lpg
 // function. If the edge is accepted, it recursively descends and
 // calls accumulator.AddPath for each discovered path until AddPath
 // returns false
-func CollectAllPaths(graph *Graph, fromNode *Node, firstLeg EdgeIterator, edgeFilter func(*Edge) bool, dir EdgeDir, min, max int, accumulator func([]*Edge, *Node) bool) {
+func CollectAllPaths(graph *Graph, fromNode *Node, firstLeg EdgeIterator, edgeFilter func(*Edge) bool, dir EdgeDir, min, max int, accumulator func(*Path, *Node) bool) {
 	var recurse func([]*Edge, *Node) bool
-	// isLoop := func(path Path) {
-
-	// }
-	// if appending nextpath to path - is loop formed (going around twice)?
-	isLoop := func(path []PathElement, nextPath PathElement) bool {
+	isLoop := func(path *Path, nextPath PathElement) bool {
 		var lastOccurrenceIdx int
 		var loopCount int
-		p := NewPathFromElements(path...)
-		for i := 0; i < p.NumNodes(); i++ {
-			node := p.GetNode(i)
+		for i := 0; i < path.NumNodes(); i++ {
+			node := path.GetNode(i)
 			if nextPath.GetTargetNode() == node {
 				lastOccurrenceIdx = i
 				loopCount++
@@ -39,44 +34,43 @@ func CollectAllPaths(graph *Graph, fromNode *Node, firstLeg EdgeIterator, edgeFi
 		if loopCount < 2 {
 			return false
 		}
-		// ShortPath: path starting at node lastOccurenceIx + nextEdge
-		// Long path: path starting at node i
+		if loopCount > 3 {
+			return true
+		}
 		shortPath := &Path{path: make([]PathElement, 0)}
-		for i := 0; i < p.NumNodes(); i++ {
-			node := p.GetNode(i)
+		for i := 0; i < path.NumNodes(); i++ {
+			node := path.GetNode(i)
 			// pontentially a loop
 			if nextPath.GetTargetNode() == node {
 				if i == lastOccurrenceIdx {
 					return false
 				}
-				return p.Slice(i, -1).HasPrefix(append(shortPath.path[lastOccurrenceIdx:], nextPath))
+				copy(shortPath.path, path.path[lastOccurrenceIdx:])
+				return path.Slice(i, -1).HasPrefixPath(shortPath.Append(nextPath))
 			}
 		}
 		return false
 	}
 	recurse = func(prefix []*Edge, lastNode *Node) bool {
 		var endNode *Node
-		// var endEdge *Edge
 		switch dir {
 		case OutgoingEdge:
 			endNode = prefix[len(prefix)-1].GetTo()
-			// endEdge = prefix[len(prefix)-1]
 		case IncomingEdge:
 			endNode = prefix[len(prefix)-1].GetFrom()
-			// endEdge = prefix[len(prefix)-1]
 		case AnyEdge:
 			if prefix[len(prefix)-1].GetTo() == lastNode {
 				endNode = prefix[len(prefix)-1].GetFrom()
 			} else {
 				endNode = prefix[len(prefix)-1].GetTo()
 			}
-			// endEdge = prefix[len(prefix)-1]
 		}
 
 		if (min == -1 || len(prefix) >= min) && (max == -1 || len(prefix) <= max) {
 			// A valid path
-			entry := make([]*Edge, len(prefix))
-			copy(entry, prefix)
+			entry := &Path{path: make([]PathElement, len(prefix))}
+			pref := NewPathFromElements(NewPathElementsFromEdges(prefix)...)
+			copy(entry.path, pref.path)
 			if !accumulator(entry, endNode) {
 				return false
 			}
@@ -86,9 +80,6 @@ func CollectAllPaths(graph *Graph, fromNode *Node, firstLeg EdgeIterator, edgeFi
 			return true
 		}
 
-		// if isLoop(endEdge, prefix[:len(prefix)-1], endNode) {
-		// 	return true
-		// }
 		itr := edgeIterator{
 			&filterIterator{
 				itr: endNode.GetEdges(dir),
@@ -100,7 +91,7 @@ func CollectAllPaths(graph *Graph, fromNode *Node, firstLeg EdgeIterator, edgeFi
 
 		for itr.Next() {
 			edge := itr.Edge()
-			if isLoop(NewPathElementsFromEdges(prefix), PathElement{Edge: edge}) {
+			if isLoop(NewPathFromElements(NewPathElementsFromEdges(prefix)...), PathElement{Edge: edge}) {
 				return true
 			}
 			if !recurse(append(prefix, edge), endNode) {
