@@ -166,7 +166,7 @@ func (processor *iterateConnectedEdges) Run(ctx *MatchContext, next matchAccumul
 	logf("IterateConnectedEdges min=%d max=%d %+v\n", processor.patternItem.Min, processor.patternItem.Max, processor.result)
 	var err error
 	// TODO: convert into PathElements
-	CollectAllPaths(ctx.Graph, node, processor.edgeItr, processor.edgeFilter, processor.dir, processor.patternItem.Min, processor.patternItem.Max, func(path *Path, endNode *Node) bool {
+	CollectAllPaths(ctx.Graph, node, processor.edgeItr, processor.edgeFilter, processor.dir, processor.patternItem.Min, processor.patternItem.Max, func(path *Path) bool {
 		edgeSlice := make([]*Edge, 0, len(path.path))
 		for _, e := range path.path {
 			edgeSlice = append(edgeSlice, e.Edge)
@@ -174,7 +174,7 @@ func (processor *iterateConnectedEdges) Run(ctx *MatchContext, next matchAccumul
 		processor.result = edgeSlice
 		logf("IterateConnectedEdges testing len=%d %+v\n", len(path.path), processor.result)
 		ctx.recordStepResult(processor)
-		ctx.variablePathNode = endNode
+		// ctx.variablePathNode = endNode
 		// filterUniquePaths := func() {
 
 		// }

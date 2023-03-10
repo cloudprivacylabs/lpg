@@ -15,7 +15,6 @@
 package lpg
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -193,11 +192,16 @@ func (p *Path) GetNode(n int) *Node {
 func (p *Path) String() string {
 	sb := strings.Builder{}
 	for _, p := range p.path {
+		sb.WriteString(p.Edge.GetFrom().String() + "->" + p.Edge.GetTo().String() + " ")
 		if p.Reverse {
-			sb.WriteString(p.GetSourceNode().String() + "<-" + p.GetTargetNode().String())
-		} else {
-			sb.WriteString(p.GetSourceNode().String() + "->" + p.GetTargetNode().String())
+			sb.WriteString("Reverse ")
 		}
+		// p.Edge.GetFrom().String()
+		// if p.Reverse {
+		// 	sb.WriteString(p.GetSourceNode().String() + "<-" + p.GetTargetNode().String())
+		// } else {
+		// 	sb.WriteString(p.GetSourceNode().String() + "->" + p.GetTargetNode().String())
+		// }
 	}
 	return sb.String()
 }
@@ -214,9 +218,9 @@ func (p *Path) HasPrefix(p1 []PathElement) bool {
 		return false
 	}
 	for path1Idx, e1 := range p1 {
-		fmt.Printf("%p %p", e1.Edge, p.path[path1Idx].Edge)
-		fmt.Println()
-		fmt.Println(e1.Edge == p.path[path1Idx].Edge)
+		// fmt.Printf("%p %p", e1.Edge, p.path[path1Idx].Edge)
+		// fmt.Println()
+		// fmt.Println(e1.Edge == p.path[path1Idx].Edge)
 		if e1 != p.path[path1Idx] {
 			return false
 		}
