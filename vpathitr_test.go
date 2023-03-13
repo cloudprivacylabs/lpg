@@ -1,7 +1,6 @@
 package lpg
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -32,31 +31,15 @@ import (
 */
 
 func TestCollectAllPaths(t *testing.T) {
-	graph, nodes := GetLineGraphWithSelfLoops(3, true)
-	// x := JSON{}
-	// buf := &bytes.Buffer{}
-	// if err := x.Encode(graph, buf); err != nil {
-	// 	t.Error(err)
-	// }
+	graph, nodes := GetLineGraphWithSelfLoops(4, true)
 	// nodes[0].SetProperty("key", "value")
-	nodes[0].SetLabels(NewStringSet("node1"))
-	nodes[1].SetLabels(NewStringSet("node2"))
+	nodes[0].SetLabels(NewStringSet("node0"))
+	nodes[1].SetLabels(NewStringSet("node1"))
+	nodes[2].SetLabels(NewStringSet("node2Label"))
 	// nodes[1].SetProperty("key", "value")
 	acc := &DefaultMatchAccumulator{}
 	CollectAllPaths(graph, nodes[1], nodes[1].GetEdges(AnyEdge), func(e *Edge) bool { return true }, AnyEdge, 1, -1, func(e *Path) bool {
-		// fmt.Println(e.String())
-		// fmt.Println(e)
 		acc.Paths = append(acc.Paths, e)
 		return true
 	})
-	fmt.Println(len(acc.Paths))
-	// for _, p := range acc.Paths {
-	// 	for _, path := range p.(*Path).path {
-	// 		fmt.Println(path)
-	// 		fmt.Printf("%p %p", path.GetSourceNode(), path.GetTargetNode())
-	// 		fmt.Println()
-	// 	}
-	// 	fmt.Println()
-	// }
-	t.Fail()
 }

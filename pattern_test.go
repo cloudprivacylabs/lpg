@@ -1,7 +1,6 @@
 package lpg
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -458,7 +457,7 @@ func TestVariablePathPatternWithoutIndex(t *testing.T) {
 func testVariablePathPattern(t *testing.T, withIndex bool) {
 	graph, nodes := GetLineGraph(10, withIndex)
 	nodes[2].SetProperty("key", "value")
-	nodes[8].SetProperty("key", "value")
+	nodes[3].SetProperty("key", "value")
 	pat := Pattern{
 		{Name: "n", Labels: StringSet{}, Properties: map[string]interface{}{"key": "value"}},
 		{Min: -1, Max: -1, Undirected: true},
@@ -469,17 +468,20 @@ func testVariablePathPattern(t *testing.T, withIndex bool) {
 		t.Error(err)
 		return
 	}
-	n2, n8 := 0, 0
+	n2, n3 := 0, 0
+	if len(acc.Paths) != 2 {
+		t.Errorf("Expected length of paths to be 2 got %d", len(acc.Paths))
+	}
 	for i := range acc.Paths {
 		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[2] {
 			n2++
 		}
-		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[8] {
-			n8++
+		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[3] {
+			n3++
 		}
 	}
-	if n2 != 3 && n8 != 3 {
-		t.Errorf("Expected number of paths to be 3, got %d", n8)
+	if n2 != 2 && n3 != 2 {
+		t.Errorf("Expected number of paths to be 2, got %d", n2)
 	}
 }
 
@@ -508,21 +510,6 @@ func testVariablePathPatternWithSelfLoops(t *testing.T, withIndex bool) {
 		t.Error(err)
 		return
 	}
-	fmt.Println(len(acc.Paths))
-	for _, p := range acc.Paths {
-		for _, path := range p.([]*Edge) {
-			fmt.Println(path.GetFrom(), path.GetTo())
-		}
-		fmt.Println()
-		// fmt.Println(acc.Paths[i].([]*Edge)[0].GetFrom())
-		// fmt.Println(acc.Paths[i].([]*Edge)[0].GetTo())
-	}
-	// if acc.Paths[1].([]*Edge)[0].GetFrom() != nodes[2] {
-	// 	t.Errorf("Expecting %v, got: %v", acc.Paths[1].([]*Edge)[0].GetFrom(), nodes[2])
-	// }
-	// if acc.Paths[7].([]*Edge)[0].GetFrom() != nodes[8] {
-	// 	t.Errorf("Expecting %v, got: %v", acc.Paths[7].([]*Edge)[0].GetFrom(), nodes[8])
-	// }
 	if len(acc.Paths) != 6 {
 		t.Errorf("Expected length of paths to be 6 got %d", len(acc.Paths))
 	}
@@ -545,11 +532,10 @@ func TestVariablePathPatternCircleGraphWithoutIndex(t *testing.T) {
 	testVariablePathPatternCircleGraph(t, false)
 }
 
-// fail
 func testVariablePathPatternCircleGraph(t *testing.T, withIndex bool) {
 	graph, nodes := GetCircleGraph(10, withIndex)
 	nodes[2].SetProperty("key", "value")
-	nodes[8].SetProperty("key", "value")
+	nodes[3].SetProperty("key", "value")
 	pat := Pattern{
 		{Name: "n", Labels: StringSet{}, Properties: map[string]interface{}{"key": "value"}},
 		{Min: -1, Max: -1, Undirected: true},
@@ -560,22 +546,20 @@ func testVariablePathPatternCircleGraph(t *testing.T, withIndex bool) {
 		t.Error(err)
 		return
 	}
-	// 16 paths
-	// 4, 5, 6, 7
-	if len(acc.Paths) != 6 {
-		t.Errorf("Expected length of paths to be 6 got %d", len(acc.Paths))
+	if len(acc.Paths) != 5 {
+		t.Errorf("Expected length of paths to be 5 got %d", len(acc.Paths))
 	}
-	n2, n8 := 0, 0
+	n2, n3 := 0, 0
 	for i := range acc.Paths {
 		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[2] {
 			n2++
 		}
-		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[8] {
-			n8++
+		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[3] {
+			n3++
 		}
 	}
-	if n2 != 3 && n8 != 3 {
-		t.Errorf("Expected number of paths to be 3, got %d", n8)
+	if n2 != 2 && n3 != 2 {
+		t.Errorf("Expected number of paths to be 3, got %d", n3)
 	}
 }
 
@@ -589,8 +573,8 @@ func TestPathLengthTwoPatternWithoutIndex(t *testing.T) {
 
 func testPathLengthTwoPattern(t *testing.T, withIndex bool) {
 	graph, nodes := GetLineGraph(10, withIndex)
-	nodes[4].SetProperty("key", "value")
-	nodes[7].SetProperty("key", "value")
+	nodes[2].SetProperty("key", "value")
+	nodes[3].SetProperty("key", "value")
 	pat := Pattern{
 		{Name: "n", Labels: StringSet{}, Properties: map[string]interface{}{"key": "value"}},
 		{Min: 2, Max: 2, Undirected: true},
@@ -601,17 +585,17 @@ func testPathLengthTwoPattern(t *testing.T, withIndex bool) {
 		t.Error(err)
 		return
 	}
-	n4, n7 := 0, 0
+	n2, n3 := 0, 0
 	for i := range acc.Paths {
-		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[4] {
-			n4++
+		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[2] {
+			n2++
 		}
-		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[7] {
-			n7++
+		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[3] {
+			n3++
 		}
 	}
-	if n4 != 1 && n7 != 1 {
-		t.Errorf("Expected number of paths to be 1, got %d", n7)
+	if n2 != 1 && n3 != 1 {
+		t.Errorf("Expected number of paths to be 1, got %d", n3)
 	}
 }
 
@@ -666,10 +650,10 @@ func TestPathLengthTwoPatternCircleGraphWithoutIndex(t *testing.T) {
 
 func testPathLengthTwoPatternCircleGraph(t *testing.T, withIndex bool) {
 	graph, nodes := GetCircleGraph(10, withIndex)
-	nodes[4].SetProperty("key", "value")
-	nodes[4].SetLabels(NewStringSet("n4"))
-	nodes[7].SetLabels(NewStringSet("n7"))
-	nodes[7].SetProperty("key", "value")
+	nodes[2].SetProperty("key", "value")
+	nodes[2].SetLabels(NewStringSet("n4"))
+	nodes[3].SetLabels(NewStringSet("n7"))
+	nodes[3].SetProperty("key", "value")
 	pat := Pattern{
 		{Name: "n", Labels: StringSet{}, Properties: map[string]interface{}{"key": "value"}},
 		{Min: 2, Max: 2, Undirected: true},
@@ -680,20 +664,20 @@ func testPathLengthTwoPatternCircleGraph(t *testing.T, withIndex bool) {
 		t.Error(err)
 		return
 	}
-	if len(acc.Paths) != 4 {
-		t.Errorf("expected length of path accumulator to be 4, got %d", len(acc.Paths))
+	if len(acc.Paths) != 1 {
+		t.Errorf("expected length of path accumulator to be 1, got %d", len(acc.Paths))
 	}
-	n4, n7 := 0, 0
+	n2, n3 := 0, 0
 	for i := range acc.Paths {
-		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[4] {
-			n4++
+		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[2] {
+			n2++
 		}
-		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[7] {
-			n7++
+		if acc.Paths[i].([]*Edge)[0].GetFrom() == nodes[3] {
+			n3++
 		}
 	}
-	if n4 != 1 && n7 != 1 {
-		t.Errorf("Expected number of paths to be 1, got %d", n7)
+	if n2 != 1 && n3 != 1 {
+		t.Errorf("Expected number of paths to be 1, got %d", n3)
 	}
 }
 

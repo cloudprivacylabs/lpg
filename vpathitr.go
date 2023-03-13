@@ -14,8 +14,6 @@
 
 package lpg
 
-import "fmt"
-
 // CollectAllPaths iterates the variable length paths that have the
 // edges in firstLeg. For each edge, it calls the edgeFilter
 // function. If the edge is accepted, it recursively descends and
@@ -26,7 +24,6 @@ func CollectAllPaths(graph *Graph, fromNode *Node, firstLeg EdgeIterator, edgeFi
 	isLoop := func(path *Path, nextPath PathElement) bool {
 		for _, p := range path.path {
 			if nextPath.Edge == p.Edge {
-				fmt.Println(path)
 				return true
 			}
 		}
@@ -68,14 +65,13 @@ func CollectAllPaths(graph *Graph, fromNode *Node, firstLeg EdgeIterator, edgeFi
 		}
 
 		itr := edgeIterator{
-			&filterIterator{
+			makeUniqueIterator(&filterIterator{
 				itr: prefix.Last().GetEdges(dir),
 				filter: func(item interface{}) bool {
 					return edgeFilter(item.(*Edge))
 				},
-			},
+			}),
 		}
-
 		for itr.Next() {
 			edge := itr.Edge()
 			pe := PathElement{Edge: edge}
@@ -84,11 +80,10 @@ func CollectAllPaths(graph *Graph, fromNode *Node, firstLeg EdgeIterator, edgeFi
 					pe.Reverse = true
 				}
 			}
-			if isLoop(prefix, pe) {
-				return true
-			}
-			if !recurse(prefix.Clone().Append(pe)) {
-				return false
+			if !isLoop(prefix, pe) {
+				if !recurse(prefix.Clone().Append(pe)) {
+					return false
+				}
 			}
 		}
 		return true
@@ -103,7 +98,6 @@ func CollectAllPaths(graph *Graph, fromNode *Node, firstLeg EdgeIterator, edgeFi
 				pe.Reverse = true
 			}
 		}
-		fmt.Println(edge)
 		if !recurse(&Path{path: []PathElement{pe}}) {
 			break
 		}

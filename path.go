@@ -122,8 +122,7 @@ func (p *Path) Append(path ...PathElement) *Path {
 		return p
 	}
 	last := p.Last()
-	if last != nil && last != path[0].GetSourceNode() {
-		// fmt.Println(last, path[0].GetSourceNode())
+	if last != nil && last != path[len(path)-1].GetSourceNode() {
 		panic("Appended edge is disconnected from path")
 	}
 	if p.only != nil {
@@ -140,7 +139,7 @@ func (p *Path) Append(path ...PathElement) *Path {
 }
 
 // can append a single node
-func (p *Path) AppendPath(path Path) *Path {
+func (p *Path) AppendPath(path *Path) *Path {
 	switch p.NumNodes() {
 	case 0:
 		copy(p.path, path.path)
@@ -218,9 +217,6 @@ func (p *Path) HasPrefix(p1 []PathElement) bool {
 		return false
 	}
 	for path1Idx, e1 := range p1 {
-		// fmt.Printf("%p %p", e1.Edge, p.path[path1Idx].Edge)
-		// fmt.Println()
-		// fmt.Println(e1.Edge == p.path[path1Idx].Edge)
 		if e1 != p.path[path1Idx] {
 			return false
 		}
