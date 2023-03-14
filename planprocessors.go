@@ -119,7 +119,7 @@ type iterateConnectedEdges struct {
 	patternItem PatternItem
 	source      planProcessor
 	dir         EdgeDir
-	result      []*Edge
+	result      *Path
 	edgeFilter  func(*Edge) bool
 	edgeItr     EdgeIterator
 }
@@ -153,7 +153,9 @@ func (processor *iterateConnectedEdges) Run(ctx *MatchContext, next matchAccumul
 	}
 	if processor.patternItem.Min == 1 && processor.patternItem.Max == 1 {
 		for processor.edgeItr.Next() {
-			processor.result = []*Edge{processor.edgeItr.Edge()}
+			processor.result = &Path{path: []PathElement{
+				{Edge: processor.edgeItr.Edge()},
+			}}
 			ctx.recordStepResult(processor)
 			logf("IterateConnectedEdges len=1 %+v\n", processor.result)
 			if err := next.Run(ctx); err != nil {
@@ -165,19 +167,11 @@ func (processor *iterateConnectedEdges) Run(ctx *MatchContext, next matchAccumul
 	}
 	logf("IterateConnectedEdges min=%d max=%d %+v\n", processor.patternItem.Min, processor.patternItem.Max, processor.result)
 	var err error
-	// TODO: convert into PathElements
 	CollectAllPaths(ctx.Graph, node, processor.edgeItr, processor.edgeFilter, processor.dir, processor.patternItem.Min, processor.patternItem.Max, func(path *Path) bool {
-		edgeSlice := make([]*Edge, 0, len(path.path))
-		for _, e := range path.path {
-			edgeSlice = append(edgeSlice, e.Edge)
-		}
-		processor.result = edgeSlice
+		processor.result = path
 		logf("IterateConnectedEdges testing len=%d %+v\n", len(path.path), processor.result)
 		ctx.recordStepResult(processor)
-		// ctx.variablePathNode = endNode
-		// filterUniquePaths := func() {
-
-		// }
+		ctx.variablePathNode = node
 		if err = next.Run(ctx); err != nil {
 			return false
 		}
