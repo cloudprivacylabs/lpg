@@ -469,16 +469,16 @@ func (g *Graph) detachRemoveNode(node *Node) {
 }
 
 func (g *Graph) detachNode(node *Node) {
-	for _, edge := range EdgeSlice(node.incoming.iterator(2)) {
-		g.disconnect(edge)
-		g.allEdges.remove(edge, 0)
-		g.index.removeEdgeFromIndex(edge, g)
+	for _, edge := range EdgeSlice(node.incoming.iterator(2)).path {
+		g.disconnect(edge.Edge)
+		g.allEdges.remove(edge.Edge, 0)
+		g.index.removeEdgeFromIndex(edge.Edge, g)
 	}
 	node.incoming = edgeMap{}
-	for _, edge := range EdgeSlice(node.outgoing.iterator(1)) {
-		g.disconnect(edge)
-		g.allEdges.remove(edge, 0)
-		g.index.removeEdgeFromIndex(edge, g)
+	for _, edge := range EdgeSlice(node.outgoing.iterator(1)).path {
+		g.disconnect(edge.Edge)
+		g.allEdges.remove(edge.Edge, 0)
+		g.index.removeEdgeFromIndex(edge.Edge, g)
 	}
 	node.outgoing = edgeMap{}
 }

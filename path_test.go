@@ -75,7 +75,7 @@ func TestPathSlice(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	path := Path{path: make([]PathElement, 0)}
+	path := &Path{path: make([]PathElement, 0)}
 	for itr := target.GetEdges(); itr.Next(); {
 		path.path = append(path.path, PathElement{
 			Edge: itr.Edge(),
@@ -120,7 +120,7 @@ func TestAppend(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	path := Path{path: make([]PathElement, 0)}
+	path := &Path{path: make([]PathElement, 0)}
 	for itr := target.GetEdges(); itr.Next(); {
 		path.path = append(path.path, PathElement{
 			Edge: itr.Edge(),

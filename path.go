@@ -138,10 +138,12 @@ func (p *Path) Append(path ...PathElement) *Path {
 	return p
 }
 
-// can append a single node
+// AppendPath can append a single node or a path to the callers path.
+// If the caller does not contain a path, the passed path is copied into the receiver
 func (p *Path) AppendPath(path *Path) *Path {
 	switch p.NumNodes() {
 	case 0:
+		p.path = make([]PathElement, len(path.path))
 		copy(p.path, path.path)
 		return p
 	case 1:

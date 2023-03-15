@@ -1,7 +1,5 @@
 package lpg
 
-import ()
-
 // Sources finds all the source nodes in the graph
 func SourcesItr(graph *Graph) NodeIterator {
 	return nodeIterator{
@@ -82,15 +80,16 @@ func CheckIsomorphism(g1, g2 *Graph, nodeEquivalenceFunc func(n1, n2 *Node) bool
 			edges1 := EdgeSlice(node1.GetEdges(OutgoingEdge))
 			edges2 := EdgeSlice(node2.GetEdges(OutgoingEdge))
 			// There must be same number of edges
-			if len(edges1) != len(edges2) {
+			if edges1.NumEdges() != edges2.NumEdges() {
 				return false
 			}
 
-			for _, edge1 := range edges1 {
+			for _, edge1 := range edges1.path {
 				found := false
-				for _, edge2 := range edges2 {
-					if nodeMapping[edge1.GetTo()] == edge2.GetTo() &&
-						edgeEquivalenceFunc(edge1, edge2) {
+				for _, edge2 := range edges2.path {
+					// edge1.Edge.GetTo()
+					if nodeMapping[edge1.GetTargetNode()] == edge2.GetTargetNode() &&
+						edgeEquivalenceFunc(edge1.Edge, edge2.Edge) {
 						found = true
 						break
 					}

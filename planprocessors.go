@@ -79,7 +79,7 @@ func (processor *iterateNodes) IsNode()                     {}
 type iterateEdges struct {
 	itr         EdgeIterator
 	patternItem PatternItem
-	result      []*Edge
+	result      *Path
 	initialized bool
 }
 
@@ -101,7 +101,7 @@ func (processor *iterateEdges) init(ctx *MatchContext) {
 func (processor *iterateEdges) Run(ctx *MatchContext, next matchAccumulator) error {
 	processor.init(ctx)
 	for processor.itr.Next() {
-		processor.result = []*Edge{processor.itr.Edge()}
+		processor.result = &Path{path: []PathElement{{Edge: processor.itr.Edge()}}}
 		ctx.recordStepResult(processor)
 		if err := next.Run(ctx); err != nil {
 			return err
@@ -214,8 +214,8 @@ func newIterateConnectedNodes(source planProcessor, item PatternItem, useNode in
 }
 
 func (processor *iterateConnectedNodes) Run(ctx *MatchContext, next matchAccumulator) error {
-	edges := processor.source.GetResult().([]*Edge)
-	edge := edges[len(edges)-1]
+	edges := processor.source.GetResult().(*Path)
+	edge := edges.GetEdge(edges.NumEdges() - 1)
 	var node *Node
 
 	if ctx.variablePathNode != nil {

@@ -141,6 +141,6 @@ func (set EdgeSet) Iterator() EdgeIterator {
 	return edgeIterator{i}
 }
 
-func (set EdgeSet) Slice() []*Edge {
+func (set EdgeSet) Slice() *Path {
 	return EdgeSlice(set.Iterator())
 }
