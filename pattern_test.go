@@ -153,8 +153,8 @@ func TestVariableLengthPath(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if out.Paths[0].(*Path).NumNodes() != 3 {
-		t.Errorf("Expecting 3 nodes: %+v, got num nodes: %d", out, out.Paths[0].(*Path).NumNodes())
+	if out.Paths[0].NumNodes() != 3 {
+		t.Errorf("Expecting 3 nodes: %+v, got num nodes: %d", out, out.Paths[0].NumNodes())
 	}
 }
 
@@ -239,10 +239,10 @@ func testSimpleDirectedPathPattern(t *testing.T, withIndex bool) {
 	}
 	n5, n6 := 0, 0
 	for _, p := range acc.Paths {
-		if p.(*Path).GetEdge(0).GetFrom() == nodes[5] {
+		if p.GetEdge(0).GetFrom() == nodes[5] {
 			n5++
 		}
-		if p.(*Path).GetEdge(0).GetFrom() == nodes[6] {
+		if p.GetEdge(0).GetFrom() == nodes[6] {
 			n6++
 		}
 	}
@@ -279,10 +279,10 @@ func testSimpleDirectedPathPatternWithSelfLoops(t *testing.T, withIndex bool) {
 	n5 := 0
 	n6 := 0
 	for _, p := range acc.Paths {
-		if p.(*Path).GetEdge(0).GetFrom() == nodes[5] {
+		if p.GetEdge(0).GetFrom() == nodes[5] {
 			n5++
 		}
-		if p.(*Path).GetEdge(0).GetFrom() == nodes[6] {
+		if p.GetEdge(0).GetFrom() == nodes[6] {
 			n6++
 		}
 	}
@@ -320,10 +320,10 @@ func testSimpleDirectedPathPatternCircleGraph(t *testing.T, withIndex bool) {
 	}
 	n5, n6 := 0, 0
 	for _, p := range acc.Paths {
-		if p.(*Path).GetEdge(0).GetFrom() == nodes[5] {
+		if p.GetEdge(0).GetFrom() == nodes[5] {
 			n5++
 		}
-		if p.(*Path).GetEdge(0).GetFrom() == nodes[6] {
+		if p.GetEdge(0).GetFrom() == nodes[6] {
 			n6++
 		}
 	}
@@ -357,10 +357,10 @@ func testSimplePathPattern(t *testing.T, withIndex bool) {
 	}
 	n2, n8 := 0, 0
 	for _, p := range acc.Paths {
-		if p.(*Path).GetEdge(0).GetFrom() == nodes[2] {
+		if p.GetEdge(0).GetFrom() == nodes[2] {
 			n2++
 		}
-		if p.(*Path).GetEdge(0).GetFrom() == nodes[8] {
+		if p.GetEdge(0).GetFrom() == nodes[8] {
 			n8++
 		}
 	}
@@ -394,10 +394,10 @@ func testSimplePathPatternWithSelfLoops(t *testing.T, withIndex bool) {
 	n2 := 0
 	n3 := 0
 	for _, p := range acc.Paths {
-		if p.(*Path).GetEdge(0).GetFrom() == nodes[2] {
+		if p.GetEdge(0).GetFrom() == nodes[2] {
 			n2++
 		}
-		if p.(*Path).GetEdge(0).GetFrom() == nodes[3] {
+		if p.GetEdge(0).GetFrom() == nodes[3] {
 			n3++
 		}
 	}
@@ -435,10 +435,10 @@ func testSimplePathPatternCircleGraph(t *testing.T, withIndex bool) {
 	}
 	n2, n8 := 0, 0
 	for _, p := range acc.Paths {
-		if p.(*Path).GetEdge(0).GetFrom() == nodes[2] {
+		if p.GetEdge(0).GetFrom() == nodes[2] {
 			n2++
 		}
-		if p.(*Path).GetEdge(0).GetFrom() == nodes[8] {
+		if p.GetEdge(0).GetFrom() == nodes[8] {
 			n8++
 		}
 	}
@@ -476,10 +476,10 @@ func testVariablePathPattern(t *testing.T, withIndex bool) {
 		t.Errorf("Expected length of paths to be 2 got %d", len(acc.Paths))
 	}
 	for _, p := range acc.Paths {
-		if p.(*Path).GetEdge(0).GetFrom() == nodes[2] {
+		if p.GetEdge(0).GetFrom() == nodes[2] {
 			n2++
 		}
-		if p.(*Path).GetEdge(0).GetFrom() == nodes[3] {
+		if p.GetEdge(0).GetFrom() == nodes[3] {
 			n3++
 		}
 	}
@@ -518,10 +518,10 @@ func testVariablePathPatternWithSelfLoops(t *testing.T, withIndex bool) {
 	}
 	n2, n3 := 0, 0
 	for _, p := range acc.Paths {
-		if p.(*Path).GetEdge(0).GetFrom() == nodes[2] {
+		if p.GetEdge(0).GetFrom() == nodes[2] {
 			n2++
 		}
-		if p.(*Path).GetEdge(0).GetFrom() == nodes[3] {
+		if p.GetEdge(0).GetFrom() == nodes[3] {
 			n3++
 		}
 	}
@@ -557,10 +557,10 @@ func testVariablePathPatternCircleGraph(t *testing.T, withIndex bool) {
 	}
 	n2, n3 := 0, 0
 	for _, p := range acc.Paths {
-		if p.(*Path).GetEdge(0).GetFrom() == nodes[2] {
+		if p.GetEdge(0).GetFrom() == nodes[2] {
 			n2++
 		}
-		if p.(*Path).GetEdge(0).GetFrom() == nodes[3] {
+		if p.GetEdge(0).GetFrom() == nodes[3] {
 			n3++
 		}
 	}
@@ -593,10 +593,10 @@ func testPathLengthTwoPattern(t *testing.T, withIndex bool) {
 	}
 	n2, n3 := 0, 0
 	for _, p := range acc.Paths {
-		if p.(*Path).GetEdge(0).GetFrom() == nodes[2] {
+		if p.GetEdge(0).GetFrom() == nodes[2] {
 			n2++
 		}
-		if p.(*Path).GetEdge(0).GetFrom() == nodes[3] {
+		if p.GetEdge(0).GetFrom() == nodes[3] {
 			n3++
 		}
 	}
@@ -629,10 +629,10 @@ func testPathLengthTwoPatternWithSelfLoops(t *testing.T, withIndex bool) {
 	// 12 paths
 	n4, n7 := 0, 0
 	for _, p := range acc.Paths {
-		if p.(*Path).GetEdge(0).GetFrom() == nodes[4] {
+		if p.GetEdge(0).GetFrom() == nodes[4] {
 			n4++
 		}
-		if p.(*Path).GetEdge(0).GetFrom() == nodes[4] {
+		if p.GetEdge(0).GetFrom() == nodes[4] {
 			n7++
 		}
 	}
@@ -674,10 +674,10 @@ func testPathLengthTwoPatternCircleGraph(t *testing.T, withIndex bool) {
 	}
 	n2, n3 := 0, 0
 	for _, p := range acc.Paths {
-		if p.(*Path).GetEdge(0).GetFrom() == nodes[2] {
+		if p.GetEdge(0).GetFrom() == nodes[2] {
 			n2++
 		}
-		if p.(*Path).GetEdge(0).GetFrom() == nodes[3] {
+		if p.GetEdge(0).GetFrom() == nodes[3] {
 			n3++
 		}
 	}

@@ -171,7 +171,7 @@ func (processor *iterateConnectedEdges) Run(ctx *MatchContext, next matchAccumul
 		processor.result = path
 		logf("IterateConnectedEdges testing len=%d %+v\n", len(path.path), processor.result)
 		ctx.recordStepResult(processor)
-		ctx.variablePathNode = node
+		ctx.variablePathNode = path.Last()
 		if err = next.Run(ctx); err != nil {
 			return false
 		}

@@ -14,10 +14,6 @@
 
 package lpg
 
-import (
-	sm "github.com/bserdar/slicemap"
-)
-
 type ErrNodeVariableExpected string
 
 func (e ErrNodeVariableExpected) Error() string {
@@ -533,9 +529,9 @@ func (n *resultAccumulator) Run(ctx *MatchContext) error {
 }
 
 // GetCurrentPath returns the current path recoded in the stages of the pattern. The result is either a single node, or a path
-func (plan MatchPlan) GetCurrentPath() interface{} {
+func (plan MatchPlan) GetCurrentPath() *Path {
 	if len(plan.steps) == 1 {
-		return plan.steps[0].GetResult()
+		return plan.steps[0].GetResult().(*Path)
 	}
 	out := &Path{}
 	for i := range plan.steps {
@@ -561,21 +557,12 @@ func (plan MatchPlan) CaptureSymbolValues() map[string]interface{} {
 
 type DefaultMatchAccumulator struct {
 	// Each element of the paths is either a Node or []Edge
-	Paths   []interface{}
+	Paths   []*Path
 	Symbols []map[string]interface{}
 }
 
 func (acc *DefaultMatchAccumulator) StoreResult(_ *MatchContext, path interface{}, symbols map[string]interface{}) {
-	set := sm.SliceMap[*Path, struct{}]{}
-	for _, p := range acc.Paths {
-		set.Put([]*Path{{path: []PathElement{{Edge: p.(*Path).GetEdge(0)}}}}, struct{}{})
-	}
-	ps := make([]*Path, 0)
-	ps = append(ps, path.(*Path))
-	_, seen := set.Get(ps)
-	if !seen {
-		acc.Paths = append(acc.Paths, path)
-	}
+	acc.Paths = append(acc.Paths, path.(*Path))
 	acc.Symbols = append(acc.Symbols, symbols)
 }
 
@@ -583,11 +570,7 @@ func (acc *DefaultMatchAccumulator) StoreResult(_ *MatchContext, path interface{
 func (acc *DefaultMatchAccumulator) GetHeadNodes() []*Node {
 	ret := make(map[*Node]struct{})
 	for _, x := range acc.Paths {
-		if n, ok := x.(*Node); ok {
-			ret[n] = struct{}{}
-		} else if e, ok := x.(*Path); ok {
-			ret[e.GetNode(0)] = struct{}{}
-		}
+		ret[x.GetNode(0)] = struct{}{}
 	}
 	arr := make([]*Node, 0, len(ret))
 	for x := range ret {
@@ -600,11 +583,7 @@ func (acc *DefaultMatchAccumulator) GetHeadNodes() []*Node {
 func (acc *DefaultMatchAccumulator) GetTailNodes() []*Node {
 	ret := make(map[*Node]struct{})
 	for _, x := range acc.Paths {
-		if n, ok := x.(*Node); ok {
-			ret[n] = struct{}{}
-		} else if e, ok := x.(*Path); ok {
-			ret[e.GetNode(e.NumNodes()-1)] = struct{}{}
-		}
+		ret[x.GetNode(x.NumNodes()-1)] = struct{}{}
 	}
 	arr := make([]*Node, 0, len(ret))
 	for x := range ret {

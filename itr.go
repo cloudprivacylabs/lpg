@@ -56,10 +56,10 @@ type EdgeIterator interface {
 }
 
 // EdgeSlice reads all the remaining items of an edge iterator and returns them in a slice
-func EdgeSlice(in EdgeIterator) *Path {
-	ret := &Path{path: make([]PathElement, 0)}
+func EdgeSlice(in EdgeIterator) []*Edge {
+	ret := make([]*Edge, 0)
 	for in.Next() {
-		ret.path = append(ret.path, PathElement{Edge: in.Edge()})
+		ret = append(ret, in.Edge())
 	}
 	return ret
 }

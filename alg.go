@@ -80,16 +80,16 @@ func CheckIsomorphism(g1, g2 *Graph, nodeEquivalenceFunc func(n1, n2 *Node) bool
 			edges1 := EdgeSlice(node1.GetEdges(OutgoingEdge))
 			edges2 := EdgeSlice(node2.GetEdges(OutgoingEdge))
 			// There must be same number of edges
-			if edges1.NumEdges() != edges2.NumEdges() {
+			if len(edges1) != len(edges2) {
 				return false
 			}
 
-			for _, edge1 := range edges1.path {
+			for _, edge1 := range edges1 {
 				found := false
-				for _, edge2 := range edges2.path {
+				for _, edge2 := range edges2 {
 					// edge1.Edge.GetTo()
-					if nodeMapping[edge1.GetTargetNode()] == edge2.GetTargetNode() &&
-						edgeEquivalenceFunc(edge1.Edge, edge2.Edge) {
+					if nodeMapping[edge1.GetTo()] == edge2.GetTo() &&
+						edgeEquivalenceFunc(edge1, edge2) {
 						found = true
 						break
 					}
