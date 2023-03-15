@@ -562,7 +562,16 @@ type DefaultMatchAccumulator struct {
 }
 
 func (acc *DefaultMatchAccumulator) StoreResult(_ *MatchContext, path interface{}, symbols map[string]interface{}) {
+	// set := sm.SliceMap[*Path, struct{}]{}
+	// for _, p := range acc.Paths {
+	// 	set.Put([]*Path{{path: []PathElement{{Edge: p.GetEdge(0)}}}}, struct{}{})
+	// }
+	// ps := make([]*Path, 0)
+	// ps = append(ps, path.(*Path))
+	// _, seen := set.Get(ps)
+	// if !seen {
 	acc.Paths = append(acc.Paths, path.(*Path))
+	// }
 	acc.Symbols = append(acc.Symbols, symbols)
 }
 
