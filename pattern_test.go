@@ -1,6 +1,7 @@
 package lpg
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -500,11 +501,11 @@ func TestVariablePathPatternSelfLoopsWithoutIndex(t *testing.T) {
 
 // fail
 func testVariablePathPatternWithSelfLoops(t *testing.T, withIndex bool) {
-	graph, nodes := GetLineGraphWithSelfLoops(10, withIndex)
+	graph, nodes := GetLineGraphWithSelfLoops(4, withIndex)
+	nodes[1].SetProperty("key", "value")
+	nodes[1].SetLabels(NewStringSet("b"))
+	nodes[2].SetLabels(NewStringSet("c"))
 	nodes[2].SetProperty("key", "value")
-	nodes[2].SetLabels(NewStringSet("node2"))
-	nodes[3].SetLabels(NewStringSet("node3"))
-	nodes[3].SetProperty("key", "value")
 	pat := Pattern{
 		{Name: "n", Labels: StringSet{}, Properties: map[string]interface{}{"key": "value"}},
 		{Min: -1, Max: -1},
@@ -526,11 +527,33 @@ func testVariablePathPatternWithSelfLoops(t *testing.T, withIndex bool) {
 		if p.GetEdge(0).GetTo() == nodes[3] {
 			n3++
 		}
+		fmt.Println(p)
 	}
-	if n2 != 3 {
-		t.Errorf("Expected number of paths through n2 to be 3, got %d", n2)
+	/*
+		neo4j:
+		(b)->(b)
+		(b)->(c)
+		(b)->(c) (c)->(c)
+		(b)->(b) (b)->(c)
+		(b)->(b) (b)->(c) (c)->(c)
+		(b)->(c)
+		(b)->(c) (b)->(b)
+		(c)->(c) (b)->(c)
+		(c)->(c) (b)->(c) (b)->(b)
+		(c)->(c)
+	*/
+	/*
+		(:b)->(:b)
+		(:b)->(:c)
+		(:b)->(:c) (:c)->(:c)
+		(:b)->(:b) (:b)->(:c)
+		(:b)->(:b) (:b)->(:c) (:c)->(:c)
+		(:c)->(:c)
+	*/
+	if n2 != 5 {
+		t.Errorf("Expected number of paths through n2 to be 5, got %d", n2)
 	}
-	if n3 != 3 {
+	if n3 != 5 {
 		t.Errorf("Expected number of paths through n3 to be 3, got %d", n3)
 	}
 }

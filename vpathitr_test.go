@@ -32,14 +32,21 @@ import (
 
 func TestCollectAllPaths(t *testing.T) {
 	graph, nodes := GetLineGraphWithSelfLoops(4, true)
-	// nodes[0].SetProperty("key", "value")
+	// nodes[2].SetProperty("key", "value")
+	nodes[2].SetLabels(NewStringSet("node2"))
+	nodes[3].SetLabels(NewStringSet("node3"))
 	nodes[0].SetLabels(NewStringSet("node0"))
 	nodes[1].SetLabels(NewStringSet("node1"))
-	nodes[2].SetLabels(NewStringSet("node2Label"))
-	// nodes[1].SetProperty("key", "value")
+	// nodes[3].SetProperty("key", "value")
 	acc := &DefaultMatchAccumulator{}
 	CollectAllPaths(graph, nodes[1], nodes[1].GetEdges(AnyEdge), func(e *Edge) bool { return true }, AnyEdge, 1, -1, func(e *Path) bool {
 		acc.Paths = append(acc.Paths, e)
 		return true
 	})
+	// for _, p := range acc.Paths {
+	// 	fmt.Println(p)
+	// 	// fmt.Println(p.GetEdge(0), p.GetNode(0))
+	// }
+	// fmt.Println(len(acc.Paths))
+	// t.Fail()
 }
