@@ -531,7 +531,10 @@ func (n *resultAccumulator) Run(ctx *MatchContext) error {
 // GetCurrentPath returns the current path recoded in the stages of the pattern. The result is either a single node, or a path
 func (plan MatchPlan) GetCurrentPath() *Path {
 	if len(plan.steps) == 1 {
-		return plan.steps[0].GetResult().(*Path)
+		if path, ok := plan.steps[0].GetResult().(*Path); ok {
+			return path
+		}
+		return &Path{only: plan.steps[0].GetResult().(*Node)}
 	}
 	out := &Path{}
 	for i := range plan.steps {

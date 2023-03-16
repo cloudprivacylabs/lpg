@@ -68,7 +68,30 @@ func TestPattern(t *testing.T) {
 	if _, i := pat.getFastestElement(graph, map[string]*PatternSymbol{}); i != 0 {
 		t.Errorf("Expecting 0, got %d", i)
 	}
+}
 
+func TestReverseSimplePath(t *testing.T) {
+	graph, nodes := GetLineGraph(2, true)
+	nodes[0].SetProperty("key", "value")
+	nodes[1].SetProperty("key", "value")
+	nodes[0].SetLabels(NewStringSet("a"))
+	nodes[1].SetLabels(NewStringSet("b"))
+	pat := Pattern{
+		{Name: "n", Labels: StringSet{}, Properties: map[string]interface{}{"key": "value"}},
+		{Min: -1, Max: -1, ToLeft: true},
+		{Name: "n2", Labels: StringSet{}}}
+	symbols := make(map[string]*PatternSymbol)
+	acc := &DefaultMatchAccumulator{}
+	if err := pat.Run(graph, symbols, acc); err != nil {
+		t.Error(err)
+		return
+	}
+	if len(acc.Paths) != 1 {
+		t.Errorf("Expected length of path to be: %d got: %d", 1, len(acc.Paths))
+	}
+	if !acc.Paths[0].path[0].Reverse {
+		t.Errorf("Expected path to be in reverse")
+	}
 }
 
 func TestLoopPattern(t *testing.T) {
@@ -205,12 +228,6 @@ func GetCircleGraph(n int, withIndex bool) (*Graph, []*Node) {
 		graph.NewEdge(nodes[i], nodes[i+1], "label", nil)
 	}
 	graph.NewEdge(nodes[n-1], nodes[0], "label", nil)
-	return graph, nodes
-}
-
-func GetTreeGraph(n, width int) (*Graph, []*Node) {
-	graph := NewGraph()
-	nodes := make([]*Node, 0)
 	return graph, nodes
 }
 

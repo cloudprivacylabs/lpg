@@ -145,7 +145,3 @@ func TestAppend(t *testing.T) {
 	}
 	path.AppendPath(appendPath)
 }
-
-// test
-// slice
-// hasprefix
