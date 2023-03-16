@@ -280,7 +280,7 @@ type MatchAccumulator interface {
 	// path is either a Node or []Edge, the matching path symbols
 	// contains the current values for each symbol. The values of the
 	// map is either Node or []Edge
-	StoreResult(ctx *MatchContext, path interface{}, symbols map[string]interface{})
+	StoreResult(ctx *MatchContext, path *Path, symbols map[string]interface{})
 }
 
 type MatchContext struct {
@@ -561,7 +561,7 @@ type DefaultMatchAccumulator struct {
 	Symbols []map[string]interface{}
 }
 
-func (acc *DefaultMatchAccumulator) StoreResult(_ *MatchContext, path interface{}, symbols map[string]interface{}) {
+func (acc *DefaultMatchAccumulator) StoreResult(_ *MatchContext, path *Path, symbols map[string]interface{}) {
 	// set := sm.SliceMap[*Path, struct{}]{}
 	// for _, p := range acc.Paths {
 	// 	set.Put([]*Path{{path: []PathElement{{Edge: p.GetEdge(0)}}}}, struct{}{})
@@ -570,7 +570,7 @@ func (acc *DefaultMatchAccumulator) StoreResult(_ *MatchContext, path interface{
 	// ps = append(ps, path.(*Path))
 	// _, seen := set.Get(ps)
 	// if !seen {
-	acc.Paths = append(acc.Paths, path.(*Path))
+	acc.Paths = append(acc.Paths, path)
 	// }
 	acc.Symbols = append(acc.Symbols, symbols)
 }
