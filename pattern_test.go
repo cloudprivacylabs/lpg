@@ -1,6 +1,7 @@
 package lpg
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -92,6 +93,49 @@ func TestReverseSimplePath(t *testing.T) {
 	if !acc.Paths[0].path[0].Reverse {
 		t.Errorf("Expected path to be in reverse")
 	}
+}
+
+func TestOCGetPattern(t *testing.T) {
+	g := NewGraph()
+	n1 := g.NewNode([]string{"root"}, nil)
+	n2 := g.NewNode([]string{"c1"}, nil)
+	n3 := g.NewNode([]string{"c2"}, nil)
+	n4 := g.NewNode([]string{"c3"}, nil)
+
+	g.NewEdge(n1, n2, "n1n2", nil)
+	g.NewEdge(n1, n3, "n1n3", nil)
+	g.NewEdge(n3, n4, "n3n4", nil)
+	pat := Pattern{
+		{Name: "this", Labels: StringSet{}, Properties: map[string]interface{}{}},
+		{},
+		{},
+
+		{Name: "", Labels: StringSet{}, Properties: map[string]interface{}{}},
+		{Min: 1, Max: 1, ToLeft: true},
+		{},
+
+		{Name: "", Labels: StringSet{}, Properties: map[string]interface{}{}},
+		{},
+		{},
+
+		{Name: "", Labels: StringSet{}, Properties: map[string]interface{}{}},
+		{Min: 1, Max: 1},
+		{},
+
+		{Name: "target", Labels: NewStringSet("c2"), Properties: map[string]interface{}{}},
+		{},
+		{},
+	}
+	symbols := make(map[string]*PatternSymbol)
+	acc := &DefaultMatchAccumulator{}
+	if err := pat.Run(g, symbols, acc); err != nil {
+		t.Error(err)
+		return
+	}
+	if len(acc.Paths) != 1 {
+		t.Errorf("Length of accumulated paths should be %d: got %d", 1, len(acc.Paths))
+	}
+	fmt.Println(len(acc.Paths))
 }
 
 func TestLoopPattern(t *testing.T) {
