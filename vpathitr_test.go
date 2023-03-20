@@ -43,10 +43,4 @@ func TestCollectAllPaths(t *testing.T) {
 		acc.Paths = append(acc.Paths, e)
 		return true
 	})
-	// for _, p := range acc.Paths {
-	// 	fmt.Println(p)
-	// 	// fmt.Println(p.GetEdge(0), p.GetNode(0))
-	// }
-	// fmt.Println(len(acc.Paths))
-	// t.Fail()
 }

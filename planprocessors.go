@@ -101,7 +101,12 @@ func (processor *iterateEdges) init(ctx *MatchContext) {
 func (processor *iterateEdges) Run(ctx *MatchContext, next matchAccumulator) error {
 	processor.init(ctx)
 	for processor.itr.Next() {
-		processor.result = &Path{path: []PathElement{{Edge: processor.itr.Edge()}}}
+		path := &Path{path: []PathElement{{Edge: processor.itr.Edge()}}}
+		// TODO: find edge dir
+		// if  {
+		// 	path.path[0].Reverse = true
+		// }
+		processor.result = path
 		ctx.recordStepResult(processor)
 		if err := next.Run(ctx); err != nil {
 			return err
@@ -153,9 +158,14 @@ func (processor *iterateConnectedEdges) Run(ctx *MatchContext, next matchAccumul
 	}
 	if processor.patternItem.Min == 1 && processor.patternItem.Max == 1 {
 		for processor.edgeItr.Next() {
-			processor.result = &Path{path: []PathElement{
-				{Edge: processor.edgeItr.Edge()},
+			edge := processor.edgeItr.Edge()
+			path := &Path{path: []PathElement{
+				{Edge: edge},
 			}}
+			if edge.GetFrom() != edge.GetTo() && edge.GetTo() == node {
+				path.path[0].Reverse = true
+			}
+			processor.result = path
 			ctx.recordStepResult(processor)
 			logf("IterateConnectedEdges len=1 %+v\n", processor.result)
 			if err := next.Run(ctx); err != nil {
@@ -243,7 +253,6 @@ func (processor *iterateConnectedNodes) Run(ctx *MatchContext, next matchAccumul
 	}
 	logf("Iterate connected nodes with node=%+v\n", node)
 	if processor.nodeFilter(node) {
-
 		constraints, err := processor.patternItem.isConstrainedNodes(ctx)
 		if err != nil {
 			return err
