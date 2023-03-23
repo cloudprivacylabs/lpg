@@ -227,6 +227,7 @@ func (p properties) clone(sourceGraph, targetGraph *Graph, cloneProperty func(st
 		sourceGraph.stringTable.allocate(k)
 	}
 	for k, v := range p {
+		// k == 2, len(strTable) == 1
 		ret[k] = cloneProperty(targetGraph.stringTable.str(k), v)
 	}
 	return ret

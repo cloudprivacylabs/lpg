@@ -67,7 +67,7 @@ func CopySubgraph(sourceNode *Node, target *Graph, clonePropertyFunc func(string
 
 // CopyNode copies the sourceNode into target graph
 func CopyNode(sourceNode *Node, target *Graph, clonePropertyFunc func(string, interface{}) interface{}) *Node {
-	return target.cloneNode(target, sourceNode, clonePropertyFunc)
+	return target.cloneNode(sourceNode.GetGraph(), sourceNode, clonePropertyFunc)
 }
 
 // CopyEdge copies the edge into graph
