@@ -1,5 +1,9 @@
 package lpg
 
+import (
+// "fmt"
+)
+
 // stringTable keeps unique strings in a slice indexed by a map, so
 // identical strings are not repeated, and integers can be used
 // instead of strings.
@@ -22,6 +26,9 @@ func (table *stringTable) init() {
 
 // allocate will allocate a string and return its index
 func (table *stringTable) allocate(s string) int {
+	// defer func() {
+	// 	fmt.Printf("allocate %p %s %v\n", table, s, table)
+	// }()
 	// If string exists, increment reference count
 	i, exists := table.strmap[s]
 	if exists {
@@ -52,10 +59,18 @@ func (table *stringTable) lookup(s string) (int, bool) {
 }
 
 func (table *stringTable) str(i int) string {
+	// defer func() {
+	// 	if err := recover(); err != nil {
+	// 		fmt.Printf("***panic, table: %p %v i %d\n", table, table, i)
+	// 	}
+	// }()
 	return table.strs[i].str
 }
 
 func (table *stringTable) free(i int) {
+	// defer func() {
+	// 	fmt.Println("tree", i, table)
+	// }()
 	table.strs[i].c--
 	if table.strs[i].c > 0 {
 		return
