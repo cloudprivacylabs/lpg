@@ -229,12 +229,10 @@ func (p properties) String() string {
 // lookup proprs from source. allocate to target
 func (p properties) clone(sourceGraph, targetGraph *Graph, cloneProperty func(string, interface{}) interface{}) properties {
 	ret := make(properties, len(p))
-	for k := range targetGraph.stringTable.strmap {
-		sourceGraph.stringTable.allocate(k)
-	}
 	for k, v := range p {
-		// k == 2, len(strTable) == 1
-		ret[k] = cloneProperty(targetGraph.stringTable.str(k), v)
+		key := sourceGraph.stringTable.str(k)
+		ix := targetGraph.stringTable.allocate(key)
+		ret[ix] = cloneProperty(key, v)
 	}
 	return ret
 }

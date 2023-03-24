@@ -408,28 +408,36 @@ func (g *Graph) setNodeProperty(node *Node, key string, value interface{}) {
 	if node.properties == nil {
 		node.properties = make(properties)
 	}
-	lookupKey, ok := g.stringTable.lookup(key)
-	if !ok {
-		lookupKey = g.stringTable.allocate(key)
-	}
-	oldValue, exists := node.properties[lookupKey]
+
 	nix := g.index.isNodePropertyIndexed(key)
-	if nix != nil && exists {
-		nix.remove(oldValue, node.id)
+	if lookupKey, exists := g.stringTable.lookup(key); exists {
+		if oldValue, exists := node.properties[lookupKey]; exists {
+			// Key already exists in properties, replace value
+			if nix != nil {
+				nix.remove(oldValue, node.id)
+			}
+			node.properties[lookupKey] = value
+			if nix != nil {
+				nix.add(value, node.id, node)
+			}
+			return
+		}
 	}
-	node.properties[lookupKey] = value
+	// Key is not in properties
+	ix := g.stringTable.allocate(key)
+	node.properties[ix] = value
 	if nix != nil {
 		nix.add(value, node.id, node)
 	}
 }
 
-func (g *Graph) cloneNode(targetGraph *Graph, node *Node, cloneProperty func(string, interface{}) interface{}) *Node {
+func (g *Graph) cloneNode(sourceGraph *Graph, sourceNode *Node, cloneProperty func(string, interface{}) interface{}) *Node {
 	newNode := &Node{
-		labels: node.labels.Clone(),
+		labels: sourceNode.labels.Clone(),
 		graph:  g,
 	}
-	if node.properties != nil {
-		newNode.properties = node.properties.clone(g, targetGraph, cloneProperty)
+	if sourceNode.properties != nil {
+		newNode.properties = sourceNode.properties.clone(sourceGraph, g, cloneProperty)
 	}
 	newNode.id = g.idBase
 	g.idBase++
@@ -483,7 +491,7 @@ func (g *Graph) detachNode(node *Node) {
 	node.outgoing = edgeMap{}
 }
 
-func (g *Graph) cloneEdge(from, to *Node, edge *Edge, cloneProperty func(string, interface{}) interface{}) *Edge {
+func (g *Graph) cloneEdge(from, to *Node, sourceEdge *Edge, cloneProperty func(string, interface{}) interface{}) *Edge {
 	if from.graph != g {
 		panic("from node is not in graph")
 	}
@@ -493,11 +501,11 @@ func (g *Graph) cloneEdge(from, to *Node, edge *Edge, cloneProperty func(string,
 	newEdge := &Edge{
 		from:  from,
 		to:    to,
-		label: edge.label,
+		label: sourceEdge.label,
 		id:    g.idBase,
 	}
-	if edge.properties != nil {
-		newEdge.properties = edge.properties.clone(g, to.graph, cloneProperty)
+	if sourceEdge.properties != nil {
+		newEdge.properties = sourceEdge.properties.clone(to.graph, g, cloneProperty)
 	}
 	g.idBase++
 	g.allEdges.add(newEdge, 0)
@@ -531,18 +539,26 @@ func (g *Graph) setEdgeProperty(edge *Edge, key string, value interface{}) {
 	if edge.properties == nil {
 		edge.properties = make(properties)
 	}
-	lookupKey, ok := g.stringTable.lookup(key)
-	if !ok {
-		lookupKey = g.stringTable.allocate(key)
+
+	eix := g.index.isEdgePropertyIndexed(key)
+	if lookupKey, exists := g.stringTable.lookup(key); exists {
+		if oldValue, exists := edge.properties[lookupKey]; exists {
+			// Key already exists in properties, replace value
+			if eix != nil {
+				eix.remove(oldValue, edge.id)
+			}
+			edge.properties[lookupKey] = value
+			if eix != nil {
+				eix.add(value, edge.id, edge)
+			}
+			return
+		}
 	}
-	oldValue, exists := edge.properties[lookupKey]
-	nix := g.index.isEdgePropertyIndexed(key)
-	if nix != nil && exists {
-		nix.remove(oldValue, edge.id)
-	}
-	edge.properties[lookupKey] = value
-	if nix != nil {
-		nix.add(value, edge.id, edge)
+	// Key is not in properties
+	ix := g.stringTable.allocate(key)
+	edge.properties[ix] = value
+	if eix != nil {
+		eix.add(value, edge.id, edge)
 	}
 }
 
