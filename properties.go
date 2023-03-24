@@ -19,30 +19,26 @@ import (
 	"strings"
 )
 
-type properties map[int]any
+type properties map[string]any
 
 // GetProperty returns the value for the key, and whether or not key
 // exists. p can be nil
-func (p *properties) getProperty(strTable *stringTable, key string) (interface{}, bool) {
+func (p *properties) getProperty(key string) (interface{}, bool) {
 	if *p == nil {
 		return nil, false
 	}
-	lookupIdx, ok := strTable.lookup(key)
-	if !ok {
-		return nil, false
-	}
-	x, ok := (*p)[lookupIdx]
+	x, ok := (*p)[key]
 	return x, ok
 }
 
 // ForEachProperty calls f for each property in p until f returns
 // false. Returns false if f returned false. p can be nil
-func (p *properties) forEachProperty(strTable *stringTable, f func(string, interface{}) bool) bool {
+func (p *properties) forEachProperty(f func(string, interface{}) bool) bool {
 	if *p == nil {
 		return true
 	}
 	for k, v := range *p {
-		if !f(strTable.str(k), v) {
+		if !f(k, v) {
 			return false
 		}
 	}
@@ -221,7 +217,7 @@ func (p properties) String() string {
 		if _, edge := v.(*Edge); edge {
 			continue
 		}
-		elements = append(elements, fmt.Sprintf("%d:%v", k, v))
+		elements = append(elements, fmt.Sprintf("%s:%v", k, v))
 	}
 	return "{" + strings.Join(elements, " ") + "}"
 }
