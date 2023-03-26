@@ -30,22 +30,18 @@ package lpg
 // Zero value for a Graph is not usable. Use `NewGraph` to construct a
 // new graph.
 type Graph struct {
-	index       graphIndex
-	allNodes    nodeList
-	allEdges    edgeMap
-	idBase      int
-	stringTable stringTable
+	index    graphIndex
+	allNodes nodeList
+	allEdges edgeMap
+	idBase   int
 }
 
 // NewGraph constructs and returns a new graph. The new graph has no
 // nodes or edges.
 func NewGraph() *Graph {
-	st := stringTable{}
-	st.init()
 	return &Graph{
-		index:       newGraphIndex(),
-		allNodes:    nodeList{},
-		stringTable: st,
+		index:    newGraphIndex(),
+		allNodes: nodeList{},
 	}
 }
 
@@ -58,7 +54,7 @@ func (g *Graph) NewNode(labels []string, props map[string]interface{}) *Node {
 	if len(props) > 0 {
 		node.properties = make(properties)
 		for k, v := range props {
-			node.properties[g.stringTable.allocate(k)] = v
+			node.properties[k] = v
 		}
 	}
 	node.id = g.idBase
@@ -89,7 +85,7 @@ func (g *Graph) NewEdge(from, to *Node, label string, props map[string]interface
 	if len(props) > 0 {
 		newEdge.properties = make(properties)
 		for k, v := range props {
-			newEdge.properties[g.stringTable.allocate(k)] = v
+			newEdge.properties[k] = v
 		}
 	}
 	g.idBase++
@@ -405,27 +401,18 @@ func (g *Graph) setNodeLabels(node *Node, labels StringSet) {
 }
 
 func (g *Graph) setNodeProperty(node *Node, key string, value interface{}) {
+	nix := g.index.isNodePropertyIndexed(key)
 	if node.properties == nil {
 		node.properties = make(properties)
-	}
-
-	nix := g.index.isNodePropertyIndexed(key)
-	if lookupKey, exists := g.stringTable.lookup(key); exists {
-		if oldValue, exists := node.properties[lookupKey]; exists {
-			// Key already exists in properties, replace value
+	} else {
+		oldValue, exists := node.properties[key]
+		if exists {
 			if nix != nil {
 				nix.remove(oldValue, node.id)
 			}
-			node.properties[lookupKey] = value
-			if nix != nil {
-				nix.add(value, node.id, node)
-			}
-			return
 		}
 	}
-	// Key is not in properties
-	ix := g.stringTable.allocate(key)
-	node.properties[ix] = value
+	node.properties[key] = value
 	if nix != nil {
 		nix.add(value, node.id, node)
 	}
@@ -454,11 +441,7 @@ func (g *Graph) removeNodeProperty(node *Node, key string) {
 	if node.properties == nil {
 		return
 	}
-	lookupKey, ok := g.stringTable.lookup(key)
-	if !ok {
-		return
-	}
-	value, exists := node.properties[lookupKey]
+	value, exists := node.properties[key]
 	if !exists {
 		return
 	}
@@ -466,8 +449,7 @@ func (g *Graph) removeNodeProperty(node *Node, key string) {
 	if nix != nil {
 		nix.remove(value, node.id)
 	}
-	g.stringTable.free(lookupKey)
-	delete(node.properties, lookupKey)
+	delete(node.properties, key)
 }
 
 func (g *Graph) detachRemoveNode(node *Node) {
@@ -536,29 +518,20 @@ func (g *Graph) removeEdge(edge *Edge) {
 }
 
 func (g *Graph) setEdgeProperty(edge *Edge, key string, value interface{}) {
+	nix := g.index.isEdgePropertyIndexed(key)
 	if edge.properties == nil {
 		edge.properties = make(properties)
-	}
-
-	eix := g.index.isEdgePropertyIndexed(key)
-	if lookupKey, exists := g.stringTable.lookup(key); exists {
-		if oldValue, exists := edge.properties[lookupKey]; exists {
-			// Key already exists in properties, replace value
-			if eix != nil {
-				eix.remove(oldValue, edge.id)
+	} else {
+		oldValue, exists := edge.properties[key]
+		if exists {
+			if nix != nil {
+				nix.remove(oldValue, edge.id)
 			}
-			edge.properties[lookupKey] = value
-			if eix != nil {
-				eix.add(value, edge.id, edge)
-			}
-			return
 		}
 	}
-	// Key is not in properties
-	ix := g.stringTable.allocate(key)
-	edge.properties[ix] = value
-	if eix != nil {
-		eix.add(value, edge.id, edge)
+	edge.properties[key] = value
+	if nix != nil {
+		nix.add(value, edge.id, edge)
 	}
 }
 
@@ -566,11 +539,7 @@ func (g *Graph) removeEdgeProperty(edge *Edge, key string) {
 	if edge.properties == nil {
 		return
 	}
-	lookupKey, ok := g.stringTable.lookup(key)
-	if !ok {
-		return
-	}
-	oldValue, exists := edge.properties[lookupKey]
+	oldValue, exists := edge.properties[key]
 	if !exists {
 		return
 	}
@@ -578,8 +547,7 @@ func (g *Graph) removeEdgeProperty(edge *Edge, key string) {
 	if nix != nil {
 		nix.remove(oldValue, edge.id)
 	}
-	g.stringTable.free(lookupKey)
-	delete(edge.properties, lookupKey)
+	delete(edge.properties, key)
 }
 
 type WithProperties interface {

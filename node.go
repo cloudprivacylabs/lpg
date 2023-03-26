@@ -33,11 +33,11 @@ type Node struct {
 
 // GetProperty returns the property value in the string table
 func (node *Node) GetProperty(key string) (interface{}, bool) {
-	return node.getProperty(&node.GetGraph().stringTable, key)
+	return node.getProperty(key)
 }
 
 func (node *Node) ForEachProperty(f func(string, interface{}) bool) bool {
-	return node.forEachProperty(&node.GetGraph().stringTable, f)
+	return node.forEachProperty(f)
 }
 
 // GetGraph returns the graph owning the node

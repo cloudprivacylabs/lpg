@@ -198,7 +198,7 @@ func (j JSON) Encode(g *Graph, out io.Writer) error {
 		var e interface{}
 		edgeProps := make(map[string]any)
 		for ix, v := range edge.properties {
-			edgeProps[g.stringTable.str(ix)] = v
+			edgeProps[ix] = v
 		}
 		properties, err := marshalProperties(edgeProps)
 		if err != nil {
@@ -288,7 +288,7 @@ func (j JSON) Encode(g *Graph, out io.Writer) error {
 				}
 				nodeProps := make(map[string]any)
 				for ix, v := range node.properties {
-					nodeProps[g.stringTable.str(ix)] = v
+					nodeProps[ix] = v
 				}
 				m, err := marshalProperties(nodeProps)
 				if err != nil {
