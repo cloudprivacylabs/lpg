@@ -123,6 +123,8 @@ func (p *Path) Append(path ...PathElement) *Path {
 	}
 	last := p.Last()
 	if last != nil && last != path[0].GetSourceNode() {
+		// fmt.Println(last.GetLabels(), path[0].GetSourceNode().GetLabels())
+		// fmt.Println(p.String())
 		panic("Appended edge is disconnected from path")
 	}
 	if p.only != nil {

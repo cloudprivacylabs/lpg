@@ -70,6 +70,32 @@ func TestPattern(t *testing.T) {
 	}
 }
 
+func TestPathPattern(t *testing.T) {
+	graph, nodes := GetLineGraph(10, true)
+	nodes[4].SetLabels(NewStringSet("n4"))
+	nodes[5].SetLabels(NewStringSet("n5"))
+	nodes[6].SetLabels(NewStringSet("n6"))
+	pat := Pattern{
+		{},
+		{Min: 1, Max: 1},
+		{Name: "bnode", Labels: NewStringSet("n5")},
+		{Min: 1, Max: 1},
+		{},
+	}
+	symbols := make(map[string]*PatternSymbol)
+	acc := &DefaultMatchAccumulator{}
+	if err := pat.Run(graph, symbols, acc); err != nil {
+		t.Error(err)
+		return
+	}
+	if len(acc.Paths) != 1 {
+		t.Errorf("expected path of length 1, got %v", len(acc.Paths))
+	}
+	if acc.Paths[0].String() != "(:n4 {})->(:n5 {})->(:n6 {})" {
+		t.Errorf("expected path to be (:n4 {})->(:n5 {})->(:n6 {}) got %s", acc.Paths[0].String())
+	}
+}
+
 func TestReverseSimplePath(t *testing.T) {
 	graph, nodes := GetLineGraph(2, true)
 	nodes[0].SetProperty("key", "value")
@@ -573,7 +599,6 @@ func TestVariablePathPatternSelfLoopsWithoutIndex(t *testing.T) {
 	testVariablePathPatternWithSelfLoops(t, false)
 }
 
-// fail
 func testVariablePathPatternWithSelfLoops(t *testing.T, withIndex bool) {
 	graph, nodes := GetLineGraphWithSelfLoops(4, withIndex)
 	nodes[1].SetProperty("key", "value")
@@ -773,12 +798,6 @@ func BenchmarkSimpleDirectedPathPatternWithoutIndex(b *testing.B) {
 
 func benchmarkSimpleDirectedPathPattern(b *testing.B, withIndex bool) {
 	graph, nodes := GetLineGraph(10, withIndex)
-	for i := 0; i < 10; i++ {
-		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
-	}
-	for i := 0; i < 9; i++ {
-		graph.NewEdge(nodes[i], nodes[i+1], "label", nil)
-	}
 	nodes[5].SetProperty("key", "value")
 	nodes[6].SetProperty("key", "value")
 	pat := Pattern{
@@ -794,12 +813,6 @@ func benchmarkSimpleDirectedPathPattern(b *testing.B, withIndex bool) {
 
 func benchmarkSimpleDirectedPathPatternWithSelfLoops(b *testing.B, withIndex bool) {
 	graph, nodes := GetLineGraphWithSelfLoops(10, withIndex)
-	for i := 0; i < 10; i++ {
-		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
-	}
-	for i := 0; i < 9; i++ {
-		graph.NewEdge(nodes[i], nodes[i+1], "label", nil)
-	}
 	nodes[2].SetProperty("key", "value")
 	nodes[8].SetProperty("key", "value")
 	pat := Pattern{
@@ -814,12 +827,6 @@ func benchmarkSimpleDirectedPathPatternWithSelfLoops(b *testing.B, withIndex boo
 }
 func benchmarkSimpleDirectedPathPatternCircleGraph(b *testing.B, withIndex bool) {
 	graph, nodes := GetCircleGraph(10, withIndex)
-	for i := 0; i < 10; i++ {
-		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
-	}
-	for i := 0; i < 9; i++ {
-		graph.NewEdge(nodes[i], nodes[i+1], "label", nil)
-	}
 	nodes[2].SetProperty("key", "value")
 	nodes[8].SetProperty("key", "value")
 	pat := Pattern{
@@ -846,12 +853,6 @@ func BenchmarkSimplePathPatternWithoutIndex(b *testing.B) {
 
 func benchmarkSimplePathPattern(b *testing.B, withIndex bool) {
 	graph, nodes := GetLineGraph(10, withIndex)
-	for i := 0; i < 10; i++ {
-		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
-	}
-	for i := 0; i < 9; i++ {
-		graph.NewEdge(nodes[i], nodes[i+1], "label", nil)
-	}
 	nodes[2].SetProperty("key", "value")
 	nodes[8].SetProperty("key", "value")
 	pat := Pattern{
@@ -867,12 +868,6 @@ func benchmarkSimplePathPattern(b *testing.B, withIndex bool) {
 
 func benchmarkSimplePathPatternWithSelfLoops(b *testing.B, withIndex bool) {
 	graph, nodes := GetLineGraphWithSelfLoops(10, withIndex)
-	for i := 0; i < 10; i++ {
-		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
-	}
-	for i := 0; i < 9; i++ {
-		graph.NewEdge(nodes[i], nodes[i+1], "label", nil)
-	}
 	nodes[2].SetProperty("key", "value")
 	nodes[8].SetProperty("key", "value")
 	pat := Pattern{
@@ -887,12 +882,6 @@ func benchmarkSimplePathPatternWithSelfLoops(b *testing.B, withIndex bool) {
 }
 func benchmarkSimplePathPatternCircleGraph(b *testing.B, withIndex bool) {
 	graph, nodes := GetCircleGraph(10, withIndex)
-	for i := 0; i < 10; i++ {
-		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
-	}
-	for i := 0; i < 9; i++ {
-		graph.NewEdge(nodes[i], nodes[i+1], "label", nil)
-	}
 	nodes[2].SetProperty("key", "value")
 	nodes[8].SetProperty("key", "value")
 	pat := Pattern{
@@ -919,12 +908,6 @@ func BenchmarkVariablePathPatternWithoutIndex(b *testing.B) {
 
 func benchmarkVariablePathPattern(b *testing.B, withIndex bool) {
 	graph, nodes := GetLineGraph(10, withIndex)
-	for i := 0; i < 10; i++ {
-		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
-	}
-	for i := 0; i < 9; i++ {
-		graph.NewEdge(nodes[i], nodes[i+1], "label", nil)
-	}
 	nodes[2].SetProperty("key", "value")
 	nodes[8].SetProperty("key", "value")
 	pat := Pattern{
@@ -940,12 +923,6 @@ func benchmarkVariablePathPattern(b *testing.B, withIndex bool) {
 
 func benchmarkVariablePathPatternCircleGraph(b *testing.B, withIndex bool) {
 	graph, nodes := GetCircleGraph(10, withIndex)
-	for i := 0; i < 10; i++ {
-		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
-	}
-	for i := 0; i < 9; i++ {
-		graph.NewEdge(nodes[i], nodes[i+1], "label", nil)
-	}
 	nodes[2].SetProperty("key", "value")
 	nodes[8].SetProperty("key", "value")
 	pat := Pattern{
@@ -961,12 +938,6 @@ func benchmarkVariablePathPatternCircleGraph(b *testing.B, withIndex bool) {
 
 func benchmarkVariablePathPatternWithSelfLoops(b *testing.B, withIndex bool) {
 	graph, nodes := GetLineGraphWithSelfLoops(10, withIndex)
-	for i := 0; i < 10; i++ {
-		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
-	}
-	for i := 0; i < 9; i++ {
-		graph.NewEdge(nodes[i], nodes[i+1], "label", nil)
-	}
 	nodes[2].SetProperty("key", "value")
 	nodes[8].SetProperty("key", "value")
 	pat := Pattern{
@@ -993,12 +964,6 @@ func BenchmarkPathLengthTwoPatternWithoutIndex(b *testing.B) {
 
 func benchmarkPathLengthTwoPattern(b *testing.B, withIndex bool) {
 	graph, nodes := GetLineGraph(10, withIndex)
-	for i := 0; i < 10; i++ {
-		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
-	}
-	for i := 0; i < 9; i++ {
-		graph.NewEdge(nodes[i], nodes[i+1], "label", nil)
-	}
 	nodes[4].SetProperty("key", "value")
 	nodes[7].SetProperty("key", "value")
 	pat := Pattern{
@@ -1013,12 +978,6 @@ func benchmarkPathLengthTwoPattern(b *testing.B, withIndex bool) {
 }
 func benchmarkPathLengthTwoPatternWithSelfLoops(b *testing.B, withIndex bool) {
 	graph, nodes := GetLineGraphWithSelfLoops(10, withIndex)
-	for i := 0; i < 10; i++ {
-		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
-	}
-	for i := 0; i < 9; i++ {
-		graph.NewEdge(nodes[i], nodes[i+1], "label", nil)
-	}
 	nodes[4].SetProperty("key", "value")
 	nodes[7].SetProperty("key", "value")
 	pat := Pattern{
@@ -1033,12 +992,6 @@ func benchmarkPathLengthTwoPatternWithSelfLoops(b *testing.B, withIndex bool) {
 }
 func benchmarkPathLengthTwoPatternCircleGraph(b *testing.B, withIndex bool) {
 	graph, nodes := GetCircleGraph(10, withIndex)
-	for i := 0; i < 10; i++ {
-		nodes = append(nodes, graph.NewNode([]string{"a"}, nil))
-	}
-	for i := 0; i < 9; i++ {
-		graph.NewEdge(nodes[i], nodes[i+1], "label", nil)
-	}
 	nodes[4].SetProperty("key", "value")
 	nodes[7].SetProperty("key", "value")
 	pat := Pattern{
