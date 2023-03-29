@@ -91,8 +91,35 @@ func TestPathPattern(t *testing.T) {
 	if len(acc.Paths) != 1 {
 		t.Errorf("expected path of length 1, got %v", len(acc.Paths))
 	}
-	if acc.Paths[0].String() != "(:n4 {})->(:n5 {})->(:n6 {})" {
-		t.Errorf("expected path to be (:n4 {})->(:n5 {})->(:n6 {}) got %s", acc.Paths[0].String())
+	if acc.Paths[0].String() != "(:n4 {})->(:n5 {}) (:n5 {})->(:n6 {})" {
+		t.Errorf("expected path to be (:n4 {})->(:n5 {}) (:n5 {})->(:n6 {}) got %s", acc.Paths[0].String())
+	}
+
+	// ()->(b)->()->(d)->()
+	nodes[7].SetLabels(NewStringSet("n7"))
+	nodes[8].SetLabels(NewStringSet("n8"))
+	pat = Pattern{
+		{},
+		{Min: 1, Max: 1},
+		{Name: "bnode", Labels: NewStringSet("n5")},
+		{Min: 1, Max: 1},
+		{},
+		{Min: 1, Max: 1},
+		{Name: "dnode", Labels: NewStringSet("n7")},
+		{Min: 1, Max: 1},
+		{},
+	}
+	symbols = make(map[string]*PatternSymbol)
+	acc = &DefaultMatchAccumulator{}
+	if err := pat.Run(graph, symbols, acc); err != nil {
+		t.Error(err)
+		return
+	}
+	if len(acc.Paths) != 1 {
+		t.Errorf("expected path of length 1, got %v", len(acc.Paths))
+	}
+	if acc.Paths[0].String() != "(:n4 {})->(:n5 {}) (:n5 {})->(:n6 {}) (:n6 {})->(:n7 {}) (:n7 {})->(:n8 {})" {
+		t.Errorf("expected path to be (:n4 {})->(:n5 {}) (:n5 {})->(:n6 {}) (:n6 {})->(:n7 {}) (:n7 {})->(:n8 {}) got %s", acc.Paths[0].String())
 	}
 }
 

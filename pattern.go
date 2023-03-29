@@ -267,7 +267,8 @@ func (p *PatternSymbol) EdgeSlice() *Path {
 }
 
 type MatchPlan struct {
-	steps []planProcessor
+	steps    []planProcessor
+	nForward int
 }
 
 type planProcessor interface {
@@ -418,6 +419,7 @@ func (pattern Pattern) GetPlan(graph *Graph, symbols map[string]*PatternSymbol) 
 				}
 			}
 			plan.steps = append(plan.steps, processors[i])
+			plan.nForward++
 		}
 		// Go backwards
 		for i := index - 1; i >= 0; i-- {
@@ -474,6 +476,7 @@ func (pattern Pattern) GetPlan(graph *Graph, symbols map[string]*PatternSymbol) 
 				}
 			}
 			plan.steps = append(plan.steps, processors[i])
+			plan.nForward++
 		}
 		// Go backwards
 		for i := index - 1; i >= 0; i-- {
@@ -538,11 +541,21 @@ func (plan MatchPlan) GetCurrentPath() *Path {
 	}
 	out := &Path{}
 	for i := range plan.steps {
+		if i > plan.nForward {
+			break
+		}
 		if path, ok := plan.steps[i].GetResult().(*Path); ok {
 			out.AppendPath(path)
 		}
 	}
-	return out
+	revPathOut := &Path{}
+	for i := len(plan.steps) - 1; i >= plan.nForward; i-- {
+		if path, ok := plan.steps[i].GetResult().(*Path); ok {
+			revPathOut.Append(PathElement{Edge: path.path[0].Edge, Reverse: !path.path[0].Reverse})
+			// revPathOut.AppendPath(path)
+		}
+	}
+	return revPathOut.AppendPath(out)
 }
 
 // CaptureSymbolValues captures the current symbol values as nodes or []Edges
