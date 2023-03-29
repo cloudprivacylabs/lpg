@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,9 +13,7 @@
 // limitations under the License.
 package lpg
 
-import (
 //	"fmt"
-)
 
 func logf(pattern string, args ...interface{}) {
 	//	fmt.Printf(pattern, args...)
@@ -81,7 +79,7 @@ func (processor *iterateNodes) IsNode()                     {}
 type iterateEdges struct {
 	itr         EdgeIterator
 	patternItem PatternItem
-	result      []*Edge
+	result      *Path
 	initialized bool
 }
 
@@ -103,7 +101,12 @@ func (processor *iterateEdges) init(ctx *MatchContext) {
 func (processor *iterateEdges) Run(ctx *MatchContext, next matchAccumulator) error {
 	processor.init(ctx)
 	for processor.itr.Next() {
-		processor.result = []*Edge{processor.itr.Edge()}
+		path := &Path{path: []PathElement{{Edge: processor.itr.Edge()}}}
+		// TODO: find edge dir
+		// if  {
+		// 	path.path[0].Reverse = true
+		// }
+		processor.result = path
 		ctx.recordStepResult(processor)
 		if err := next.Run(ctx); err != nil {
 			return err
@@ -121,7 +124,7 @@ type iterateConnectedEdges struct {
 	patternItem PatternItem
 	source      planProcessor
 	dir         EdgeDir
-	result      []*Edge
+	result      *Path
 	edgeFilter  func(*Edge) bool
 	edgeItr     EdgeIterator
 }
@@ -155,7 +158,14 @@ func (processor *iterateConnectedEdges) Run(ctx *MatchContext, next matchAccumul
 	}
 	if processor.patternItem.Min == 1 && processor.patternItem.Max == 1 {
 		for processor.edgeItr.Next() {
-			processor.result = []*Edge{processor.edgeItr.Edge()}
+			edge := processor.edgeItr.Edge()
+			path := &Path{path: []PathElement{
+				{Edge: edge},
+			}}
+			if edge.GetFrom() != edge.GetTo() && edge.GetTo() == node {
+				path.path[0].Reverse = true
+			}
+			processor.result = path
 			ctx.recordStepResult(processor)
 			logf("IterateConnectedEdges len=1 %+v\n", processor.result)
 			if err := next.Run(ctx); err != nil {
@@ -167,11 +177,11 @@ func (processor *iterateConnectedEdges) Run(ctx *MatchContext, next matchAccumul
 	}
 	logf("IterateConnectedEdges min=%d max=%d %+v\n", processor.patternItem.Min, processor.patternItem.Max, processor.result)
 	var err error
-	CollectAllPaths(ctx.Graph, node, processor.edgeItr, processor.edgeFilter, processor.dir, processor.patternItem.Min, processor.patternItem.Max, func(path []*Edge, endNode *Node) bool {
+	CollectAllPaths(ctx.Graph, node, processor.edgeItr, processor.edgeFilter, processor.dir, processor.patternItem.Min, processor.patternItem.Max, func(path *Path) bool {
 		processor.result = path
-		logf("IterateConnectedEdges testing len=%d %+v\n", len(path), processor.result)
+		logf("IterateConnectedEdges testing len=%d %+v\n", len(path.path), processor.result)
 		ctx.recordStepResult(processor)
-		ctx.variablePathNode = endNode
+		ctx.variablePathNode = path.Last()
 		if err = next.Run(ctx); err != nil {
 			return false
 		}
@@ -179,6 +189,7 @@ func (processor *iterateConnectedEdges) Run(ctx *MatchContext, next matchAccumul
 		ctx.resetStepResult(processor)
 		return true
 	})
+
 	return err
 }
 
@@ -213,8 +224,8 @@ func newIterateConnectedNodes(source planProcessor, item PatternItem, useNode in
 }
 
 func (processor *iterateConnectedNodes) Run(ctx *MatchContext, next matchAccumulator) error {
-	edges := processor.source.GetResult().([]*Edge)
-	edge := edges[len(edges)-1]
+	edges := processor.source.GetResult().(*Path)
+	edge := edges.GetEdge(edges.NumEdges() - 1)
 	var node *Node
 
 	if ctx.variablePathNode != nil {
@@ -242,7 +253,6 @@ func (processor *iterateConnectedNodes) Run(ctx *MatchContext, next matchAccumul
 	}
 	logf("Iterate connected nodes with node=%+v\n", node)
 	if processor.nodeFilter(node) {
-
 		constraints, err := processor.patternItem.isConstrainedNodes(ctx)
 		if err != nil {
 			return err

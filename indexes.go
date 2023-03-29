@@ -106,7 +106,7 @@ func (g *graphIndex) EdgesWithProperty(key string) EdgeIterator {
 	return edgeIterator{index.valueItr()}
 }
 
-func (g *graphIndex) addNodeToIndex(node *Node) {
+func (g *graphIndex) addNodeToIndex(node *Node, graph *Graph) {
 	g.nodesByLabel.Add(node)
 
 	for k, v := range node.properties {
@@ -118,7 +118,7 @@ func (g *graphIndex) addNodeToIndex(node *Node) {
 	}
 }
 
-func (g *graphIndex) removeNodeFromIndex(node *Node) {
+func (g *graphIndex) removeNodeFromIndex(node *Node, graph *Graph) {
 	g.nodesByLabel.Remove(node)
 
 	for k, v := range node.properties {
@@ -153,7 +153,7 @@ func (g *graphIndex) EdgePropertyIndex(propertyName string, graph *Graph, it Ind
 	}
 }
 
-func (g *graphIndex) addEdgeToIndex(edge *Edge) {
+func (g *graphIndex) addEdgeToIndex(edge *Edge, graph *Graph) {
 	for k, v := range edge.properties {
 		index, found := g.edgeProperties[k]
 		if !found {
@@ -163,7 +163,7 @@ func (g *graphIndex) addEdgeToIndex(edge *Edge) {
 	}
 }
 
-func (g *graphIndex) removeEdgeFromIndex(edge *Edge) {
+func (g *graphIndex) removeEdgeFromIndex(edge *Edge, graph *Graph) {
 	for k, v := range edge.properties {
 		index, found := g.edgeProperties[k]
 		if !found {

@@ -21,7 +21,7 @@ type withProperties interface {
 // CopyGraph copies source graph into target, using clonePropertyFunc to clone properties
 func CopyGraph(source, target *Graph, clonePropertyFunc func(string, interface{}) interface{}) map[*Node]*Node {
 	return CopyGraphf(source, func(node *Node, nodeMap map[*Node]*Node) *Node {
-		return target.cloneNode(node, clonePropertyFunc)
+		return target.cloneNode(source, node, clonePropertyFunc)
 	}, func(edge *Edge, nodeMap map[*Node]*Node) *Edge {
 		return target.cloneEdge(nodeMap[edge.GetFrom()], nodeMap[edge.GetTo()], edge, clonePropertyFunc)
 	})
@@ -67,7 +67,7 @@ func CopySubgraph(sourceNode *Node, target *Graph, clonePropertyFunc func(string
 
 // CopyNode copies the sourceNode into target graph
 func CopyNode(sourceNode *Node, target *Graph, clonePropertyFunc func(string, interface{}) interface{}) *Node {
-	return target.cloneNode(sourceNode, clonePropertyFunc)
+	return target.cloneNode(sourceNode.GetGraph(), sourceNode, clonePropertyFunc)
 }
 
 // CopyEdge copies the edge into graph
