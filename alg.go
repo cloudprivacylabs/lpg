@@ -120,6 +120,7 @@ func CheckIsomorphism(g1, g2 *Graph, nodeEquivalenceFunc func(n1, n2 *Node) bool
 			for _, edge1 := range edges1 {
 				found := false
 				for _, edge2 := range edges2 {
+					// edge1.Edge.GetTo()
 					if nodeMapping[edge1.GetTo()] == edge2.GetTo() &&
 						edgeEquivalenceFunc(edge1, edge2) {
 						found = true

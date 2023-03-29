@@ -1,0 +1,19 @@
+{
+    "nodes": [
+        {
+            "n": 5,
+            "properties": {
+                "id": "5"
+            },
+            "edges": [
+                { "to": 6, "label": "h" }
+            ]
+        },
+        {
+            "n": 6,
+            "properties": {
+                "id": "6"
+            }
+        }
+    ]
+}

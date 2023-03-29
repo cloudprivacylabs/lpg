@@ -226,7 +226,7 @@ func (p *PatternSymbol) Add(item interface{}) bool {
 		}
 		p.Edges.Add(k)
 
-	case []*Edge:
+	case *Path:
 		p.AddPath(k)
 	}
 	return true
@@ -239,12 +239,12 @@ func (p *PatternSymbol) AddNode(item *Node) {
 	p.Nodes.Add(item)
 }
 
-func (p *PatternSymbol) AddPath(path []*Edge) {
+func (p *PatternSymbol) AddPath(path *Path) {
 	if p.Edges == nil {
 		p.Edges = NewEdgeSet()
 	}
-	for _, x := range path {
-		p.Edges.Add(x)
+	for _, x := range path.path {
+		p.Edges.Add(x.Edge)
 	}
 }
 
@@ -255,15 +255,20 @@ func (p *PatternSymbol) NodeSlice() []*Node {
 	return nil
 }
 
-func (p *PatternSymbol) EdgeSlice() []*Edge {
+func (p *PatternSymbol) EdgeSlice() *Path {
 	if p.Edges != nil {
-		return p.Edges.Slice()
+		path := &Path{path: make([]PathElement, 0)}
+		for itr := p.Edges.Iterator(); itr.Next(); {
+			path.path = append(path.path, PathElement{Edge: itr.Edge()})
+		}
+		return path
 	}
 	return nil
 }
 
 type MatchPlan struct {
-	steps []planProcessor
+	steps    []planProcessor
+	nForward int
 }
 
 type planProcessor interface {
@@ -276,7 +281,7 @@ type MatchAccumulator interface {
 	// path is either a Node or []Edge, the matching path symbols
 	// contains the current values for each symbol. The values of the
 	// map is either Node or []Edge
-	StoreResult(ctx *MatchContext, path interface{}, symbols map[string]interface{})
+	StoreResult(ctx *MatchContext, path *Path, symbols map[string]interface{})
 }
 
 type MatchContext struct {
@@ -414,6 +419,7 @@ func (pattern Pattern) GetPlan(graph *Graph, symbols map[string]*PatternSymbol) 
 				}
 			}
 			plan.steps = append(plan.steps, processors[i])
+			plan.nForward++
 		}
 		// Go backwards
 		for i := index - 1; i >= 0; i-- {
@@ -470,6 +476,7 @@ func (pattern Pattern) GetPlan(graph *Graph, symbols map[string]*PatternSymbol) 
 				}
 			}
 			plan.steps = append(plan.steps, processors[i])
+			plan.nForward++
 		}
 		// Go backwards
 		for i := index - 1; i >= 0; i-- {
@@ -525,17 +532,30 @@ func (n *resultAccumulator) Run(ctx *MatchContext) error {
 }
 
 // GetCurrentPath returns the current path recoded in the stages of the pattern. The result is either a single node, or a path
-func (plan MatchPlan) GetCurrentPath() interface{} {
+func (plan MatchPlan) GetCurrentPath() *Path {
 	if len(plan.steps) == 1 {
-		return plan.steps[0].GetResult()
+		if path, ok := plan.steps[0].GetResult().(*Path); ok {
+			return path
+		}
+		return &Path{only: plan.steps[0].GetResult().(*Node)}
 	}
-	out := make([]*Edge, 0)
+	out := &Path{}
 	for i := range plan.steps {
-		if edges, ok := plan.steps[i].GetResult().([]*Edge); ok {
-			out = append(out, edges...)
+		if i > plan.nForward {
+			break
+		}
+		if path, ok := plan.steps[i].GetResult().(*Path); ok {
+			out.AppendPath(path)
 		}
 	}
-	return out
+	revPathOut := &Path{}
+	for i := len(plan.steps) - 1; i >= plan.nForward; i-- {
+		if path, ok := plan.steps[i].GetResult().(*Path); ok {
+			revPathOut.Append(PathElement{Edge: path.path[0].Edge, Reverse: !path.path[0].Reverse})
+			// revPathOut.AppendPath(path)
+		}
+	}
+	return revPathOut.AppendPath(out)
 }
 
 // CaptureSymbolValues captures the current symbol values as nodes or []Edges
@@ -553,12 +573,21 @@ func (plan MatchPlan) CaptureSymbolValues() map[string]interface{} {
 
 type DefaultMatchAccumulator struct {
 	// Each element of the paths is either a Node or []Edge
-	Paths   []interface{}
+	Paths   []*Path
 	Symbols []map[string]interface{}
 }
 
-func (acc *DefaultMatchAccumulator) StoreResult(_ *MatchContext, path interface{}, symbols map[string]interface{}) {
+func (acc *DefaultMatchAccumulator) StoreResult(_ *MatchContext, path *Path, symbols map[string]interface{}) {
+	// set := sm.SliceMap[*Path, struct{}]{}
+	// for _, p := range acc.Paths {
+	// 	set.Put([]*Path{{path: []PathElement{{Edge: p.GetEdge(0)}}}}, struct{}{})
+	// }
+	// ps := make([]*Path, 0)
+	// ps = append(ps, path.(*Path))
+	// _, seen := set.Get(ps)
+	// if !seen {
 	acc.Paths = append(acc.Paths, path)
+	// }
 	acc.Symbols = append(acc.Symbols, symbols)
 }
 
@@ -566,11 +595,7 @@ func (acc *DefaultMatchAccumulator) StoreResult(_ *MatchContext, path interface{
 func (acc *DefaultMatchAccumulator) GetHeadNodes() []*Node {
 	ret := make(map[*Node]struct{})
 	for _, x := range acc.Paths {
-		if n, ok := x.(*Node); ok {
-			ret[n] = struct{}{}
-		} else if e, ok := x.([]*Edge); ok {
-			ret[e[0].GetFrom()] = struct{}{}
-		}
+		ret[x.GetNode(0)] = struct{}{}
 	}
 	arr := make([]*Node, 0, len(ret))
 	for x := range ret {
@@ -583,11 +608,7 @@ func (acc *DefaultMatchAccumulator) GetHeadNodes() []*Node {
 func (acc *DefaultMatchAccumulator) GetTailNodes() []*Node {
 	ret := make(map[*Node]struct{})
 	for _, x := range acc.Paths {
-		if n, ok := x.(*Node); ok {
-			ret[n] = struct{}{}
-		} else if e, ok := x.([]*Edge); ok {
-			ret[e[len(e)-1].GetTo()] = struct{}{}
-		}
+		ret[x.GetNode(x.NumNodes()-1)] = struct{}{}
 	}
 	arr := make([]*Node, 0, len(ret))
 	for x := range ret {

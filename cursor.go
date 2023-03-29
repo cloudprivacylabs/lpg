@@ -36,7 +36,9 @@ func (c *Cursor) StartPath() *Cursor {
 // and the pushed edge must be connected to the current node. This
 // also advances the cursor to the target node.
 func (c *Cursor) PushToPath(edge *Edge) *Cursor {
-	c.path.Append(edge)
+	c.path.Append(PathElement{
+		Edge: edge,
+	})
 	c.node = edge.GetTo()
 	return c
 }

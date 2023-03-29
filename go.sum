@@ -1,2 +1,4 @@
+github.com/bserdar/slicemap v0.0.0-20230110022437-d67753b63828 h1:hFSnamfyFSMTKfZPxIyRg/YEkQa+ZcGuhZKhIlN2eBs=
+github.com/bserdar/slicemap v0.0.0-20230110022437-d67753b63828/go.mod h1:xyBZY3aWglxFd2p4PbsBKMTI0N7Eu9pZABi2Q5IRPaM=
 github.com/emirpasic/gods v1.18.1 h1:FXtiHYKDGKCW2KzwZKx0iC0PQmdlorYgdFG9jPXJ1Bc=
 github.com/emirpasic/gods v1.18.1/go.mod h1:8tpGGwCnJ5H4r6BWwaV6OrWmMoPhUl5jm/FMNAnJvWQ=

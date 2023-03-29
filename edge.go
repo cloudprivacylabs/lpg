@@ -75,6 +75,15 @@ func (edge *Edge) RemoveProperty(key string) {
 	edge.from.graph.removeEdgeProperty(edge, key)
 }
 
+// write public func for GetProperty, ForEachProperty
+func (edge *Edge) GetProperty(key string) (interface{}, bool) {
+	return edge.getProperty(key)
+}
+
+func (edge *Edge) ForEachProperty(f func(string, interface{}) bool) bool {
+	return edge.forEachProperty(f)
+}
+
 // Remove an edge
 func (edge *Edge) Remove() {
 	edge.from.graph.removeEdge(edge)

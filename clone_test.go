@@ -39,7 +39,7 @@ func BenchmarkClone(b *testing.B) {
 
 func TestClone(t *testing.T) {
 	source := NewGraph()
-	target := NewGraph()
+	target := NewGraph() // target graph has empty strtable
 	nodes := make([]*Node, 0)
 	for i := 0; i < 10; i++ {
 		nodes = append(nodes, source.NewNode([]string{"a"}, map[string]interface{}{"key": i}))
@@ -53,10 +53,12 @@ func TestClone(t *testing.T) {
 	})
 
 	if !CheckIsomorphism(source, target, func(n1, n2 *Node) bool {
-		return n1.GetLabels().HasAll(n2.GetLabels().Slice()...) && reflect.DeepEqual(n1.properties, n2.properties)
+		result := n1.GetLabels().HasAll(n2.GetLabels().Slice()...) && reflect.DeepEqual(n1.properties, n2.properties)
+		return result
 	},
 		func(e1, e2 *Edge) bool {
-			return e1.label == e2.label && reflect.DeepEqual(e1.properties, e2.properties)
+			result := e1.label == e2.label && reflect.DeepEqual(e1.properties, e2.properties)
+			return result
 		}) {
 		t.Errorf("Clone result not isomorphic")
 	}

@@ -14,8 +14,6 @@
 
 package lpg
 
-import ()
-
 // A Graph is a labeled property graph containing nodes, and directed
 // edges combining those nodes.
 //
@@ -50,9 +48,14 @@ func NewGraph() *Graph {
 // NewNode creates a new node with the given labels and properties
 func (g *Graph) NewNode(labels []string, props map[string]interface{}) *Node {
 	node := &Node{
-		labels:     NewStringSet(labels...),
-		properties: properties(props),
-		graph:      g,
+		labels: NewStringSet(labels...),
+		graph:  g,
+	}
+	if len(props) > 0 {
+		node.properties = make(properties)
+		for k, v := range props {
+			node.properties[k] = v
+		}
 	}
 	node.id = g.idBase
 	g.idBase++
@@ -69,17 +72,26 @@ func (g *Graph) NewEdge(from, to *Node, label string, props map[string]interface
 	if to.graph != g {
 		panic("to node is not in graph")
 	}
+	// var p properties = make(map[int]any)
+	// for k, v := range props {
+	// 	p[g.stringTable.allocate(k)] = v
+	// }
 	newEdge := &Edge{
-		from:       from,
-		to:         to,
-		label:      label,
-		properties: properties(props),
-		id:         g.idBase,
+		from:  from,
+		to:    to,
+		label: label,
+		id:    g.idBase,
+	}
+	if len(props) > 0 {
+		newEdge.properties = make(properties)
+		for k, v := range props {
+			newEdge.properties[k] = v
+		}
 	}
 	g.idBase++
 	g.allEdges.add(newEdge, 0)
 	g.connect(newEdge)
-	g.index.addEdgeToIndex(newEdge)
+	g.index.addEdgeToIndex(newEdge, g)
 	return newEdge
 }
 
@@ -389,13 +401,16 @@ func (g *Graph) setNodeLabels(node *Node, labels StringSet) {
 }
 
 func (g *Graph) setNodeProperty(node *Node, key string, value interface{}) {
+	nix := g.index.isNodePropertyIndexed(key)
 	if node.properties == nil {
 		node.properties = make(properties)
-	}
-	oldValue, exists := node.properties[key]
-	nix := g.index.isNodePropertyIndexed(key)
-	if nix != nil && exists {
-		nix.remove(oldValue, node.id)
+	} else {
+		oldValue, exists := node.properties[key]
+		if exists {
+			if nix != nil {
+				nix.remove(oldValue, node.id)
+			}
+		}
 	}
 	node.properties[key] = value
 	if nix != nil {
@@ -403,11 +418,13 @@ func (g *Graph) setNodeProperty(node *Node, key string, value interface{}) {
 	}
 }
 
-func (g *Graph) cloneNode(node *Node, cloneProperty func(string, interface{}) interface{}) *Node {
+func (g *Graph) cloneNode(sourceGraph *Graph, sourceNode *Node, cloneProperty func(string, interface{}) interface{}) *Node {
 	newNode := &Node{
-		labels:     node.labels.Clone(),
-		properties: node.properties.clone(cloneProperty),
-		graph:      g,
+		labels: sourceNode.labels.Clone(),
+		graph:  g,
+	}
+	if sourceNode.properties != nil {
+		newNode.properties = sourceNode.properties.clone(sourceGraph, g, cloneProperty)
 	}
 	newNode.id = g.idBase
 	g.idBase++
@@ -417,7 +434,7 @@ func (g *Graph) cloneNode(node *Node, cloneProperty func(string, interface{}) in
 
 func (g *Graph) addNode(node *Node) {
 	g.allNodes.add(node)
-	g.index.addNodeToIndex(node)
+	g.index.addNodeToIndex(node, g)
 }
 
 func (g *Graph) removeNodeProperty(node *Node, key string) {
@@ -438,25 +455,25 @@ func (g *Graph) removeNodeProperty(node *Node, key string) {
 func (g *Graph) detachRemoveNode(node *Node) {
 	g.detachNode(node)
 	g.allNodes.remove(node)
-	g.index.removeNodeFromIndex(node)
+	g.index.removeNodeFromIndex(node, g)
 }
 
 func (g *Graph) detachNode(node *Node) {
 	for _, edge := range EdgeSlice(node.incoming.iterator(2)) {
 		g.disconnect(edge)
 		g.allEdges.remove(edge, 0)
-		g.index.removeEdgeFromIndex(edge)
+		g.index.removeEdgeFromIndex(edge, g)
 	}
 	node.incoming = edgeMap{}
 	for _, edge := range EdgeSlice(node.outgoing.iterator(1)) {
 		g.disconnect(edge)
 		g.allEdges.remove(edge, 0)
-		g.index.removeEdgeFromIndex(edge)
+		g.index.removeEdgeFromIndex(edge, g)
 	}
 	node.outgoing = edgeMap{}
 }
 
-func (g *Graph) cloneEdge(from, to *Node, edge *Edge, cloneProperty func(string, interface{}) interface{}) *Edge {
+func (g *Graph) cloneEdge(from, to *Node, sourceEdge *Edge, cloneProperty func(string, interface{}) interface{}) *Edge {
 	if from.graph != g {
 		panic("from node is not in graph")
 	}
@@ -464,16 +481,18 @@ func (g *Graph) cloneEdge(from, to *Node, edge *Edge, cloneProperty func(string,
 		panic("to node is not in graph")
 	}
 	newEdge := &Edge{
-		from:       from,
-		to:         to,
-		label:      edge.label,
-		properties: edge.properties.clone(cloneProperty),
-		id:         g.idBase,
+		from:  from,
+		to:    to,
+		label: sourceEdge.label,
+		id:    g.idBase,
+	}
+	if sourceEdge.properties != nil {
+		newEdge.properties = sourceEdge.properties.clone(to.graph, g, cloneProperty)
 	}
 	g.idBase++
 	g.allEdges.add(newEdge, 0)
 	g.connect(newEdge)
-	g.index.addEdgeToIndex(newEdge)
+	g.index.addEdgeToIndex(newEdge, g)
 	return newEdge
 }
 
@@ -499,13 +518,16 @@ func (g *Graph) removeEdge(edge *Edge) {
 }
 
 func (g *Graph) setEdgeProperty(edge *Edge, key string, value interface{}) {
+	nix := g.index.isEdgePropertyIndexed(key)
 	if edge.properties == nil {
 		edge.properties = make(properties)
-	}
-	oldValue, exists := edge.properties[key]
-	nix := g.index.isEdgePropertyIndexed(key)
-	if nix != nil && exists {
-		nix.remove(oldValue, edge.id)
+	} else {
+		oldValue, exists := edge.properties[key]
+		if exists {
+			if nix != nil {
+				nix.remove(oldValue, edge.id)
+			}
+		}
 	}
 	edge.properties[key] = value
 	if nix != nil {
