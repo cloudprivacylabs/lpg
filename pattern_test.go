@@ -121,6 +121,31 @@ func TestPathPattern(t *testing.T) {
 	if acc.Paths[0].String() != "(:n4 {})->(:n5 {}) (:n5 {})->(:n6 {}) (:n6 {})->(:n7 {}) (:n7 {})->(:n8 {})" {
 		t.Errorf("expected path to be (:n4 {})->(:n5 {}) (:n5 {})->(:n6 {}) (:n6 {})->(:n7 {}) (:n7 {})->(:n8 {}) got %s", acc.Paths[0].String())
 	}
+
+	// ()->()->()->()->(e)
+	pat = Pattern{
+		{},
+		{Min: 1, Max: 1},
+		{},
+		{Min: 1, Max: 1},
+		{},
+		{Min: 1, Max: 1},
+		{},
+		{Min: 1, Max: 1},
+		{Name: "enode", Labels: NewStringSet("n8")},
+	}
+	symbols = make(map[string]*PatternSymbol)
+	acc = &DefaultMatchAccumulator{}
+	if err := pat.Run(graph, symbols, acc); err != nil {
+		t.Error(err)
+		return
+	}
+	if len(acc.Paths) != 1 {
+		t.Errorf("expected path of length 1, got %v", len(acc.Paths))
+	}
+	if acc.Paths[0].String() != "(:n4 {})->(:n5 {}) (:n5 {})->(:n6 {}) (:n6 {})->(:n7 {}) (:n7 {})->(:n8 {})" {
+		t.Errorf("expected path to be (:n4 {})->(:n5 {}) (:n5 {})->(:n6 {}) (:n6 {})->(:n7 {}) (:n7 {})->(:n8 {}) got %s", acc.Paths[0].String())
+	}
 }
 
 func TestReverseSimplePath(t *testing.T) {
