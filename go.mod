@@ -1,8 +1,5 @@
-module github.com/cloudprivacylabs/lpg
+module github.com/cloudprivacylabs/lpg/v2
 
-go 1.18
+go 1.19
 
-require (
-	github.com/bserdar/slicemap v0.0.0-20230110022437-d67753b63828
-	github.com/emirpasic/gods v1.18.1
-)
+require github.com/emirpasic/gods v1.18.1
