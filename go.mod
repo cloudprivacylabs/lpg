@@ -1,4 +1,4 @@
-module github.com/cloudprivacylabs/lpg/v2
+module github.com/cloudprivacylabs/lpg
 
 go 1.19
 
