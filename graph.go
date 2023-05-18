@@ -47,15 +47,24 @@ func NewGraph() *Graph {
 
 // NewNode creates a new node with the given labels and properties
 func (g *Graph) NewNode(labels []string, props map[string]interface{}) *Node {
-	node := &Node{
-		labels: NewStringSet(labels...),
-		graph:  g,
-	}
+	var p properties
 	if len(props) > 0 {
-		node.properties = make(properties)
+		p = make(properties, len(props))
 		for k, v := range props {
-			node.properties[k] = v
+			p[k] = v
 		}
+	}
+	return g.FastNewNode(NewStringSet(labels...), p)
+}
+
+// FastNewNode creates a new node with the given labels and
+// properties. This version does not copy the labels and properties,
+// but uses the given label set and map directly
+func (g *Graph) FastNewNode(labels StringSet, props map[string]interface{}) *Node {
+	node := &Node{
+		labels:     labels,
+		graph:      g,
+		properties: properties(props),
 	}
 	node.id = g.idBase
 	g.idBase++
@@ -65,28 +74,34 @@ func (g *Graph) NewNode(labels []string, props map[string]interface{}) *Node {
 
 // NewEdge creates a new edge between the two nodes of the graph. Both
 // nodes must be nodes of this graph, otherwise this call panics
-func (g *Graph) NewEdge(from, to *Node, label string, props map[string]interface{}) *Edge {
+func (g *Graph) NewEdge(from, to *Node, label string, props map[string]any) *Edge {
+	var p properties
+	if len(props) > 0 {
+		p = make(properties, len(props))
+		for k, v := range props {
+			p[k] = v
+		}
+	}
+	return g.FastNewEdge(from, to, label, p)
+}
+
+// FastNewEdge creates a new edge between the two nodes of the
+// graph. Both nodes must be nodes of this graph, otherwise this call
+// panics. This version uses the given properties map directly without
+// copying it.
+func (g *Graph) FastNewEdge(from, to *Node, label string, props map[string]any) *Edge {
 	if from.graph != g {
 		panic("from node is not in graph")
 	}
 	if to.graph != g {
 		panic("to node is not in graph")
 	}
-	// var p properties = make(map[int]any)
-	// for k, v := range props {
-	// 	p[g.stringTable.allocate(k)] = v
-	// }
 	newEdge := &Edge{
-		from:  from,
-		to:    to,
-		label: label,
-		id:    g.idBase,
-	}
-	if len(props) > 0 {
-		newEdge.properties = make(properties)
-		for k, v := range props {
-			newEdge.properties[k] = v
-		}
+		from:       from,
+		to:         to,
+		label:      label,
+		id:         g.idBase,
+		properties: properties(props),
 	}
 	g.idBase++
 	g.allEdges.add(newEdge, 0)
