@@ -21,8 +21,8 @@ it. Create a graph using `NewGraph` function:
 ```
 g := lpg.NewGraph()
 // Create two nodes
-n1 := g.NewNode([]string{"label1"},map[string]interface{}{"prop": "value1" })
-n2 := g.NewNode([]string{"label2"},map[string]interface{}{"prop": "value2" })
+n1 := g.NewNode([]string{"label1"},map[string]any{"prop": "value1" })
+n2 := g.NewNode([]string{"label2"},map[string]any{"prop": "value2" })
 // Connect the two nodes with an edge
 edge:=g.NewEdge(n1,n2,"relatedTo",nil)
 ```
@@ -173,7 +173,7 @@ array include both a `from` and a `to` index.
 
 Standard library JSON marshaler/unmarshaler does not work with graphs,
 because the edge and node property values are of type
-`interface{}`. The `JSON` struct can be used to marshal and unmarshal
+`any`. The `JSON` struct can be used to marshal and unmarshal
 graphs with custom property marshaler and unmarshalers.
 
 This Go module is part of the [Layered Schema
