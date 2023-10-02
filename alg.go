@@ -14,6 +14,10 @@
 
 package lpg
 
+import (
+	"context"
+)
+
 // Sources finds all the source nodes in the graph
 func SourcesItr(graph *Graph) NodeIterator {
 	return nodeIterator{
@@ -73,9 +77,13 @@ func EdgesBetweenNodes(from, to *Node) []*Edge {
 // nodeEquivalenceFunction will be called for all pairs of nodes. The
 // edgeEquivalenceFunction will be called for edges connecting
 // equivalent nodes.
-func CheckIsomorphism(g1, g2 *Graph, nodeEquivalenceFunc func(n1, n2 *Node) bool, edgeEquivalenceFunc func(e1, e2 *Edge) bool) bool {
+//
+// This is a potentially long running function. Cancel the context to
+// stop. If the function returns because of context cancellation,
+// error will be ctx.Err()
+func CheckIsomorphism(ctx context.Context, g1, g2 *Graph, nodeEquivalenceFunc func(n1, n2 *Node) bool, edgeEquivalenceFunc func(e1, e2 *Edge) bool) (bool, error) {
 	if g1.NumNodes() != g2.NumNodes() || g1.NumEdges() != g2.NumEdges() {
-		return false
+		return false, nil
 	}
 
 	// Slice of all nodes of g1
@@ -92,7 +100,10 @@ func CheckIsomorphism(g1, g2 *Graph, nodeEquivalenceFunc func(n1, n2 *Node) bool
 			}
 		}
 		if len(equivalences[i]) == 0 {
-			return false
+			return false, nil
+		}
+		if err := ctx.Err(); err != nil {
+			return false, err
 		}
 	}
 
@@ -153,13 +164,16 @@ func CheckIsomorphism(g1, g2 *Graph, nodeEquivalenceFunc func(n1, n2 *Node) bool
 	for {
 		nodeMapping := buildNodeEquivalence()
 		if isIsomorphism(nodeMapping) {
-			return true
+			return true, nil
 		}
 		if !next() {
 			break
 		}
+		if err := ctx.Err(); err != nil {
+			return false, err
+		}
 	}
-	return false
+	return false, nil
 }
 
 // ForEachNode iterates through all the nodes of g until predicate

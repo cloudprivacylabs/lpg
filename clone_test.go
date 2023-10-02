@@ -15,6 +15,7 @@
 package lpg
 
 import (
+	"context"
 	"reflect"
 	"testing"
 )
@@ -52,14 +53,14 @@ func TestClone(t *testing.T) {
 		return value
 	})
 
-	if !CheckIsomorphism(source, target, func(n1, n2 *Node) bool {
+	if ok, _ := CheckIsomorphism(context.Background(), source, target, func(n1, n2 *Node) bool {
 		result := n1.GetLabels().HasAll(n2.GetLabels().Slice()...) && reflect.DeepEqual(n1.properties, n2.properties)
 		return result
 	},
 		func(e1, e2 *Edge) bool {
 			result := e1.label == e2.label && reflect.DeepEqual(e1.properties, e2.properties)
 			return result
-		}) {
+		}); !ok {
 		t.Errorf("Clone result not isomorphic")
 	}
 }
